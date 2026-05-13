@@ -27,8 +27,16 @@ export abstract class BaseApiClient {
     return this.http.put<T>(`${this.baseUrl}${path}`, body);
   }
 
-  protected patch<T>(path: string, body: unknown): Observable<T> {
-    return this.http.patch<T>(`${this.baseUrl}${path}`, body);
+  protected patch<T>(path: string, body: unknown, params?: Record<string, string | number | boolean | undefined>): Observable<T> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          httpParams = httpParams.set(key, String(value));
+        }
+      });
+    }
+    return this.http.patch<T>(`${this.baseUrl}${path}`, body, { params: httpParams });
   }
 
   protected delete<T>(path: string): Observable<T> {

@@ -1,0 +1,9 @@
+dist/
+node_modules/
+coverage/
+.angular/
+*.generated.ts
+src/app/api/types.generated.ts
+pnpm-lock.yaml
+package-lock.json
+yarn.lock

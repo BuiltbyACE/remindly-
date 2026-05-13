@@ -1,0 +1,3690 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Remindly", "version": "v1" },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "health_check_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/summaries": {
+      "post": {
+        "tags": ["AI Intelligence"],
+        "summary": "Request Summary",
+        "operationId": "request_summary_api_v1_ai_summaries_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/SummaryCreate" } }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/SummaryResponse" } }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/summaries/{summary_id}": {
+      "get": {
+        "tags": ["AI Intelligence"],
+        "summary": "Get Summary",
+        "operationId": "get_summary_api_v1_ai_summaries__summary_id__get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "summary_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Summary Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/SummaryResponse" } }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/events/{event_id}/summaries": {
+      "get": {
+        "tags": ["AI Intelligence"],
+        "summary": "List Summaries",
+        "operationId": "list_summaries_api_v1_ai_events__event_id__summaries_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SummaryListResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/parse-voice": {
+      "post": {
+        "tags": ["AI Intelligence"],
+        "summary": "Parse Voice Transcript",
+        "operationId": "parse_voice_transcript_api_v1_ai_parse_voice_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/VoiceParseRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/ParsedVoiceIntent" } }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/briefings": {
+      "post": {
+        "tags": ["AI Intelligence"],
+        "summary": "Generate Briefing",
+        "operationId": "generate_briefing_api_v1_ai_briefings_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/BriefingCreate" } }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/BriefingResponse" } }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["AI Intelligence"],
+        "summary": "List Briefings",
+        "operationId": "list_briefings_api_v1_ai_briefings_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BriefingListResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/meeting-summaries": {
+      "post": {
+        "tags": ["AI Intelligence"],
+        "summary": "Summarize Meeting",
+        "operationId": "summarize_meeting_api_v1_ai_meeting_summaries_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MeetingSummaryCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MeetingSummaryResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": ["auth"],
+        "summary": "Get Current User Info",
+        "operationId": "get_current_user_info_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      }
+    },
+    "/api/v1/users/me": {
+      "get": {
+        "tags": ["users"],
+        "summary": "Get My Profile",
+        "operationId": "get_my_profile_api_v1_users_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      },
+      "put": {
+        "tags": ["users"],
+        "summary": "Update My Profile",
+        "operationId": "update_my_profile_api_v1_users_me_put",
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UserUpdate" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      }
+    },
+    "/api/v1/users/{user_id}": {
+      "get": {
+        "tags": ["users"],
+        "summary": "Get User By Id",
+        "operationId": "get_user_by_id_api_v1_users__user_id__get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "User Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "post": {
+        "tags": ["users"],
+        "summary": "Create User",
+        "operationId": "create_user_api_v1_users_post",
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UserCreate" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      }
+    },
+    "/api/v1/organizations": {
+      "get": {
+        "tags": ["organizations"],
+        "summary": "List Organizations",
+        "operationId": "list_organizations_api_v1_organizations_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      },
+      "post": {
+        "tags": ["organizations"],
+        "summary": "Create Organization",
+        "operationId": "create_organization_api_v1_organizations_post",
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/OrganizationCreate" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      }
+    },
+    "/api/v1/organizations/{org_id}": {
+      "get": {
+        "tags": ["organizations"],
+        "summary": "Get Organization",
+        "operationId": "get_organization_api_v1_organizations__org_id__get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "org_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Org Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["organizations"],
+        "summary": "Update Organization",
+        "operationId": "update_organization_api_v1_organizations__org_id__put",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "org_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Org Id" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/OrganizationUpdate" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["organizations"],
+        "summary": "Deactivate Organization",
+        "operationId": "deactivate_organization_api_v1_organizations__org_id__delete",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "org_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Org Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{org_id}/members": {
+      "post": {
+        "tags": ["organizations"],
+        "summary": "Add Organization Member",
+        "operationId": "add_organization_member_api_v1_organizations__org_id__members_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "org_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Org Id" }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "User Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["organizations"],
+        "summary": "List Organization Members",
+        "operationId": "list_organization_members_api_v1_organizations__org_id__members_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "org_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Org Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rbac/permissions": {
+      "get": {
+        "tags": ["rbac"],
+        "summary": "List Permissions",
+        "operationId": "list_permissions_api_v1_rbac_permissions_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rbac/permissions/my": {
+      "get": {
+        "tags": ["rbac"],
+        "summary": "Get My Permissions",
+        "operationId": "get_my_permissions_api_v1_rbac_permissions_my_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rbac/permissions/check": {
+      "get": {
+        "tags": ["rbac"],
+        "summary": "Check Permission",
+        "operationId": "check_permission_api_v1_rbac_permissions_check_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "permission_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Permission key to check",
+              "title": "Permission Key"
+            },
+            "description": "Permission key to check"
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rbac/roles": {
+      "get": {
+        "tags": ["rbac"],
+        "summary": "List Roles",
+        "operationId": "list_roles_api_v1_rbac_roles_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rbac/roles/assign": {
+      "post": {
+        "tags": ["rbac"],
+        "summary": "Assign Role",
+        "operationId": "assign_role_api_v1_rbac_roles_assign_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/RoleAssign" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rbac/roles/assignments/{membership_id}/{role_id}": {
+      "delete": {
+        "tags": ["rbac"],
+        "summary": "Remove Role",
+        "operationId": "remove_role_api_v1_rbac_roles_assignments__membership_id___role_id__delete",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "membership_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Membership Id" }
+          },
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Role Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rbac/delegations": {
+      "post": {
+        "tags": ["rbac"],
+        "summary": "Create Delegation",
+        "operationId": "create_delegation_api_v1_rbac_delegations_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/DelegationCreate" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rbac/delegations/{delegation_id}/revoke": {
+      "post": {
+        "tags": ["rbac"],
+        "summary": "Revoke Delegation",
+        "operationId": "revoke_delegation_api_v1_rbac_delegations__delegation_id__revoke_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "delegation_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Delegation Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events": {
+      "post": {
+        "tags": ["events"],
+        "summary": "Create Event",
+        "operationId": "create_event_api_v1_events_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/EventCreate" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["events"],
+        "summary": "List Events",
+        "operationId": "list_events_api_v1_events_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Filter by event status",
+              "title": "Status"
+            },
+            "description": "Filter by event status"
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}": {
+      "get": {
+        "tags": ["events"],
+        "summary": "Get Event",
+        "operationId": "get_event_api_v1_events__event_id__get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["events"],
+        "summary": "Update Event",
+        "operationId": "update_event_api_v1_events__event_id__patch",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "expected_version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Current version for optimistic locking",
+              "title": "Expected Version"
+            },
+            "description": "Current version for optimistic locking"
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/EventUpdate" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["events"],
+        "summary": "Delete Event",
+        "operationId": "delete_event_api_v1_events__event_id__delete",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/request-approval": {
+      "post": {
+        "tags": ["events"],
+        "summary": "Request Approval",
+        "operationId": "request_approval_api_v1_events__event_id__request_approval_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EventTransitionRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/approve": {
+      "post": {
+        "tags": ["events"],
+        "summary": "Approve Event",
+        "operationId": "approve_event_api_v1_events__event_id__approve_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EventTransitionRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/schedule": {
+      "post": {
+        "tags": ["events"],
+        "summary": "Schedule Event",
+        "operationId": "schedule_event_api_v1_events__event_id__schedule_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EventScheduleRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["schedules"],
+        "summary": "Get Schedule",
+        "operationId": "get_schedule_api_v1_events__event_id__schedule_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/activate": {
+      "post": {
+        "tags": ["events"],
+        "summary": "Activate Event",
+        "operationId": "activate_event_api_v1_events__event_id__activate_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EventTransitionRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/complete": {
+      "post": {
+        "tags": ["events"],
+        "summary": "Complete Event",
+        "operationId": "complete_event_api_v1_events__event_id__complete_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EventTransitionRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/cancel": {
+      "post": {
+        "tags": ["events"],
+        "summary": "Cancel Event",
+        "operationId": "cancel_event_api_v1_events__event_id__cancel_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EventTransitionRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/assign-policy": {
+      "post": {
+        "tags": ["events"],
+        "summary": "Assign Policy",
+        "operationId": "assign_policy_api_v1_events__event_id__assign_policy_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EventAssignPolicyRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/participants": {
+      "get": {
+        "tags": ["events"],
+        "summary": "List Participants",
+        "operationId": "list_participants_api_v1_events__event_id__participants_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["events"],
+        "summary": "Add Participant",
+        "operationId": "add_participant_api_v1_events__event_id__participants_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ParticipantCreate" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/participants/{participant_id}": {
+      "patch": {
+        "tags": ["events"],
+        "summary": "Update Participant",
+        "operationId": "update_participant_api_v1_events__event_id__participants__participant_id__patch",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "participant_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Participant Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ParticipantUpdate" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["events"],
+        "summary": "Remove Participant",
+        "operationId": "remove_participant_api_v1_events__event_id__participants__participant_id__delete",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "participant_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Participant Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/reminders": {
+      "get": {
+        "tags": ["events"],
+        "summary": "List Reminders",
+        "operationId": "list_reminders_api_v1_events__event_id__reminders_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/reminders/{reminder_id}/acknowledge": {
+      "post": {
+        "tags": ["events"],
+        "summary": "Acknowledge Reminder",
+        "operationId": "acknowledge_reminder_api_v1_events__event_id__reminders__reminder_id__acknowledge_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "reminder_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Reminder Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/reminder-policies": {
+      "get": {
+        "tags": ["events"],
+        "summary": "List Reminder Policies",
+        "operationId": "list_reminder_policies_api_v1_events_reminder_policies_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["events"],
+        "summary": "Create Reminder Policy",
+        "operationId": "create_reminder_policy_api_v1_events_reminder_policies_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ReminderPolicyCreate" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/reminder-policies/{policy_id}": {
+      "get": {
+        "tags": ["events"],
+        "summary": "Get Reminder Policy",
+        "operationId": "get_reminder_policy_api_v1_events_reminder_policies__policy_id__get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Policy Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["events"],
+        "summary": "Delete Reminder Policy",
+        "operationId": "delete_reminder_policy_api_v1_events_reminder_policies__policy_id__delete",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Policy Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/attendees": {
+      "post": {
+        "tags": ["attendees"],
+        "summary": "Add Attendee",
+        "operationId": "add_attendee_api_v1_events__event_id__attendees_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/AttendeeCreate" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["attendees"],
+        "summary": "List Attendees",
+        "operationId": "list_attendees_api_v1_events__event_id__attendees_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/attendees/{attendee_id}": {
+      "patch": {
+        "tags": ["attendees"],
+        "summary": "Update Attendee",
+        "operationId": "update_attendee_api_v1_events__event_id__attendees__attendee_id__patch",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "attendee_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Attendee Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/AttendeeUpdate" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["attendees"],
+        "summary": "Remove Attendee",
+        "operationId": "remove_attendee_api_v1_events__event_id__attendees__attendee_id__delete",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "attendee_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Attendee Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/approvals": {
+      "post": {
+        "tags": ["approvals"],
+        "summary": "Create Approval",
+        "operationId": "create_approval_api_v1_events__event_id__approvals_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ApprovalCreate" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["approvals"],
+        "summary": "List Approvals",
+        "operationId": "list_approvals_api_v1_events__event_id__approvals_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/approvals/{approval_id}/process": {
+      "post": {
+        "tags": ["approvals"],
+        "summary": "Process Approval",
+        "operationId": "process_approval_api_v1_events__event_id__approvals__approval_id__process_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Event Id" }
+          },
+          {
+            "name": "approval_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Approval Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ApprovalProcess" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/connect": {
+      "post": {
+        "tags": ["Integrations"],
+        "summary": "Connect Integration",
+        "operationId": "connect_integration_api_v1_integrations_connect_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/IntegrationConnectRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IntegrationResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations": {
+      "get": {
+        "tags": ["Integrations"],
+        "summary": "List Integrations",
+        "operationId": "list_integrations_api_v1_integrations_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IntegrationListResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/{integration_id}": {
+      "get": {
+        "tags": ["Integrations"],
+        "summary": "Get Integration",
+        "operationId": "get_integration_api_v1_integrations__integration_id__get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "integration_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Integration Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IntegrationResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/{integration_id}/sync": {
+      "post": {
+        "tags": ["Integrations"],
+        "summary": "Sync Calendar",
+        "operationId": "sync_calendar_api_v1_integrations__integration_id__sync_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "integration_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Integration Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncRequest",
+                "default": { "direction": "bidirectional" }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SyncStatusResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/{integration_id}/disconnect": {
+      "post": {
+        "tags": ["Integrations"],
+        "summary": "Disconnect Integration",
+        "operationId": "disconnect_integration_api_v1_integrations__integration_id__disconnect_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "integration_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Integration Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Successful Response" },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/notifications": {
+      "get": {
+        "tags": ["notifications"],
+        "summary": "List Notifications",
+        "operationId": "list_notifications_api_v1_notifications_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }],
+              "title": "Event Id"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Status" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/notifications/my": {
+      "get": {
+        "tags": ["notifications"],
+        "summary": "List My Notifications",
+        "operationId": "list_my_notifications_api_v1_notifications_my_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Status" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/notifications/{notification_id}": {
+      "get": {
+        "tags": ["notifications"],
+        "summary": "Get Notification",
+        "operationId": "get_notification_api_v1_notifications__notification_id__get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "notification_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Notification Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/notifications/{notification_id}/acknowledge": {
+      "post": {
+        "tags": ["notifications"],
+        "summary": "Acknowledge Notification",
+        "operationId": "acknowledge_notification_api_v1_notifications__notification_id__acknowledge_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "notification_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Notification Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NotificationAcknowledgeRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/voice/commands": {
+      "post": {
+        "tags": ["Voice"],
+        "summary": "Create Voice Command",
+        "operationId": "create_voice_command_api_v1_voice_commands_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/VoiceCommandCreate" } }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/VoiceCommandResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Voice"],
+        "summary": "List Voice Commands",
+        "operationId": "list_voice_commands_api_v1_voice_commands_get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "maximum": 100, "default": 50, "title": "Limit" }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 0, "default": 0, "title": "Offset" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/VoiceCommandListResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/voice/commands/{command_id}": {
+      "get": {
+        "tags": ["Voice"],
+        "summary": "Get Voice Command",
+        "operationId": "get_voice_command_api_v1_voice_commands__command_id__get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "command_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Command Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/VoiceCommandResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/voice/commands/{command_id}/confirm": {
+      "post": {
+        "tags": ["Voice"],
+        "summary": "Confirm Voice Command",
+        "operationId": "confirm_voice_command_api_v1_voice_commands__command_id__confirm_post",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "command_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Command Id" }
+          },
+          {
+            "name": "X-Organization-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/CommandConfirmation" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CommandExecutionResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/deep": {
+      "get": {
+        "summary": "Deep Health",
+        "operationId": "deep_health_health_deep_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "summary": "Metrics",
+        "operationId": "metrics_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApprovalCreate": {
+        "properties": {
+          "approver_membership_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Approver Membership Id"
+          },
+          "comments": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Comments" }
+        },
+        "type": "object",
+        "required": ["approver_membership_id"],
+        "title": "ApprovalCreate"
+      },
+      "ApprovalProcess": {
+        "properties": {
+          "status": { "$ref": "#/components/schemas/ApprovalStatus" },
+          "comments": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Comments" }
+        },
+        "type": "object",
+        "required": ["status"],
+        "title": "ApprovalProcess"
+      },
+      "ApprovalStatus": {
+        "type": "string",
+        "enum": ["pending", "approved", "rejected"],
+        "title": "ApprovalStatus"
+      },
+      "AttendanceStatus": {
+        "type": "string",
+        "enum": ["pending", "accepted", "declined", "tentative"],
+        "title": "AttendanceStatus"
+      },
+      "AttendeeCreate": {
+        "properties": {
+          "user_id": {
+            "anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }],
+            "title": "User Id"
+          },
+          "email": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Email" },
+          "role": { "$ref": "#/components/schemas/AttendeeRole", "default": "required" }
+        },
+        "type": "object",
+        "title": "AttendeeCreate"
+      },
+      "AttendeeRole": {
+        "type": "string",
+        "enum": ["required", "optional", "organizer"],
+        "title": "AttendeeRole"
+      },
+      "AttendeeStatus": {
+        "type": "string",
+        "enum": ["pending", "accepted", "declined", "tentative"],
+        "title": "AttendeeStatus"
+      },
+      "AttendeeUpdate": {
+        "properties": {
+          "status": {
+            "anyOf": [{ "$ref": "#/components/schemas/AttendeeStatus" }, { "type": "null" }]
+          },
+          "role": { "anyOf": [{ "$ref": "#/components/schemas/AttendeeRole" }, { "type": "null" }] }
+        },
+        "type": "object",
+        "title": "AttendeeUpdate"
+      },
+      "BriefingCreate": {
+        "properties": {
+          "briefing_date": { "type": "string", "format": "date", "title": "Briefing Date" },
+          "executive_id": { "type": "string", "format": "uuid", "title": "Executive Id" }
+        },
+        "type": "object",
+        "required": ["briefing_date", "executive_id"],
+        "title": "BriefingCreate"
+      },
+      "BriefingListResponse": {
+        "properties": {
+          "briefings": {
+            "items": { "$ref": "#/components/schemas/BriefingResponse" },
+            "type": "array",
+            "title": "Briefings"
+          }
+        },
+        "type": "object",
+        "required": ["briefings"],
+        "title": "BriefingListResponse"
+      },
+      "BriefingResponse": {
+        "properties": {
+          "id": { "type": "string", "format": "uuid", "title": "Id" },
+          "organization_id": { "type": "string", "format": "uuid", "title": "Organization Id" },
+          "executive_id": { "type": "string", "format": "uuid", "title": "Executive Id" },
+          "briefing_date": { "type": "string", "format": "date", "title": "Briefing Date" },
+          "content": {
+            "anyOf": [{ "additionalProperties": true, "type": "object" }, { "type": "null" }],
+            "title": "Content"
+          },
+          "status": { "$ref": "#/components/schemas/BriefingStatus" },
+          "model_used": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Model Used"
+          },
+          "tokens_used": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Tokens Used"
+          },
+          "generated_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Generated At"
+          },
+          "error_log": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Error Log"
+          },
+          "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
+          "updated_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "executive_id",
+          "briefing_date",
+          "content",
+          "status",
+          "model_used",
+          "tokens_used",
+          "generated_at",
+          "error_log",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "BriefingResponse"
+      },
+      "BriefingStatus": {
+        "type": "string",
+        "enum": ["draft", "published"],
+        "title": "BriefingStatus"
+      },
+      "CommandConfirmation": {
+        "properties": {
+          "command_id": { "type": "string", "format": "uuid", "title": "Command Id" },
+          "confirmed": { "type": "boolean", "title": "Confirmed" }
+        },
+        "type": "object",
+        "required": ["command_id", "confirmed"],
+        "title": "CommandConfirmation"
+      },
+      "CommandExecutionResponse": {
+        "properties": {
+          "command_id": { "type": "string", "format": "uuid", "title": "Command Id" },
+          "status": { "$ref": "#/components/schemas/VoiceCommandStatus" },
+          "requires_confirmation": {
+            "type": "boolean",
+            "title": "Requires Confirmation",
+            "default": false
+          },
+          "result_summary": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Result Summary"
+          },
+          "error": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Error" }
+        },
+        "type": "object",
+        "required": ["command_id", "status"],
+        "title": "CommandExecutionResponse"
+      },
+      "DelegationCreate": {
+        "properties": {
+          "delegate_membership_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Delegate Membership Id"
+          },
+          "permission_scope": {
+            "items": { "type": "string" },
+            "type": "array",
+            "title": "Permission Scope"
+          },
+          "ends_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Ends At"
+          }
+        },
+        "type": "object",
+        "required": ["delegate_membership_id", "permission_scope"],
+        "title": "DelegationCreate"
+      },
+      "EventAssignPolicyRequest": {
+        "properties": {
+          "reminder_policy_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Reminder Policy Id"
+          },
+          "expected_version": { "type": "integer", "minimum": 1.0, "title": "Expected Version" }
+        },
+        "type": "object",
+        "required": ["reminder_policy_id", "expected_version"],
+        "title": "EventAssignPolicyRequest"
+      },
+      "EventCreate": {
+        "properties": {
+          "title": { "type": "string", "maxLength": 500, "minLength": 1, "title": "Title" },
+          "description": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Description"
+          },
+          "location": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Location" },
+          "priority": { "$ref": "#/components/schemas/EventPriority", "default": "medium" },
+          "starts_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Ends At"
+          },
+          "timezone": { "type": "string", "title": "Timezone", "default": "UTC" },
+          "requires_acknowledgement": {
+            "type": "boolean",
+            "title": "Requires Acknowledgement",
+            "default": false
+          },
+          "allow_delegation": { "type": "boolean", "title": "Allow Delegation", "default": false }
+        },
+        "type": "object",
+        "required": ["title"],
+        "title": "EventCreate"
+      },
+      "EventPriority": {
+        "type": "string",
+        "enum": ["low", "medium", "high", "critical"],
+        "title": "EventPriority"
+      },
+      "EventScheduleRequest": {
+        "properties": {
+          "starts_at": { "type": "string", "format": "date-time", "title": "Starts At" },
+          "ends_at": { "type": "string", "format": "date-time", "title": "Ends At" },
+          "timezone": { "type": "string", "title": "Timezone", "default": "UTC" },
+          "location": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Location" },
+          "expected_version": { "type": "integer", "minimum": 1.0, "title": "Expected Version" }
+        },
+        "type": "object",
+        "required": ["starts_at", "ends_at", "expected_version"],
+        "title": "EventScheduleRequest"
+      },
+      "EventTransitionRequest": {
+        "properties": {
+          "expected_version": { "type": "integer", "minimum": 1.0, "title": "Expected Version" }
+        },
+        "type": "object",
+        "required": ["expected_version"],
+        "title": "EventTransitionRequest"
+      },
+      "EventUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [{ "type": "string", "maxLength": 500, "minLength": 1 }, { "type": "null" }],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Description"
+          },
+          "location": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Location" },
+          "priority": {
+            "anyOf": [{ "$ref": "#/components/schemas/EventPriority" }, { "type": "null" }]
+          },
+          "starts_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Ends At"
+          },
+          "timezone": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Timezone" },
+          "requires_acknowledgement": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Requires Acknowledgement"
+          },
+          "allow_delegation": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Allow Delegation"
+          }
+        },
+        "type": "object",
+        "title": "EventUpdate"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": { "$ref": "#/components/schemas/ValidationError" },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "IntegrationAuthStatus": {
+        "type": "string",
+        "enum": ["connected", "expired", "revoked"],
+        "title": "IntegrationAuthStatus"
+      },
+      "IntegrationConnectRequest": {
+        "properties": {
+          "provider": { "$ref": "#/components/schemas/IntegrationProvider" },
+          "auth_code": { "type": "string", "title": "Auth Code" },
+          "redirect_uri": { "type": "string", "title": "Redirect Uri" }
+        },
+        "type": "object",
+        "required": ["provider", "auth_code", "redirect_uri"],
+        "title": "IntegrationConnectRequest"
+      },
+      "IntegrationListResponse": {
+        "properties": {
+          "integrations": {
+            "items": { "$ref": "#/components/schemas/IntegrationResponse" },
+            "type": "array",
+            "title": "Integrations"
+          }
+        },
+        "type": "object",
+        "required": ["integrations"],
+        "title": "IntegrationListResponse"
+      },
+      "IntegrationProvider": {
+        "type": "string",
+        "enum": ["google", "outlook"],
+        "title": "IntegrationProvider"
+      },
+      "IntegrationResponse": {
+        "properties": {
+          "id": { "type": "string", "format": "uuid", "title": "Id" },
+          "organization_id": { "type": "string", "format": "uuid", "title": "Organization Id" },
+          "provider": { "$ref": "#/components/schemas/IntegrationProvider" },
+          "calendar_id": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Calendar Id"
+          },
+          "calendar_name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Calendar Name"
+          },
+          "provider_account_email": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Provider Account Email"
+          },
+          "auth_status": { "$ref": "#/components/schemas/IntegrationAuthStatus" },
+          "sync_enabled": { "type": "boolean", "title": "Sync Enabled" },
+          "sync_direction": { "$ref": "#/components/schemas/SyncDirection" },
+          "sync_status": { "$ref": "#/components/schemas/SyncStatus" },
+          "last_synced_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Last Synced At"
+          },
+          "last_error": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Last Error"
+          },
+          "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
+          "updated_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "provider",
+          "calendar_id",
+          "calendar_name",
+          "provider_account_email",
+          "auth_status",
+          "sync_enabled",
+          "sync_direction",
+          "sync_status",
+          "last_synced_at",
+          "last_error",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "IntegrationResponse"
+      },
+      "MeetingSummaryCreate": {
+        "properties": {
+          "event_id": { "type": "string", "format": "uuid", "title": "Event Id" },
+          "notes": { "type": "string", "title": "Notes" }
+        },
+        "type": "object",
+        "required": ["event_id", "notes"],
+        "title": "MeetingSummaryCreate"
+      },
+      "MeetingSummaryResponse": {
+        "properties": {
+          "id": { "type": "string", "format": "uuid", "title": "Id" },
+          "organization_id": { "type": "string", "format": "uuid", "title": "Organization Id" },
+          "event_id": { "type": "string", "format": "uuid", "title": "Event Id" },
+          "summary_text": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Summary Text"
+          },
+          "action_items": {
+            "anyOf": [{ "additionalProperties": true, "type": "object" }, { "type": "null" }],
+            "title": "Action Items"
+          },
+          "model_used": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Model Used"
+          },
+          "tokens_used": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Tokens Used"
+          },
+          "generated_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Generated At"
+          },
+          "error_log": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Error Log"
+          },
+          "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
+          "updated_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "event_id",
+          "summary_text",
+          "action_items",
+          "model_used",
+          "tokens_used",
+          "generated_at",
+          "error_log",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "MeetingSummaryResponse"
+      },
+      "NotificationAcknowledgeRequest": {
+        "properties": {
+          "notification_id": { "type": "string", "format": "uuid", "title": "Notification Id" }
+        },
+        "type": "object",
+        "required": ["notification_id"],
+        "title": "NotificationAcknowledgeRequest"
+      },
+      "OrganizationCreate": {
+        "properties": {
+          "name": { "type": "string", "title": "Name" },
+          "slug": { "type": "string", "title": "Slug" },
+          "organization_type": { "type": "string", "title": "Organization Type" }
+        },
+        "type": "object",
+        "required": ["name", "slug", "organization_type"],
+        "title": "OrganizationCreate"
+      },
+      "OrganizationUpdate": {
+        "properties": {
+          "name": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Name" },
+          "organization_type": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Organization Type"
+          },
+          "is_active": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "title": "OrganizationUpdate"
+      },
+      "ParsedVoiceIntent": {
+        "properties": {
+          "command_type": { "type": "string", "title": "Command Type" },
+          "confidence": { "type": "number", "title": "Confidence", "default": 0.0 },
+          "parameters": { "additionalProperties": true, "type": "object", "title": "Parameters" },
+          "raw_transcript": { "type": "string", "title": "Raw Transcript", "default": "" }
+        },
+        "type": "object",
+        "required": ["command_type"],
+        "title": "ParsedVoiceIntent"
+      },
+      "ParticipantCreate": {
+        "properties": {
+          "membership_id": { "type": "string", "format": "uuid", "title": "Membership Id" },
+          "role": { "$ref": "#/components/schemas/ParticipantRole", "default": "staff" },
+          "can_acknowledge": { "type": "boolean", "title": "Can Acknowledge", "default": false },
+          "can_modify": { "type": "boolean", "title": "Can Modify", "default": false },
+          "can_delegate": { "type": "boolean", "title": "Can Delegate", "default": false }
+        },
+        "type": "object",
+        "required": ["membership_id"],
+        "title": "ParticipantCreate"
+      },
+      "ParticipantRole": {
+        "type": "string",
+        "enum": ["executive", "secretary", "staff", "observer", "external"],
+        "title": "ParticipantRole"
+      },
+      "ParticipantUpdate": {
+        "properties": {
+          "role": {
+            "anyOf": [{ "$ref": "#/components/schemas/ParticipantRole" }, { "type": "null" }]
+          },
+          "attendance_status": {
+            "anyOf": [{ "$ref": "#/components/schemas/AttendanceStatus" }, { "type": "null" }]
+          }
+        },
+        "type": "object",
+        "title": "ParticipantUpdate"
+      },
+      "ReminderPolicyCreate": {
+        "properties": {
+          "name": { "type": "string", "maxLength": 200, "minLength": 1, "title": "Name" },
+          "description": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Description"
+          },
+          "reminder_offsets": {
+            "items": { "type": "integer" },
+            "type": "array",
+            "title": "Reminder Offsets"
+          },
+          "escalation_offsets": {
+            "items": { "type": "integer" },
+            "type": "array",
+            "title": "Escalation Offsets"
+          },
+          "requires_acknowledgement": {
+            "type": "boolean",
+            "title": "Requires Acknowledgement",
+            "default": true
+          },
+          "retry_strategy": { "type": "string", "title": "Retry Strategy", "default": "fixed" },
+          "max_retries": { "type": "integer", "title": "Max Retries", "default": 3 },
+          "quiet_hours_enabled": {
+            "type": "boolean",
+            "title": "Quiet Hours Enabled",
+            "default": false
+          },
+          "quiet_hours_start": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Quiet Hours Start"
+          },
+          "quiet_hours_end": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Quiet Hours End"
+          }
+        },
+        "type": "object",
+        "required": ["name"],
+        "title": "ReminderPolicyCreate"
+      },
+      "RoleAssign": {
+        "properties": {
+          "membership_id": { "type": "string", "format": "uuid", "title": "Membership Id" },
+          "role_id": { "type": "string", "format": "uuid", "title": "Role Id" },
+          "assigned_by": {
+            "anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }],
+            "title": "Assigned By"
+          },
+          "expires_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Expires At"
+          }
+        },
+        "type": "object",
+        "required": ["membership_id", "role_id"],
+        "title": "RoleAssign"
+      },
+      "SummaryCreate": {
+        "properties": {
+          "event_id": { "type": "string", "format": "uuid", "title": "Event Id" },
+          "summary_type": { "$ref": "#/components/schemas/SummaryType", "default": "executive" }
+        },
+        "type": "object",
+        "required": ["event_id"],
+        "title": "SummaryCreate"
+      },
+      "SummaryListResponse": {
+        "properties": {
+          "summaries": {
+            "items": { "$ref": "#/components/schemas/SummaryResponse" },
+            "type": "array",
+            "title": "Summaries"
+          }
+        },
+        "type": "object",
+        "required": ["summaries"],
+        "title": "SummaryListResponse"
+      },
+      "SummaryResponse": {
+        "properties": {
+          "id": { "type": "string", "format": "uuid", "title": "Id" },
+          "event_id": { "type": "string", "format": "uuid", "title": "Event Id" },
+          "organization_id": { "type": "string", "format": "uuid", "title": "Organization Id" },
+          "summary_type": { "$ref": "#/components/schemas/SummaryType" },
+          "content": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Content" },
+          "status": { "$ref": "#/components/schemas/SummaryStatus" },
+          "model_used": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Model Used"
+          },
+          "tokens_used": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Tokens Used"
+          },
+          "generated_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Generated At"
+          },
+          "error_log": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Error Log"
+          },
+          "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
+          "updated_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "event_id",
+          "organization_id",
+          "summary_type",
+          "content",
+          "status",
+          "model_used",
+          "tokens_used",
+          "generated_at",
+          "error_log",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "SummaryResponse"
+      },
+      "SummaryStatus": {
+        "type": "string",
+        "enum": ["pending", "generating", "completed", "failed"],
+        "title": "SummaryStatus"
+      },
+      "SummaryType": {
+        "type": "string",
+        "enum": ["executive", "detailed", "action_items", "key_decisions", "attendee_notes"],
+        "title": "SummaryType"
+      },
+      "SyncDirection": {
+        "type": "string",
+        "enum": ["import", "export", "bidirectional"],
+        "title": "SyncDirection"
+      },
+      "SyncRequest": {
+        "properties": {
+          "direction": { "$ref": "#/components/schemas/SyncDirection", "default": "bidirectional" }
+        },
+        "type": "object",
+        "title": "SyncRequest"
+      },
+      "SyncStatus": {
+        "type": "string",
+        "enum": ["idle", "syncing", "error"],
+        "title": "SyncStatus"
+      },
+      "SyncStatusResponse": {
+        "properties": {
+          "integration_id": { "type": "string", "format": "uuid", "title": "Integration Id" },
+          "sync_status": { "$ref": "#/components/schemas/SyncStatus" },
+          "last_synced_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Last Synced At"
+          },
+          "message": { "type": "string", "title": "Message", "default": "" }
+        },
+        "type": "object",
+        "required": ["integration_id", "sync_status", "last_synced_at"],
+        "title": "SyncStatusResponse"
+      },
+      "UserCreate": {
+        "properties": {
+          "email": { "type": "string", "title": "Email" },
+          "full_name": { "type": "string", "title": "Full Name" },
+          "avatar_url": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Avatar Url"
+          },
+          "supabase_user_id": {
+            "anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }],
+            "title": "Supabase User Id"
+          }
+        },
+        "type": "object",
+        "required": ["email", "full_name"],
+        "title": "UserCreate"
+      },
+      "UserUpdate": {
+        "properties": {
+          "full_name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Full Name"
+          },
+          "avatar_url": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Avatar Url"
+          },
+          "is_active": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Is Active"
+          },
+          "is_verified": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Is Verified"
+          }
+        },
+        "type": "object",
+        "title": "UserUpdate"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": { "type": "string", "title": "Message" },
+          "type": { "type": "string", "title": "Error Type" },
+          "input": { "title": "Input" },
+          "ctx": { "type": "object", "title": "Context" }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      },
+      "VoiceCommandCreate": {
+        "properties": {
+          "command_text": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Command Text"
+          },
+          "source": {
+            "anyOf": [{ "$ref": "#/components/schemas/VoiceCommandSource" }, { "type": "null" }]
+          }
+        },
+        "type": "object",
+        "title": "VoiceCommandCreate"
+      },
+      "VoiceCommandListResponse": {
+        "properties": {
+          "commands": {
+            "items": { "$ref": "#/components/schemas/VoiceCommandResponse" },
+            "type": "array",
+            "title": "Commands"
+          }
+        },
+        "type": "object",
+        "required": ["commands"],
+        "title": "VoiceCommandListResponse"
+      },
+      "VoiceCommandResponse": {
+        "properties": {
+          "id": { "type": "string", "format": "uuid", "title": "Id" },
+          "organization_id": { "type": "string", "format": "uuid", "title": "Organization Id" },
+          "user_id": { "type": "string", "format": "uuid", "title": "User Id" },
+          "command_text": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Command Text"
+          },
+          "command_type": { "$ref": "#/components/schemas/VoiceCommandType" },
+          "status": { "$ref": "#/components/schemas/VoiceCommandStatus" },
+          "transcript": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Transcript"
+          },
+          "intent_data": {
+            "anyOf": [{ "additionalProperties": true, "type": "object" }, { "type": "null" }],
+            "title": "Intent Data"
+          },
+          "execution_data": {
+            "anyOf": [{ "additionalProperties": true, "type": "object" }, { "type": "null" }],
+            "title": "Execution Data"
+          },
+          "result": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Result" },
+          "error_log": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Error Log"
+          },
+          "source": {
+            "anyOf": [{ "$ref": "#/components/schemas/VoiceCommandSource" }, { "type": "null" }]
+          },
+          "processed_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Processed At"
+          },
+          "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
+          "updated_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization_id",
+          "user_id",
+          "command_text",
+          "command_type",
+          "status",
+          "transcript",
+          "intent_data",
+          "execution_data",
+          "result",
+          "error_log",
+          "source",
+          "processed_at",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "VoiceCommandResponse"
+      },
+      "VoiceCommandSource": {
+        "type": "string",
+        "enum": ["microphone", "telephony", "upload"],
+        "title": "VoiceCommandSource"
+      },
+      "VoiceCommandStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "processing",
+          "awaiting_confirmation",
+          "completed",
+          "failed",
+          "rejected"
+        ],
+        "title": "VoiceCommandStatus"
+      },
+      "VoiceCommandType": {
+        "type": "string",
+        "enum": [
+          "create_event",
+          "reschedule_event",
+          "cancel_event",
+          "query_events",
+          "acknowledge_reminder",
+          "escalate",
+          "summarize_event",
+          "unknown"
+        ],
+        "title": "VoiceCommandType"
+      },
+      "VoiceParseRequest": {
+        "properties": { "transcript": { "type": "string", "title": "Transcript" } },
+        "type": "object",
+        "required": ["transcript"],
+        "title": "VoiceParseRequest"
+      }
+    },
+    "securitySchemes": { "HTTPBearer": { "type": "http", "scheme": "bearer" } }
+  }
+}

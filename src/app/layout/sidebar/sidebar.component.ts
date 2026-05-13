@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '../../auth/stores/auth.store';
 import { RbacStore } from '../../auth/stores/rbac.store';
@@ -26,15 +26,25 @@ const NAV_ITEMS: NavItem[] = [
   imports: [RouterLink, RouterLinkActive],
   template: `
     <aside class="w-64 h-screen bg-white border-r border-[var(--color-border)] flex flex-col">
-      <!-- Logo -->
+      <!-- Logo + Close (mobile) -->
       <div class="h-16 flex items-center px-6 border-b border-[var(--color-border)]">
         <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center mr-3">
           <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
         <span class="font-semibold text-lg text-[var(--color-text-primary)]">Remindly</span>
+        <button
+          type="button"
+          (click)="close.emit()"
+          class="ml-auto p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-alt)] lg:hidden transition-colors"
+          aria-label="Close sidebar"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       <!-- Navigation -->
@@ -49,7 +59,8 @@ const NAV_ITEMS: NavItem[] = [
                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
                          text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-alt)]
                          hover:text-[var(--color-text-primary)] transition-all"
-                  [attr.aria-label]="item.label">
+                  [attr.aria-label]="item.label"
+                  (click)="close.emit()">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon" />
                   </svg>
@@ -82,4 +93,5 @@ export class SidebarComponent {
   readonly authStore = inject(AuthStore);
   readonly rbacStore = inject(RbacStore);
   readonly navItems = NAV_ITEMS;
+  readonly close = output<void>();
 }

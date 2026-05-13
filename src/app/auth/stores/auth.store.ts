@@ -53,6 +53,8 @@ export const AuthStore = signalStore(
           user: result.user,
           isLoading: false,
         });
+        // Persist non-sensitive user info to sessionStorage for page reload recovery
+        sessionStorage.setItem('remindly_user', JSON.stringify(result.user));
         await rbacStore.hydratePermissions();
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Login failed';
@@ -63,6 +65,27 @@ export const AuthStore = signalStore(
 
     clearSession(): void {
       patchState(store, { accessToken: null, user: null, error: null });
+      sessionStorage.removeItem('remindly_user');
+    },
+
+    persistToStorage(user: UserProfile): void {
+      // Store non-sensitive user info in sessionStorage
+      sessionStorage.setItem('remindly_user', JSON.stringify(user));
+    },
+
+    hydrateFromStorage(): boolean {
+      // Restore user from sessionStorage on page reload
+      const stored = sessionStorage.getItem('remindly_user');
+      if (stored) {
+        try {
+          const user = JSON.parse(stored) as UserProfile;
+          patchState(store, { user });
+          return true;
+        } catch {
+          sessionStorage.removeItem('remindly_user');
+        }
+      }
+      return false;
     },
   })),
 );
