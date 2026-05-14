@@ -9,6 +9,7 @@ import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { organizationInterceptor } from './core/interceptors/organization.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { responseInterceptor } from './core/interceptors/response.interceptor';
 import { API_CONFIG } from './core/tokens/api-config.token';
 import { environment } from '@env/environment';
 import { AuthStore } from './auth/stores/auth.store';
@@ -26,6 +27,7 @@ export const appConfig: ApplicationConfig = {
         authInterceptor,
         organizationInterceptor,
         errorInterceptor,
+        responseInterceptor,
       ]),
     ),
     provideServiceWorker('ngsw-worker.js', {

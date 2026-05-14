@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy, inject, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, output, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '../../auth/stores/auth.store';
+import { RbacStore } from '../../auth/stores/rbac.store';
 import { AppPermissionDirective } from '@shared/directives/app-permission/app-permission.directive';
 
 interface NavItem {
@@ -79,7 +80,7 @@ const NAV_ITEMS: NavItem[] = [
             <p class="text-sm font-semibold text-gray-900 truncate">
               {{ authStore.userDisplayName() }}
             </p>
-            <p class="text-xs text-gray-500">Executive</p>
+            <p class="text-xs text-gray-500">{{ roleLabel() }}</p>
           </div>
           <svg aria-hidden="true" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -91,6 +92,14 @@ const NAV_ITEMS: NavItem[] = [
 })
 export class SidebarComponent {
   readonly authStore = inject(AuthStore);
+  readonly rbacStore = inject(RbacStore);
   readonly navItems = NAV_ITEMS;
   readonly close = output<void>();
+
+  readonly roleLabel = computed(() => {
+    if (this.rbacStore.hasPermission()('audit.read')) return 'Executive';
+    if (this.rbacStore.hasPermission()('events.approve')) return 'Admin';
+    if (this.rbacStore.hasPermission()('events.read')) return 'Secretary';
+    return 'Member';
+  });
 }

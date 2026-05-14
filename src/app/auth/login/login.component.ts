@@ -194,7 +194,7 @@ export class LoginComponent {
 
   async onSubmit(): Promise<void> {
     if (!this.email() || !this.password()) return;
-    
+
     try {
       await this.authStore.login(this.email(), this.password());
       await this.router.navigate(['/dashboard']);
