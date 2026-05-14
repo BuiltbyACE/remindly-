@@ -41,6 +41,10 @@ function fromApiReminder(data: unknown): Reminder {
 }
 
 function fromApiListResponse(data: unknown): ReminderListResponse {
+  if (Array.isArray(data)) {
+    const items = data.map(fromApiReminder);
+    return { items, total: items.length };
+  }
   const response = data as Record<string, unknown>;
   const items = Array.isArray(response['items'])
     ? response['items'].map(fromApiReminder)

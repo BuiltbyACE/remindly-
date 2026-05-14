@@ -35,6 +35,10 @@ function fromApiEntry(data: unknown): AuditLogEntry {
 }
 
 function fromApiListResponse(data: unknown): AuditListResponse {
+  if (Array.isArray(data)) {
+    const items = data.map(fromApiEntry);
+    return { items, total: items.length, page: 1, page_size: items.length };
+  }
   const response = data as Record<string, unknown>;
   const items = Array.isArray(response['data'])
     ? response['data'].map(fromApiEntry)

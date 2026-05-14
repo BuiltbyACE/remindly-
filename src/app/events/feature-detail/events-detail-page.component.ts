@@ -29,7 +29,7 @@ import { EventDetailComponent } from '../components/event-detail/event-detail.co
 })
 export class EventsDetailPageComponent implements OnInit {
   readonly store = inject(EventsStore);
-  readonly eventId = input.required<string>();
+  readonly eventId = input.required<string>({ alias: 'id' });
 
   ngOnInit(): void {
     // Clear any previous selection and load the event

@@ -73,7 +73,7 @@ export class EventsEditPageComponent implements OnInit {
   readonly router = inject(Router);
   readonly toast = inject(ToastService);
 
-  readonly eventId = input.required<string>();
+  readonly eventId = input.required<string>({ alias: 'id' });
 
   ngOnInit(): void {
     this.loadEvent();

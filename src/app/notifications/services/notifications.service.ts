@@ -32,6 +32,10 @@ function fromApiNotification(data: unknown): Notification {
 }
 
 function fromApiListResponse(data: unknown): NotificationListResponse {
+  if (Array.isArray(data)) {
+    const items = data.map(fromApiNotification);
+    return { items, total: items.length, page: 1, page_size: items.length };
+  }
   const response = data as Record<string, unknown>;
   const items = Array.isArray(response['items'])
     ? response['items'].map(fromApiNotification)

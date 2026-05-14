@@ -30,6 +30,10 @@ function fromApiApproval(data: unknown): Approval {
 }
 
 function fromApiListResponse(data: unknown): ApprovalListResponse {
+  if (Array.isArray(data)) {
+    const items = data.map(fromApiApproval);
+    return { items, total: items.length, page: 1, page_size: items.length };
+  }
   const response = data as Record<string, unknown>;
   const items = Array.isArray(response['items'])
     ? response['items'].map(fromApiApproval)

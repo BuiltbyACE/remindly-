@@ -46,6 +46,10 @@ function fromApiCommand(data: unknown): VoiceCommandResponse {
 }
 
 function fromApiListResponse(data: unknown): VoiceCommandListResponse {
+  if (Array.isArray(data)) {
+    const items = data.map(fromApiCommand);
+    return { items, total: items.length };
+  }
   const response = data as Record<string, unknown>;
   const items = Array.isArray(response['commands'])
     ? response['commands'].map(fromApiCommand)

@@ -52,16 +52,23 @@ export class EventMapper {
    * Convert list response
    */
   static fromApiListResponse(data: unknown): EventListResponse {
-    const response = data as Record<string, unknown>;
-    const events = Array.isArray(response['events']) 
-      ? response['events'].map(e => this.fromApiResponse(e))
-      : [];
+    let rawList: unknown[];
+
+    if (Array.isArray(data)) {
+      rawList = data;
+    } else {
+      const response = data as Record<string, unknown>;
+      rawList = (Array.isArray(response['events']) ? response['events'] :
+                 Array.isArray(response['data']) ? response['data'] : []) as unknown[];
+    }
+
+    const events = rawList.map(e => this.fromApiResponse(e));
 
     return {
       events,
-      total: Number(response['total'] ?? events.length),
-      limit: Number(response['limit'] ?? 20),
-      offset: Number(response['offset'] ?? 0),
+      total: events.length,
+      limit: 20,
+      offset: 0,
     };
   }
 
