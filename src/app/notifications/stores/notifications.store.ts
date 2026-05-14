@@ -53,13 +53,15 @@ export const NotificationsStore = signalStore(
       let wsSubscription: Subscription | null = null;
 
       // Subscribe to notification-related WebSocket messages
+      // Backend emits 'notification.new' and 'notification.updated'
+      // See app/websocket/enums.py — WebSocketMessageType
       wsSubscription = webSocketStore
-        .messagesOfTypes(['notification.created', 'notification.updated'])
+        .messagesOfTypes(['notification.new', 'notification.updated'])
         .subscribe((message) => {
           const notification = message.payload as Notification;
 
           // Add new notification to the list
-          if (message.type === 'notification.created') {
+          if (message.type === 'notification.new') {
             const currentNotifications = store.notifications();
             if (!currentNotifications.find((n) => n.id === notification.id)) {
               patchState(store, {

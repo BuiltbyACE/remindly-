@@ -46,9 +46,10 @@ export const VoiceStore = signalStore(
       const webSocketStore = inject(WebSocketStore);
       const toastService = inject(ToastService);
 
-      // Subscribe to voice status changes via WebSocket
+      // Subscribe to voice command results via WebSocket
+      // Backend emits 'voice.command_result' — see app/websocket/enums.py
       const wsSubscription = webSocketStore
-        .messagesOfType('voice.status_changed')
+        .messagesOfType('voice.command_result')
         .subscribe((message) => {
           const command = message.payload as VoiceCommandResponse;
 

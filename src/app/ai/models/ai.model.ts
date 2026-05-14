@@ -27,34 +27,19 @@ export interface BriefingResponse {
 }
 
 export interface BriefingContent {
-  headline: string;
-  key_insights: string[];
-  upcoming_events: BriefingEvent[];
-  action_items: ActionItem[];
-  risk_alerts: RiskAlert[];
+  summary: string;
+  event_count: number;
+  events: BriefingEvent[];
+  overlapping_events: string[];
+  urgent_priorities: string[];
+  recommendation: string;
 }
 
 export interface BriefingEvent {
-  event_id: string;
   title: string;
-  scheduled_time: string;
-  location: string | null;
-  preparation_status: 'ready' | 'needs_attention' | 'urgent';
-  notes: string | null;
-}
-
-export interface ActionItem {
-  description: string;
+  time: string;
   priority: 'high' | 'medium' | 'low';
-  due_date: string | null;
-  source_event_id: string | null;
-}
-
-export interface RiskAlert {
-  type: 'scheduling_conflict' | 'approval_needed' | 'reminder_escalated' | 'deadline_approaching';
-  severity: 'critical' | 'high' | 'medium';
-  description: string;
-  related_event_id: string | null;
+  brief_note: string;
 }
 
 export interface BriefingListResponse {

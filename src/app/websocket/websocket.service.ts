@@ -6,6 +6,7 @@
 import { Injectable, inject, NgZone } from '@angular/core';
 import { Subject, Observable, filter, map, retry, timer, Subscription } from 'rxjs';
 import { API_CONFIG } from '../core/tokens/api-config.token';
+import { AuthStore } from '../auth/stores/auth.store';
 
 export interface WebSocketMessage {
   type: string;
@@ -16,16 +17,50 @@ export interface WebSocketMessage {
 
 export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
 
+/**
+ * WebSocket message type constants matching backend app/websocket/enums.py
+ */
+export const WS_MESSAGE_TYPE = {
+  NOTIFICATION_NEW: 'notification.new',
+  NOTIFICATION_UPDATED: 'notification.updated',
+  EVENT_UPDATED: 'event.updated',
+  EVENT_REMINDER: 'event.reminder',
+  ESCALATION_CREATED: 'escalation.created',
+  APPROVAL_CREATED: 'approval.created',
+  APPROVAL_UPDATED: 'approval.updated',
+  VOICE_COMMAND_RESULT: 'voice.command_result',
+  BRIEFING_READY: 'briefing.ready',
+  CONNECTION_ACK: 'connection.ack',
+  ERROR: 'error',
+  PING: 'ping',
+  PONG: 'pong',
+} as const;
+
+export type WsMessageType = (typeof WS_MESSAGE_TYPE)[keyof typeof WS_MESSAGE_TYPE];
+
+/**
+ * WebSocket subscription channel constants matching backend app/websocket/enums.py
+ */
+export const WS_SUBSCRIBE_TYPE = {
+  USER: 'user',
+  ORGANIZATION: 'organization',
+  EVENT: 'event',
+} as const;
+
+export type WsSubscribeType = (typeof WS_SUBSCRIBE_TYPE)[keyof typeof WS_SUBSCRIBE_TYPE];
+
 @Injectable({
   providedIn: 'root',
 })
 export class WebSocketService {
   private readonly apiConfig = inject(API_CONFIG);
   private readonly ngZone = inject(NgZone);
+  private readonly authStore = inject(AuthStore);
 
   private ws: WebSocket | null = null;
   private messageSubject = new Subject<WebSocketMessage>();
   private statusSubject = new Subject<ConnectionStatus>();
+  private connectionAckSubject = new Subject<void>();
   
   // Reconnect configuration
   private reconnectAttempts = 0;
@@ -56,6 +91,13 @@ export class WebSocketService {
    */
   get status$(): Observable<ConnectionStatus> {
     return this.statusSubject.asObservable();
+  }
+
+  /**
+   * Observable that emits when connection.ack is received from server
+   */
+  get connectionAck$(): Observable<void> {
+    return this.connectionAckSubject.asObservable();
   }
 
   /**
@@ -138,6 +180,49 @@ export class WebSocketService {
   }
 
   /**
+   * Subscribe to a WebSocket channel (user, organization, or event)
+   */
+  subscribe(channel: WsSubscribeType, id: string): void {
+    this.send({
+      type: 'subscribe',
+      channel,
+      [`${channel}_id`]: id,
+    });
+  }
+
+  /**
+   * Unsubscribe from a WebSocket channel
+   */
+  unsubscribe(channel: WsSubscribeType, id: string): void {
+    this.send({
+      type: 'unsubscribe',
+      channel,
+      [`${channel}_id`]: id,
+    });
+  }
+
+  /**
+   * Convenience: subscribe to an organization channel
+   */
+  subscribeToOrganization(orgId: string): void {
+    this.subscribe(WS_SUBSCRIBE_TYPE.ORGANIZATION, orgId);
+  }
+
+  /**
+   * Convenience: subscribe to a user channel
+   */
+  subscribeToUser(userId: string): void {
+    this.subscribe(WS_SUBSCRIBE_TYPE.USER, userId);
+  }
+
+  /**
+   * Convenience: subscribe to event-specific updates
+   */
+  subscribeToEvent(eventId: string): void {
+    this.subscribe(WS_SUBSCRIBE_TYPE.EVENT, eventId);
+  }
+
+  /**
    * Get filtered observable for specific message types
    */
   messagesOfType(type: string): Observable<WebSocketMessage> {
@@ -184,13 +269,27 @@ export class WebSocketService {
     
     // Append path if not present
     if (!url.includes('/ws')) {
-      url = url.endsWith('/') ? `${url}ws` : `${url}/ws`;
+      url = url.endsWith('/') ? `${url}api/v1/ws` : `${url}/api/v1/ws`;
     }
     
-    // Add organization query param if provided
+    // Build query params
+    const params: string[] = [];
+    
+    // Add JWT token from auth store (primary auth mechanism for WS)
+    const token = this.authStore.accessToken();
+    if (token) {
+      params.push(`token=${encodeURIComponent(token)}`);
+    }
+    
+    // Add organization ID if provided
     if (organizationId) {
+      params.push(`org=${encodeURIComponent(organizationId)}`);
+    }
+    
+    // Append query params to URL
+    if (params.length > 0) {
       const separator = url.includes('?') ? '&' : '?';
-      url = `${url}${separator}org=${organizationId}`;
+      url = `${url}${separator}${params.join('&')}`;
     }
     
     return url;
@@ -199,13 +298,19 @@ export class WebSocketService {
   private handleMessage(data: string): void {
     try {
       const message = JSON.parse(data) as WebSocketMessage;
-      
+
       // Handle pong response
-      if (message.type === 'pong') {
+      if (message.type === WS_MESSAGE_TYPE.PONG) {
         this.handlePong();
         return;
       }
-      
+
+      // Handle connection acknowledgment
+      if (message.type === WS_MESSAGE_TYPE.CONNECTION_ACK) {
+        this.handleConnectionAck();
+        return;
+      }
+
       // Validate message structure
       if (!message.type) {
         return;
@@ -214,6 +319,14 @@ export class WebSocketService {
       this.messageSubject.next(message);
     } catch (error) {
       // ignore parse errors
+    }
+  }
+
+  private handleConnectionAck(): void {
+    this.connectionAckSubject.next();
+    // Auto-subscribe to organization channel on successful auth
+    if (this.currentOrganizationId) {
+      this.subscribe(WS_SUBSCRIBE_TYPE.ORGANIZATION, this.currentOrganizationId);
     }
   }
 
@@ -248,7 +361,7 @@ export class WebSocketService {
     
     this.heartbeatTimer = setInterval(() => {
       if (this.isConnected) {
-        this.send({ type: 'ping' });
+        this.send({ type: WS_MESSAGE_TYPE.PING });
         
         // Set timeout for pong response
         this.pongTimeout = setTimeout(() => {

@@ -18,6 +18,7 @@ import { responseInterceptor } from './core/interceptors/response.interceptor';
 import { API_CONFIG } from './core/tokens/api-config.token';
 import { environment } from '@env/environment';
 import { AuthStore } from './auth/stores/auth.store';
+import { PushSubscriptionService } from './push/push-subscription.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -51,6 +52,14 @@ export const appConfig: ApplicationConfig = {
       useFactory: () => {
         const authStore = inject(AuthStore);
         return () => authStore.hydrateFromStorage();
+      },
+      multi: true,
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: () => {
+        const pushService = inject(PushSubscriptionService);
+        return () => pushService.initialize();
       },
       multi: true,
     },

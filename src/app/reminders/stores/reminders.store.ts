@@ -47,8 +47,10 @@ export const RemindersStore = signalStore(
       let wsSubscription: Subscription | null = null;
 
       // Subscribe to reminder-related WebSocket messages
+      // Backend emits 'event.reminder' for reminders and 'escalation.created' for escalations
+      // See app/websocket/enums.py — WebSocketMessageType
       wsSubscription = webSocketStore
-        .messagesOfType('reminder.triggered')
+        .messagesOfTypes(['event.reminder', 'escalation.created'])
         .subscribe((message) => {
           const reminder = message.payload as Reminder;
 
@@ -71,8 +73,13 @@ export const RemindersStore = signalStore(
             patchState(store, { reminders: updatedReminders });
 
             // Show toast for triggered reminders
-            if (reminder.status === 'triggered') {
+            if (message.type === 'event.reminder' && reminder.status === 'triggered') {
               toastService.info('Event reminder triggered');
+            }
+
+            // Show urgent alert for escalations
+            if (message.type === 'escalation.created') {
+              toastService.warning('Reminder escalated — urgent attention required');
             }
           }
         });

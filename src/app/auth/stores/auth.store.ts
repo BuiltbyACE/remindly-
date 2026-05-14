@@ -3,6 +3,7 @@ import { computed, inject } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
 import { AuthService, UserProfile } from '../services/auth.service';
 import { RbacStore } from './rbac.store';
+import { PushSubscriptionService } from '../../push/push-subscription.service';
 
 interface AuthState {
   accessToken: string | null;
@@ -27,7 +28,7 @@ export const AuthStore = signalStore(
       return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     }),
   })),
-  withMethods((store, authService = inject(AuthService), rbacStore = inject(RbacStore)) => ({
+  withMethods((store, authService = inject(AuthService), rbacStore = inject(RbacStore), pushService = inject(PushSubscriptionService)) => ({
     setToken(token: string): void {
       patchState(store, { accessToken: token });
     },
@@ -53,9 +54,11 @@ export const AuthStore = signalStore(
           user: result.user,
           isLoading: false,
         });
-        localStorage.setItem('remindly_token', result.access_token);
+        sessionStorage.setItem('remindly_token', result.access_token);
         sessionStorage.setItem('remindly_user', JSON.stringify(result.user));
         await rbacStore.hydratePermissions();
+        await pushService.initialize();
+        await pushService.register();
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Login failed';
         patchState(store, { isLoading: false, error: message });
@@ -64,8 +67,9 @@ export const AuthStore = signalStore(
     },
 
     clearSession(): void {
+      pushService.unregister();
       patchState(store, { accessToken: null, user: null, error: null });
-      localStorage.removeItem('remindly_token');
+      sessionStorage.removeItem('remindly_token');
       sessionStorage.removeItem('remindly_user');
     },
 
@@ -75,7 +79,7 @@ export const AuthStore = signalStore(
   })),
   withMethods((store) => ({
     hydrateFromStorage(): boolean {
-      const token = localStorage.getItem('remindly_token');
+      const token = sessionStorage.getItem('remindly_token');
       if (!token) return false;
 
       patchState(store, { accessToken: token });

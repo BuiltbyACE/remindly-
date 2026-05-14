@@ -24,6 +24,7 @@ export interface EventsState {
   selectedEvent: Event | null;
   loading: boolean;
   error: string | null;
+  notFound: boolean;
   pagination: EventPagination;
   filters: EventFilters;
 }
@@ -61,60 +62,46 @@ export class EventsStore implements OnDestroy {
    */
   private initializeWebSocketSubscriptions(): void {
     // Subscribe to event-related WebSocket messages
-    this.wsSubscription = this.webSocketStore.messagesOfTypes([
-      'event.created',
-      'event.updated',
-      'event.status_changed',
-    ]).subscribe((message) => {
-      this.handleWebSocketMessage(message);
-    });
+    // Backend emits 'event.updated' for all event changes (create, update, status change)
+    // See app/websocket/enums.py — WebSocketMessageType.EVENT_UPDATED
+    this.wsSubscription = this.webSocketStore
+      .messagesOfType('event.updated')
+      .subscribe((message) => {
+        this.handleWebSocketMessage(message);
+      });
   }
 
   /**
-   * Handle WebSocket messages for events
+   * Handle WebSocket messages for events (upsert: adds new or updates existing)
    */
   private handleWebSocketMessage(message: { type: string; payload: unknown }): void {
-    switch (message.type) {
-      case 'event.created': {
-        const event = message.payload as Event;
-        // Add new event to the list if it matches current filters
-        const currentEvents = this.state().events;
-        if (!currentEvents.find(e => e.id === event.id)) {
-          this.patchState({
-            events: [event, ...currentEvents],
-            pagination: {
-              ...this.state().pagination,
-              total: this.state().pagination.total + 1,
-            },
-          });
-        }
-        break;
-      }
+    const event = message.payload as Event;
+    const currentEvents = this.state().events;
+    const existingIndex = currentEvents.findIndex(e => e.id === event.id);
 
-      case 'event.updated': {
-        const event = message.payload as Event;
-        this.updateEventInState(event);
-        break;
-      }
+    if (existingIndex >= 0) {
+      // Update existing event
+      const updatedEvents = currentEvents.map(e =>
+        e.id === event.id ? event : e
+      );
+      const updatedSelected =
+        this.state().selectedEvent?.id === event.id
+          ? event
+          : this.state().selectedEvent;
 
-      case 'event.status_changed': {
-        const { id, new_status } = message.payload as { id: string; new_status: EventStatus };
-        // Find and update the event status
-        const currentEvents = this.state().events;
-        const updatedEvents = currentEvents.map(e =>
-          e.id === id ? { ...e, status: new_status } : e
-        );
-        const selected = this.state().selectedEvent;
-        const updatedSelected = selected?.id === id 
-          ? { ...selected, status: new_status } 
-          : selected;
-        
-        this.patchState({
-          events: updatedEvents,
-          selectedEvent: updatedSelected as Event | null,
-        });
-        break;
-      }
+      this.patchState({
+        events: updatedEvents,
+        selectedEvent: updatedSelected,
+      });
+    } else {
+      // Add new event
+      this.patchState({
+        events: [event, ...currentEvents],
+        pagination: {
+          ...this.state().pagination,
+          total: this.state().pagination.total + 1,
+        },
+      });
     }
   }
 
@@ -124,6 +111,7 @@ export class EventsStore implements OnDestroy {
     selectedEvent: null,
     loading: false,
     error: null,
+    notFound: false,
     pagination: {
       limit: 20,
       offset: 0,
@@ -140,6 +128,7 @@ export class EventsStore implements OnDestroy {
   readonly selectedEvent = computed(() => this.state().selectedEvent);
   readonly loading = computed(() => this.state().loading);
   readonly error = computed(() => this.state().error);
+  readonly notFound = computed(() => this.state().notFound);
   readonly pagination = computed(() => this.state().pagination);
   readonly filters = computed(() => this.state().filters);
 
@@ -200,8 +189,12 @@ export class EventsStore implements OnDestroy {
         loading: false,
       });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load event';
-      this.patchState({ error: message, loading: false });
+      const is404 = (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) as boolean;
+      this.patchState({
+        error: is404 ? null : (err instanceof Error ? err.message : 'Failed to load event'),
+        notFound: is404,
+        loading: false,
+      });
     }
   }
 
@@ -209,7 +202,7 @@ export class EventsStore implements OnDestroy {
    * Clear selected event
    */
   clearSelection(): void {
-    this.patchState({ selectedEvent: null });
+    this.patchState({ selectedEvent: null, notFound: false });
   }
 
   /**

@@ -79,8 +79,8 @@ import { EmptyStateComponent } from '../shared/components/empty-state/empty-stat
               <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
                 <div>
                   <p class="text-sm font-medium text-gray-900">{{ briefing.briefing_date }}</p>
-                  @if (briefing.content?.headline; as headline) {
-                    <p class="text-xs text-gray-500 truncate max-w-md">{{ headline }}</p>
+                  @if (briefing.content?.summary; as summary) {
+                    <p class="text-xs text-gray-500 truncate max-w-md">{{ summary }}</p>
                   }
                 </div>
                 <span class="text-xs text-gray-400">

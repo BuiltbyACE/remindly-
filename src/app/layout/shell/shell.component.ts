@@ -56,9 +56,10 @@ export class ShellComponent implements OnInit, OnDestroy {
     return window.innerWidth >= 1024;
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.authStore.hydrateUser();
-    this.orgStore.loadOrganizations();
+
+    await this.orgStore.loadOrganizations();
 
     const activeOrgId = this.orgStore.activeOrganization()?.id;
     this.wsStore.connect(activeOrgId);

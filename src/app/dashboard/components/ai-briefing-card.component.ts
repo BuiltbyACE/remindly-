@@ -1,14 +1,13 @@
 import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { TitleCasePipe } from '@angular/common';
 import { AiStore } from '../../ai/stores/ai.store';
 import { AuthStore } from '../../auth/stores/auth.store';
 import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skeleton-loader.component';
-import type { RiskAlert, ActionItem } from '../../ai/models/ai.model';
 
 @Component({
   selector: 'app-ai-briefing-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, SkeletonLoaderComponent],
+  imports: [SkeletonLoaderComponent, TitleCasePipe],
   template: `
     <div class="bg-white rounded-xl shadow-sm border border-gray-200">
       <div class="p-5 border-b border-gray-200 flex items-center justify-between">
@@ -41,77 +40,78 @@ import type { RiskAlert, ActionItem } from '../../ai/models/ai.model';
           </div>
         } @else if (aiStore.isLoading()) {
           <app-skeleton-loader variant="card" [count]="3" />
-        } @else if (briefingContent()) {
-          <!-- Headline -->
-          <p class="text-lg font-bold text-gray-900 mb-4">{{ briefingContent()!.headline }}</p>
-
-          <!-- Key Insights -->
-          @if (keyInsights().length > 0) {
-            <div class="mb-4">
-              <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Key Insights</h3>
-              <ul class="space-y-2">
-                @for (insight of keyInsights(); track insight) {
-                  <li class="flex items-start gap-2 text-sm text-gray-700">
-                    <span class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0"></span>
-                    {{ insight }}
-                  </li>
-                }
-              </ul>
-            </div>
+        } @else if (briefingContent(); as c) {
+          <!-- Summary -->
+          @if (c.summary) {
+            <p class="text-sm text-gray-700 mb-4 leading-relaxed">{{ c.summary }}</p>
           }
 
-          <!-- Action Items -->
-          @if (actionItems().length > 0) {
+          <!-- Events -->
+          @if (c.events.length > 0) {
             <div class="mb-4">
-              <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Action Items</h3>
+              <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Events ({{ c.event_count }})
+              </h3>
               <div class="space-y-2">
-                @for (item of actionItems(); track item.description) {
-                  <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50">
-                    <div class="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                         [class]="getPriorityDot(item.priority)"></div>
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm text-gray-700 truncate">{{ item.description }}</p>
-                      @if (item.due_date) {
-                        <p class="text-xs text-gray-400">Due: {{ formatDate(item.due_date) }}</p>
-                      }
+                @for (event of c.events; track event.title) {
+                  <div class="p-2 rounded-lg bg-gray-50">
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-medium text-gray-900 truncate">{{ event.title }}</p>
+                      <span class="text-xs text-gray-500 flex-shrink-0 ml-2">{{ event.time }}</span>
                     </div>
-                    @if (item.source_event_id) {
-                      <a [routerLink]="['/events', item.source_event_id]"
-                         class="text-purple-600 hover:text-purple-800 text-xs font-medium flex-shrink-0">
-                        View
-                      </a>
+                    @if (event.brief_note) {
+                      <p class="text-xs text-gray-600 mt-0.5">{{ event.brief_note }}</p>
                     }
+                    <span class="inline-block mt-1 px-1.5 py-0.5 text-xs font-medium rounded"
+                          [class.bg-red-100]="event.priority === 'high'"
+                          [class.text-red-700]="event.priority === 'high'"
+                          [class.bg-yellow-100]="event.priority === 'medium'"
+                          [class.text-yellow-700]="event.priority === 'medium'"
+                          [class.bg-green-100]="event.priority === 'low'"
+                          [class.text-green-700]="event.priority === 'low'">
+                      {{ event.priority | titlecase }}
+                    </span>
                   </div>
                 }
               </div>
             </div>
           }
 
-          <!-- Risk Alerts -->
-          @if (riskAlerts().length > 0) {
-            <div>
-              <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Risk Alerts</h3>
-              <div class="space-y-2">
-                @for (alert of riskAlerts(); track alert.description) {
-                  <div class="flex items-start gap-2 p-2 rounded-lg"
-                       [class]="getAlertBg(alert.severity)">
-                    <svg aria-hidden="true" class="w-4 h-4 mt-0.5 flex-shrink-0"
-                         [class]="getAlertIconColor(alert.severity)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm font-medium text-gray-900">{{ alert.description }}</p>
-                      <p class="text-xs text-gray-500">{{ alert.type.replace('_', ' ') }}</p>
-                    </div>
-                    @if (alert.related_event_id) {
-                      <a [routerLink]="['/events', alert.related_event_id]"
-                         class="text-purple-600 hover:text-purple-800 text-xs font-medium flex-shrink-0">
-                        View
-                      </a>
-                    }
+          <!-- Scheduling Conflicts -->
+          @if (c.overlapping_events.length > 0) {
+            <div class="mb-4">
+              <h3 class="text-xs font-semibold text-red-500 uppercase tracking-wider mb-2">Scheduling Conflicts</h3>
+              <div class="space-y-1">
+                @for (conflict of c.overlapping_events; track conflict) {
+                  <div class="flex items-start gap-1.5 text-sm text-red-700">
+                    <span class="w-1 h-1 rounded-full bg-red-500 mt-2 flex-shrink-0"></span>
+                    {{ conflict }}
                   </div>
                 }
               </div>
+            </div>
+          }
+
+          <!-- Urgent Priorities -->
+          @if (c.urgent_priorities.length > 0) {
+            <div class="mb-4">
+              <h3 class="text-xs font-semibold text-orange-500 uppercase tracking-wider mb-2">Urgent Priorities</h3>
+              <div class="space-y-1">
+                @for (priority of c.urgent_priorities; track priority) {
+                  <div class="flex items-start gap-1.5 text-sm text-orange-700">
+                    <span class="w-1 h-1 rounded-full bg-orange-500 mt-2 flex-shrink-0"></span>
+                    {{ priority }}
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Recommendation -->
+          @if (c.recommendation) {
+            <div class="p-3 rounded-lg bg-purple-50 border border-purple-200">
+              <p class="text-xs font-semibold text-purple-700 uppercase tracking-wider mb-1">Recommendation</p>
+              <p class="text-sm text-purple-800">{{ c.recommendation }}</p>
             </div>
           }
         } @else {
@@ -135,47 +135,10 @@ export class AiBriefingCardComponent {
 
   readonly briefingContent = computed(() => this.aiStore.briefingContent());
 
-  readonly keyInsights = computed(() => this.briefingContent()?.key_insights ?? []);
-
-  readonly actionItems = computed<ActionItem[]>(() => this.briefingContent()?.action_items ?? []);
-
-  readonly riskAlerts = computed<RiskAlert[]>(() => this.briefingContent()?.risk_alerts ?? []);
-
   async generateBriefing(): Promise<void> {
     const userId = this.authStore.user()?.id;
     if (userId) {
       await this.aiStore.generateBriefing(userId);
     }
-  }
-
-  getPriorityDot(priority: ActionItem['priority']): string {
-    const colors: Record<string, string> = {
-      high: 'bg-red-500',
-      medium: 'bg-orange-400',
-      low: 'bg-gray-400',
-    };
-    return colors[priority] ?? 'bg-gray-400';
-  }
-
-  getAlertBg(severity: RiskAlert['severity']): string {
-    const colors: Record<string, string> = {
-      critical: 'bg-red-50',
-      high: 'bg-orange-50',
-      medium: 'bg-yellow-50',
-    };
-    return colors[severity] ?? 'bg-gray-50';
-  }
-
-  getAlertIconColor(severity: RiskAlert['severity']): string {
-    const colors: Record<string, string> = {
-      critical: 'text-red-500',
-      high: 'text-orange-500',
-      medium: 'text-yellow-500',
-    };
-    return colors[severity] ?? 'text-gray-500';
-  }
-
-  formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 }

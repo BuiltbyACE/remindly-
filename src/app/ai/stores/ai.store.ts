@@ -39,6 +39,7 @@ export const AiStore = signalStore(
       const toastService = inject(ToastService);
 
       // Subscribe to briefing WebSocket messages
+      // Backend emits 'briefing.ready' — see app/websocket/enums.py
       const wsSubscription = webSocketStore
         .messagesOfType('briefing.ready')
         .subscribe((message) => {

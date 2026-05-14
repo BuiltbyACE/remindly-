@@ -2,6 +2,8 @@
   "name": "Remindly",
   "short_name": "Remindly",
   "display": "standalone",
+  "theme_color": "#1E3A5F",
+  "background_color": "#FFFFFF",
   "scope": "./",
   "start_url": "./",
   "icons": [

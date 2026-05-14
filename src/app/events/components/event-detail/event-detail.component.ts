@@ -8,6 +8,7 @@ import { Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { EventsStore } from '../../stores/events.store';
 import { RemindersStore } from '../../../reminders/stores/reminders.store';
+import { RbacStore } from '../../../auth/stores/rbac.store';
 import { StatusChipComponent } from '@shared/components/status-chip/status-chip.component';
 
 import { PriorityBadgeComponent } from '@shared/components/priority-badge/priority-badge.component';
@@ -35,6 +36,20 @@ import { EventScheduleRequest, getAvailableActions } from '../../models/event.mo
             <div class="h-4 bg-gray-200 rounded w-1/2"></div>
             <div class="h-32 bg-gray-200 rounded"></div>
           </div>
+        </div>
+      }
+
+      @if (store.notFound()) {
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-12 text-center">
+          <div class="text-6xl mb-4">🔍</div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Event Not Found</h2>
+          <p class="text-gray-600 mb-6">The event you're looking for doesn't exist or may have been deleted.</p>
+          <a
+            routerLink="/events"
+            class="inline-block px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+          >
+            Back to Events
+          </a>
         </div>
       }
 
@@ -66,19 +81,23 @@ import { EventScheduleRequest, getAvailableActions } from '../../models/event.mo
               }
             </div>
             <div class="flex gap-2">
-              <a
-                [routerLink]="['/events', event.id, 'edit']"
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-              >
-                Edit
-              </a>
-              <button
-                type="button"
-                (click)="showDeleteConfirm.set(true)"
-                class="px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md hover:bg-red-50"
-              >
-                Delete
-              </button>
+              @if (canEdit()) {
+                <a
+                  [routerLink]="['/events', event.id, 'edit']"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Edit
+                </a>
+              }
+              @if (canDelete()) {
+                <button
+                  type="button"
+                  (click)="showDeleteConfirm.set(true)"
+                  class="px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md hover:bg-red-50"
+                >
+                  Delete
+                </button>
+              }
             </div>
           </div>
         </div>
@@ -351,6 +370,7 @@ import { EventScheduleRequest, getAvailableActions } from '../../models/event.mo
 export class EventDetailComponent implements OnInit, OnDestroy {
   readonly store = inject(EventsStore);
   readonly remindersStore = inject(RemindersStore);
+  readonly rbacStore = inject(RbacStore);
   readonly router = inject(Router);
   readonly toast = inject(ToastService);
   private readonly el = inject(ElementRef);
@@ -369,10 +389,27 @@ export class EventDetailComponent implements OnInit, OnDestroy {
 
   readonly event = () => this.store.selectedEvent();
 
+  readonly canEdit = () => this.rbacStore.hasPermission()('events.write');
+  readonly canDelete = () => this.rbacStore.hasPermission()('events.delete');
+  readonly canApprove = () => this.rbacStore.hasPermission()('events.approve');
+
+  readonly ACTION_PERMISSIONS: Record<string, string> = {
+    request_approval: 'events.write',
+    approve: 'events.approve',
+    reject: 'events.approve',
+    schedule: 'events.write',
+    activate: 'events.write',
+    complete: 'events.write',
+    cancel: 'events.write',
+  };
+
   readonly availableActions = () => {
     const event = this.event();
     if (!event) return [];
-    return getAvailableActions(event.status);
+    const hasPermission = this.rbacStore.hasPermission();
+    return getAvailableActions(event.status).filter(
+      action => hasPermission(this.ACTION_PERMISSIONS[action] ?? 'events.read')
+    );
   };
 
   ngOnInit(): void {

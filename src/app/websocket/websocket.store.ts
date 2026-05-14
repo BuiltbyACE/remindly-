@@ -88,6 +88,20 @@ export const WebSocketStore = signalStore(
       },
 
       /**
+       * Observable that emits when connection.ack is received
+       */
+      connectionAck$() {
+        return webSocketService.connectionAck$;
+      },
+
+      /**
+       * Subscribe to a WebSocket channel
+       */
+      subscribe(channel: Parameters<typeof webSocketService.subscribe>[0], id: string): void {
+        webSocketService.subscribe(channel, id);
+      },
+
+      /**
        * Get observable for specific message types
        */
       messagesOfType(type: string) {

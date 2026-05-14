@@ -47,9 +47,11 @@ export const ApprovalsStore = signalStore(
       let wsSubscription: Subscription | null = null;
       
       // Subscribe to approval-related WebSocket messages
+      // Backend emits 'approval.created' and 'approval.updated'
+      // See app/websocket/enums.py — WebSocketMessageType
       wsSubscription = webSocketStore.messagesOfTypes([
-        'approval.requested',
-        'approval.processed',
+        'approval.created',
+        'approval.updated',
       ]).subscribe((message) => {
         const approval = message.payload as Approval;
         
