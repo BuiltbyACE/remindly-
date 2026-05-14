@@ -20,70 +20,142 @@ import { AnalyticsChartsComponent } from './components/analytics-charts.componen
   selector: 'app-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    DatePipe,
-    StatsCardsComponent,
-    QuickActionsComponent,
-    TodayScheduleComponent,
-    RecentActivityComponent,
-    EscalatedAlertComponent,
-    AiBriefingCardComponent,
-    CriticalAlertsComponent,
-    PendingApprovalsComponent,
-    AnalyticsChartsComponent,
+    DatePipe, StatsCardsComponent, QuickActionsComponent, TodayScheduleComponent,
+    RecentActivityComponent, EscalatedAlertComponent, AiBriefingCardComponent,
+    CriticalAlertsComponent, PendingApprovalsComponent, AnalyticsChartsComponent,
   ],
+  styles: [`
+    :host { display: block; }
+
+    /* ── Hero ── clean blue, no orbs */
+    .hero {
+      background: linear-gradient(135deg, #0D2137 0%, #1565C0 100%);
+      border-radius: 14px;
+      padding: 28px 32px;
+      color: #fff;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .hero-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 4px;
+      letter-spacing: -.01em;
+    }
+
+    .hero-sub {
+      font-size: 13.5px;
+      opacity: .8;
+      margin: 0;
+    }
+
+    .hero-sub strong { color: #90CAF9; font-weight: 600; }
+
+    .date-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    /* ── Section heading ── */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: #94A3B8;
+      margin: 0 0 10px;
+    }
+
+    /* ── Two-col grid ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ── Spacing ── */
+    .section { margin-bottom: 24px; }
+  `],
   template: `
-    <div class="space-y-5">
-      <!-- Header -->
-      <div class="flex items-center justify-between">
+    <div>
+      <!-- Hero -->
+      <div class="hero">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">{{ dashboardTitle() }}</h1>
-          <p class="text-sm text-gray-500 mt-0.5">
-            Welcome back, <span class="font-semibold text-blue-600">{{ authStore.userDisplayName() }}</span>
+          <h1 class="hero-title">{{ dashboardTitle() }}</h1>
+          <p class="hero-sub">
+            Welcome back, <strong>{{ authStore.userDisplayName() }}</strong>
           </p>
         </div>
-        <div class="text-right">
-          <p class="text-sm text-gray-500">{{ today | date:'EEEE, MMMM d, y' }}</p>
-        </div>
+        <span class="date-chip">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          {{ today | date:'EEE, MMM d, y' }}
+        </span>
       </div>
 
-      <!-- Stats Cards -->
-      <app-stats-cards />
+      <!-- Stats -->
+      <div class="section">
+        <p class="section-title">Overview</p>
+        <app-stats-cards />
+      </div>
 
-      <!-- Escalated Alert Banner -->
+      <!-- Escalated alert -->
       <app-escalated-alert />
 
-      <!-- Executive-only: AI Briefing + Critical Alerts -->
+      <!-- Executive: AI + Alerts -->
       @if (isExecutive()) {
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <div class="lg:col-span-2">
+        <div class="section">
+          <p class="section-title">Intelligence</p>
+          <div class="two-col">
             <app-ai-briefing-card />
-          </div>
-          <div>
             <app-critical-alerts />
           </div>
         </div>
       }
 
-      <!-- Executive-only: Analytics Charts -->
+      <!-- Executive: Analytics -->
       @if (isExecutive()) {
-        <app-analytics-charts />
-      }
-
-      <!-- Admin + Executive: Pending Approvals (prominent for admin) -->
-      @if (isAdmin() || isExecutive()) {
-        <app-pending-approvals />
-      }
-
-      <!-- Main Content Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div class="lg:col-span-2">
-          <app-today-schedule />
+        <div class="section">
+          <p class="section-title">Analytics</p>
+          <app-analytics-charts />
         </div>
-        <div>
+      }
+
+      <!-- Pending Approvals -->
+      @if (isAdmin() || isExecutive()) {
+        <div class="section">
+          <p class="section-title">Pending Action</p>
+          <app-pending-approvals />
+        </div>
+      }
+
+      <!-- Schedule + Activity -->
+      <div class="section">
+        <p class="section-title">Schedule & Activity</p>
+        <div class="two-col">
+          <app-today-schedule />
           <app-recent-activity />
         </div>
       </div>
 
+      <!-- Quick Actions -->
       <app-quick-actions />
     </div>
   `,
@@ -97,15 +169,9 @@ export class DashboardComponent implements OnInit {
   readonly analyticsStore = inject(AnalyticsStore);
   readonly today = new Date();
 
-  readonly isExecutive = computed(() =>
-    this.rbacStore.hasPermission()('audit.read')
-  );
-  readonly isAdmin = computed(() =>
-    this.rbacStore.hasPermission()('events.approve') && !this.isExecutive()
-  );
-  readonly isSecretary = computed(() =>
-    !this.isExecutive() && !this.isAdmin()
-  );
+  readonly isExecutive = computed(() => this.rbacStore.hasPermission()('audit.read'));
+  readonly isAdmin = computed(() => this.rbacStore.hasPermission()('events.approve') && !this.isExecutive());
+  readonly isSecretary = computed(() => !this.isExecutive() && !this.isAdmin());
 
   readonly dashboardTitle = computed(() => {
     if (this.isExecutive()) return 'Executive Dashboard';

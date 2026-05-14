@@ -1,11 +1,39 @@
 {
-  "name": "Remindly",
+  "name": "Remindly — Executive AI Assistant",
   "short_name": "Remindly",
+  "description": "Enterprise-grade operational command center. Events, reminders, approvals and AI briefings — all in one place.",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
   "theme_color": "#1E3A5F",
-  "background_color": "#FFFFFF",
+  "background_color": "#0F172A",
   "scope": "./",
   "start_url": "./",
+  "categories": ["productivity", "business", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Open the executive command center",
+      "url": "./dashboard",
+      "icons": [{ "src": "icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Events",
+      "short_name": "Events",
+      "description": "View and manage events",
+      "url": "./events",
+      "icons": [{ "src": "icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Notifications",
+      "short_name": "Alerts",
+      "description": "View your notifications",
+      "url": "./notifications",
+      "icons": [{ "src": "icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
   "icons": [
     {
       "src": "icons/icon-72x72.png",

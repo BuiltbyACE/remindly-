@@ -11,32 +11,103 @@ import { WebSocketStore } from '../../websocket/websocket.store';
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, SidebarComponent, TopbarComponent, ToastComponent],
-  template: `
-    <div class="min-h-screen bg-gray-50 flex">
-      <!-- Mobile backdrop -->
-      @if (sidebarOpen() && !isDesktop()) {
-        <div
-          class="fixed inset-0 z-30 bg-black/50 lg:hidden"
-          (click)="sidebarOpen.set(false)"
-          role="presentation"
-        ></div>
-      }
+  styles: [`
+    :host { display: contents; }
 
-      <!-- Sidebar: off-canvas on mobile, static on desktop -->
+    /* ── Root shell ── */
+    .shell {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;           /* shell itself never scrolls */
+      background: var(--color-surface-alt);
+    }
+
+    /* ── Sidebar: sticky column on desktop ── */
+    .sidebar-col {
+      flex-shrink: 0;
+      width: 256px;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      transition: transform 300ms cubic-bezier(.4,0,.2,1);
+    }
+
+    /* Mobile: sidebar slides off-canvas */
+    @media (max-width: 1023px) {
+      .sidebar-col {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 256px;
+      }
+      .sidebar-col.off {
+        transform: translateX(-100%);
+      }
+    }
+
+    /* ── Main area scrolls independently ── */
+    .main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Topbar stays pinned at top of main area */
+    app-topbar {
+      flex-shrink: 0;
+    }
+
+    main {
+      flex: 1;
+      overflow-y: auto;           /* only this scrolls */
+      overflow-x: hidden;
+      padding: 28px 32px 48px;
+      scroll-behavior: smooth;
+    }
+
+    @media (max-width: 640px) {
+      main { padding: 16px 16px 32px; }
+    }
+
+    /* Mobile overlay backdrop */
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(2px);
+      display: none;
+    }
+    .backdrop.visible { display: block; }
+  `],
+  template: `
+    <div class="shell">
+      <!-- Mobile backdrop -->
       <div
-        class="fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out
-               lg:relative lg:translate-x-0"
-        [class.-translate-x-full]="!sidebarOpen() && !isDesktop()"
-        [class.translate-x-0]="sidebarOpen() || isDesktop()"
+        class="backdrop"
+        [class.visible]="sidebarOpen() && !isDesktop()"
+        (click)="sidebarOpen.set(false)"
+        role="presentation"
+        aria-hidden="true"
+      ></div>
+
+      <!-- Sidebar column -->
+      <div
+        class="sidebar-col"
+        [class.off]="!sidebarOpen() && !isDesktop()"
       >
         <app-sidebar (close)="sidebarOpen.set(false)" />
       </div>
 
-      <!-- Main Content -->
-      <div class="flex-1 flex flex-col min-h-screen min-w-0">
+      <!-- Main content column -->
+      <div class="main-area">
         <app-topbar (toggleSidebar)="sidebarOpen.update(v => !v)" />
-
-        <main class="flex-1 p-6 overflow-auto">
+        <main id="main-content">
           <router-outlet />
         </main>
       </div>
@@ -58,9 +129,7 @@ export class ShellComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     this.authStore.hydrateUser();
-
     await this.orgStore.loadOrganizations();
-
     const activeOrgId = this.orgStore.activeOrganization()?.id;
     this.wsStore.connect(activeOrgId);
     this.wsStore.initialize();
