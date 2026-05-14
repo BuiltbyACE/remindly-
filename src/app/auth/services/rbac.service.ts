@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { BaseApiClient } from '../../api/base-api.client';
 
 export interface RoleAssign {
@@ -21,6 +21,26 @@ export class RbacService extends BaseApiClient {
 
   getMyPermissions(): Observable<string[]> {
     return this.get<string[]>('/api/v1/rbac/permissions/my');
+  }
+
+  /**
+   * Fetches the authenticated user's assigned role names.
+   * Normalises both string[] and object[] responses from the API.
+   */
+  getMyRoles(): Observable<string[]> {
+    return this.get<unknown>('/api/v1/rbac/roles/my').pipe(
+      map((data: unknown) => {
+        if (!Array.isArray(data)) return [];
+        return (data as unknown[]).map((item: unknown) => {
+          if (typeof item === 'string') return item;
+          if (item && typeof item === 'object') {
+            const obj = item as Record<string, unknown>;
+            return String(obj['name'] ?? obj['role_name'] ?? obj['role'] ?? '');
+          }
+          return '';
+        }).filter(Boolean);
+      }),
+    );
   }
 
   checkPermission(permission: string): Observable<boolean> {

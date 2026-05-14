@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, output, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '../../auth/stores/auth.store';
 import { RbacStore } from '../../auth/stores/rbac.store';
@@ -278,7 +278,7 @@ const NAV_ITEMS: NavItem[] = [
           <div class="avatar">{{ authStore.userInitials() }}</div>
           <div style="flex:1;min-width:0">
             <p class="user-name">{{ authStore.userDisplayName() }}</p>
-            <p class="user-role">{{ roleLabel() }}</p>
+            <p class="user-role">{{ rbacStore.primaryRoleLabel() }}</p>
           </div>
           <svg width="14" height="14" fill="none" stroke="#475569" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -294,13 +294,6 @@ export class SidebarComponent {
   readonly pwa = inject(PwaInstallService);
   readonly navItems = NAV_ITEMS;
   readonly close = output<void>();
-
-  readonly roleLabel = computed(() => {
-    if (this.rbacStore.hasPermission()('audit.read')) return 'Executive';
-    if (this.rbacStore.hasPermission()('events.approve')) return 'Admin';
-    if (this.rbacStore.hasPermission()('events.read')) return 'Secretary';
-    return 'Member';
-  });
 
   async installApp(): Promise<void> {
     await this.pwa.promptInstall();

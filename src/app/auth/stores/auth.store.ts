@@ -68,10 +68,12 @@ export const AuthStore = signalStore(
 
     clearSession(): void {
       pushService.unregister();
+      rbacStore.reset();  // ← clear permissions so next user starts clean
       patchState(store, { accessToken: null, user: null, error: null });
       sessionStorage.removeItem('remindly_token');
       sessionStorage.removeItem('remindly_user');
     },
+
 
     persistToStorage(user: UserProfile): void {
       sessionStorage.setItem('remindly_user', JSON.stringify(user));
