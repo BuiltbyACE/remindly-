@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '../../auth/stores/auth.store';
-import { RbacStore } from '../../auth/stores/rbac.store';
+import { AppPermissionDirective } from '@shared/directives/app-permission/app-permission.directive';
 
 interface NavItem {
   path: string;
@@ -23,25 +23,25 @@ const NAV_ITEMS: NavItem[] = [
 @Component({
   selector: 'app-sidebar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, AppPermissionDirective],
   template: `
-    <aside class="w-64 h-screen bg-white border-r border-[var(--color-border)] flex flex-col">
+    <aside class="w-64 h-screen bg-white border-r border-gray-200 flex flex-col">
       <!-- Logo + Close (mobile) -->
-      <div class="h-16 flex items-center px-6 border-b border-[var(--color-border)]">
-        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center mr-3">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="h-16 flex items-center px-5 border-b border-gray-200">
+        <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center mr-3">
+          <svg aria-hidden="true" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
         </div>
-        <span class="font-semibold text-lg text-[var(--color-text-primary)]">Remindly</span>
+        <span class="font-bold text-xl text-gray-900">Remindly</span>
         <button
           type="button"
           (click)="close.emit()"
-          class="ml-auto p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-alt)] lg:hidden transition-colors"
+          class="ml-auto p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 lg:hidden transition-colors"
           aria-label="Close sidebar"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -51,39 +51,39 @@ const NAV_ITEMS: NavItem[] = [
       <nav class="flex-1 py-4 px-3 overflow-y-auto">
         <ul class="space-y-1">
           @for (item of navItems; track item.path) {
-            @if (!item.permission || rbacStore.hasPermission()(item.permission)) {
-              <li>
-                <a
-                  [routerLink]="item.path"
-                  routerLinkActive="bg-blue-50 text-blue-700"
-                  class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
-                         text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-alt)]
-                         hover:text-[var(--color-text-primary)] transition-all"
-                  [attr.aria-label]="item.label"
-                  (click)="close.emit()">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon" />
-                  </svg>
-                  {{ item.label }}
-                </a>
-              </li>
-            }
+            <li *appPermission="item.permission">
+              <a
+                [routerLink]="item.path"
+                routerLinkActive="bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
+                       text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all border-l-4 border-transparent"
+                [attr.aria-label]="item.label"
+                (click)="close.emit()">
+                <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon" />
+                </svg>
+                {{ item.label }}
+              </a>
+            </li>
           }
         </ul>
       </nav>
 
       <!-- User Profile -->
-      <div class="p-4 border-t border-[var(--color-border)]">
+      <div class="p-4 border-t border-gray-200">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
-            <span class="text-sm font-medium text-blue-700">{{ authStore.userInitials() }}</span>
+          <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+            <span class="text-sm font-bold text-blue-700">{{ authStore.userInitials() }}</span>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-[var(--color-text-primary)] truncate">
+            <p class="text-sm font-semibold text-gray-900 truncate">
               {{ authStore.userDisplayName() }}
             </p>
-            <p class="text-xs text-[var(--color-text-muted)]">Executive</p>
+            <p class="text-xs text-gray-500">Executive</p>
           </div>
+          <svg aria-hidden="true" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
         </div>
       </div>
     </aside>
@@ -91,7 +91,6 @@ const NAV_ITEMS: NavItem[] = [
 })
 export class SidebarComponent {
   readonly authStore = inject(AuthStore);
-  readonly rbacStore = inject(RbacStore);
   readonly navItems = NAV_ITEMS;
   readonly close = output<void>();
 }

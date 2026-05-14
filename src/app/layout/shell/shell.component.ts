@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, inject, signal, OnInit, OnDestroy }
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
-import { ToastComponent } from '../../shared/components/toast/toast.component';
+import { ToastComponent } from '@shared/components/toast/toast.component';
 import { AuthStore } from '../../auth/stores/auth.store';
 import { OrganizationStore } from '../../organizations/stores/organization.store';
 import { WebSocketStore } from '../../websocket/websocket.store';
@@ -12,7 +12,7 @@ import { WebSocketStore } from '../../websocket/websocket.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, SidebarComponent, TopbarComponent, ToastComponent],
   template: `
-    <div class="min-h-screen bg-[var(--color-surface-alt)] flex">
+    <div class="min-h-screen bg-gray-50 flex">
       <!-- Mobile backdrop -->
       @if (sidebarOpen() && !isDesktop()) {
         <div

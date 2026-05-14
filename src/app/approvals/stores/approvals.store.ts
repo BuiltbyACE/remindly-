@@ -7,7 +7,7 @@ import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
 import { lastValueFrom, Subscription } from 'rxjs';
 import { ApprovalsService } from '../services/approvals.service';
-import { ToastService } from '../../shared/components/toast/toast.service';
+import { ToastService } from '@shared/components/toast/toast.service';
 import { WebSocketStore } from '../../websocket/websocket.store';
 import type { Approval, ApprovalStatus, ApprovalFilterOptions, PaginationParams } from '../models/approval.model';
 
@@ -172,12 +172,12 @@ export const ApprovalsStore = signalStore(
     },
 
     // Create approval request
-    async requestApproval(eventId: string, comments?: string): Promise<boolean> {
+    async requestApproval(eventId: string, approverMembershipId: string, comments?: string): Promise<boolean> {
       patchState(store, { loading: true, error: null });
       
       try {
         const newApproval = await lastValueFrom(
-          approvalsService.createApproval(eventId, { comments })
+          approvalsService.createApproval(eventId, { approver_membership_id: approverMembershipId, comments })
         );
 
         if (newApproval) {

@@ -4,7 +4,7 @@
  */
 
 import { Injectable, inject, computed, signal, OnDestroy } from '@angular/core';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { lastValueFrom, Subscription } from 'rxjs';
 import { EventsService } from '../services/events.service';
 import { WebSocketStore } from '../../websocket/websocket.store';
 import { RemindersStore } from '../../reminders/stores/reminders.store';
@@ -66,7 +66,6 @@ export class EventsStore implements OnDestroy {
       'event.updated',
       'event.status_changed',
     ]).subscribe((message) => {
-      console.log('[EventsStore] WebSocket message received:', message.type);
       this.handleWebSocketMessage(message);
     });
   }
@@ -169,7 +168,7 @@ export class EventsStore implements OnDestroy {
 
     try {
       const currentState = this.state();
-      const response = await firstValueFrom(
+      const response = await lastValueFrom(
         this.eventsService.listEvents(currentState.filters, currentState.pagination)
       );
 
@@ -195,7 +194,7 @@ export class EventsStore implements OnDestroy {
     this.patchState({ loading: true, error: null });
 
     try {
-      const event = await firstValueFrom(this.eventsService.getEvent(eventId));
+      const event = await lastValueFrom(this.eventsService.getEvent(eventId));
       this.patchState({
         selectedEvent: event,
         loading: false,
@@ -220,7 +219,7 @@ export class EventsStore implements OnDestroy {
     this.patchState({ loading: true, error: null });
 
     try {
-      const event = await firstValueFrom(this.eventsService.createEvent(request));
+      const event = await lastValueFrom(this.eventsService.createEvent(request));
       
       // Refresh the list to include the new event
       await this.loadEvents();
@@ -249,7 +248,7 @@ export class EventsStore implements OnDestroy {
         throw new Error('No event selected');
       }
 
-      const event = await firstValueFrom(
+      const event = await lastValueFrom(
         this.eventsService.updateEvent(eventId, request, currentEvent.version)
       );
 
@@ -277,7 +276,7 @@ export class EventsStore implements OnDestroy {
     this.patchState({ loading: true, error: null });
 
     try {
-      await firstValueFrom(this.eventsService.deleteEvent(eventId));
+      await lastValueFrom(this.eventsService.deleteEvent(eventId));
 
       // Clear selection if deleted event was selected
       if (this.state().selectedEvent?.id === eventId) {
@@ -323,7 +322,7 @@ export class EventsStore implements OnDestroy {
     this.patchState({ loading: true, error: null });
 
     try {
-      const event = await firstValueFrom(
+      const event = await lastValueFrom(
         this.eventsService.scheduleEvent(eventId, request)
       );
 
@@ -464,10 +463,10 @@ export class EventsStore implements OnDestroy {
       let event = this.state().selectedEvent;
       if (!event || event.id !== eventId) {
         // Load the event first to get current version
-        event = await firstValueFrom(this.eventsService.getEvent(eventId));
+        event = await lastValueFrom(this.eventsService.getEvent(eventId));
       }
 
-      const updatedEvent = await firstValueFrom(serviceCall(eventId, event.version));
+      const updatedEvent = await lastValueFrom(serviceCall(eventId, event.version));
 
       this.updateEventInState(updatedEvent);
       this.patchState({ loading: false });

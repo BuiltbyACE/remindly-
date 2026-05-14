@@ -10,7 +10,8 @@ export type EventStatus =
   | 'scheduled'
   | 'active'
   | 'completed'
-  | 'cancelled';
+  | 'cancelled'
+  | 'escalated';
 
 export type EventPriority = 'low' | 'medium' | 'high' | 'critical';
 
@@ -96,6 +97,7 @@ export const EVENT_STATUS_LABELS: Record<EventStatus, string> = {
   active: 'Active',
   completed: 'Completed',
   cancelled: 'Cancelled',
+  escalated: 'Escalated',
 };
 
 export const EVENT_PRIORITY_LABELS: Record<EventPriority, string> = {
@@ -110,9 +112,10 @@ export const ALLOWED_TRANSITIONS: Record<EventStatus, string[]> = {
   pending_approval: ['approve', 'reject', 'cancel'],
   approved: ['schedule', 'cancel'],
   scheduled: ['activate', 'cancel'],
-  active: ['complete', 'cancel'],
+  active: ['complete', 'cancel', 'escalate'],
   completed: [],
   cancelled: [],
+  escalated: [],
 };
 
 export function canTransition(status: EventStatus, action: string): boolean {

@@ -127,7 +127,6 @@ export class VoiceComponent implements OnInit {
 
   onCommandSubmitted(text: string): void {
     // Command was submitted, store handles processing
-    console.log('Command submitted:', text);
   }
 
   async onConfirmCommand(commandId: string, confirmed: boolean): Promise<void> {

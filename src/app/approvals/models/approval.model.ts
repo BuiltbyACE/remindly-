@@ -20,6 +20,7 @@ export interface Approval {
 }
 
 export interface ApprovalCreateRequest {
+  approver_membership_id: string;
   comments?: string;
 }
 

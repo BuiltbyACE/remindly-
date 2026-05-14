@@ -9,7 +9,7 @@ import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApprovalsStore } from '../../stores/approvals.store';
 import { APPROVAL_STATUS_LABELS, APPROVAL_STATUS_COLORS, type Approval } from '../../models/approval.model';
-import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-approval-detail',
@@ -96,7 +96,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
                 [disabled]="store.loading()"
                 class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 inline-flex items-center gap-2"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
                 Approve
@@ -108,7 +108,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
                 [disabled]="store.loading()"
                 class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 inline-flex items-center gap-2"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
                 Reject
@@ -119,8 +119,8 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
 
         <!-- Error Message -->
         @if (store.error(); as error) {
-          <div class="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
-            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2" role="alert">
+            <svg aria-hidden="true" class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p class="text-sm text-red-700">{{ error }}</p>

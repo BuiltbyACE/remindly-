@@ -7,7 +7,7 @@ import { Component, ChangeDetectionStrategy, inject, input, OnInit, signal } fro
 import { Router, RouterLink } from '@angular/router';
 import { EventsStore } from '../stores/events.store';
 import { EventFormComponent } from '../components/event-form/event-form.component';
-import { ToastService } from '../../shared/components/toast/toast.service';
+import { ToastService } from '@shared/components/toast/toast.service';
 import type { EventUpdateRequest } from '../models/event.model';
 
 @Component({

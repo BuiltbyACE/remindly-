@@ -4,9 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { lastValueFrom } from 'rxjs';
 import { EventsStore } from '../../stores/events.store';
 import { EventsService } from '../../services/events.service';
-import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
-import { PriorityBadgeComponent } from '../../../shared/components/priority-badge/priority-badge.component';
-import { BulkActionBarComponent, type BulkAction } from '../../../shared/components/bulk-action-bar/bulk-action-bar.component';
+import { StatusChipComponent } from '@shared/components/status-chip/status-chip.component';
+
+import { PriorityBadgeComponent } from '@shared/components/priority-badge/priority-badge.component';
+
+import { BulkActionBarComponent, type BulkAction } from '@shared/components/bulk-action-bar/bulk-action-bar.component';
 import { EVENT_STATUS_LABELS, type EventStatus } from '../../models/event.model';
 
 @Component({
@@ -85,7 +87,7 @@ import { EVENT_STATUS_LABELS, type EventStatus } from '../../models/event.model'
 
       <!-- Error State -->
       @if (store.error(); as error) {
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4" role="alert">
           <p class="text-red-800">{{ error }}</p>
           <button
             type="button"
@@ -115,22 +117,22 @@ import { EVENT_STATUS_LABELS, type EventStatus } from '../../models/event.model'
                         aria-label="Select all events"
                       />
                     </th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
+                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                       Title
                     </th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
+                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                       Status
                     </th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
+                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                       Priority
                     </th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
+                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                       Date
                     </th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider hidden lg:table-cell">
+                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider hidden lg:table-cell">
                       Location
                     </th>
-                    <th class="px-3 py-2 text-right text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
+                    <th scope="col" class="px-3 py-2 text-right text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -183,7 +185,7 @@ import { EVENT_STATUS_LABELS, type EventStatus } from '../../models/event.model'
                           class="text-blue-600 hover:text-blue-800 mr-2"
                           aria-label="View {{ event.title }}"
                         >
-                          <svg class="w-4 h-4 inline-block lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg aria-hidden="true" class="w-4 h-4 inline-block lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
@@ -194,7 +196,7 @@ import { EVENT_STATUS_LABELS, type EventStatus } from '../../models/event.model'
                           class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                           aria-label="Edit {{ event.title }}"
                         >
-                          <svg class="w-4 h-4 inline-block lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg aria-hidden="true" class="w-4 h-4 inline-block lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
                           <span class="hidden lg:inline ml-2">Edit</span>

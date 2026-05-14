@@ -3,22 +3,24 @@
  * Displays full event information with state transitions
  */
 
-import { Component, ChangeDetectionStrategy, inject, input, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, OnInit, OnDestroy, signal, HostListener, ElementRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { EventsStore } from '../../stores/events.store';
 import { RemindersStore } from '../../../reminders/stores/reminders.store';
-import { StatusChipComponent } from '../../../shared/components/status-chip/status-chip.component';
-import { PriorityBadgeComponent } from '../../../shared/components/priority-badge/priority-badge.component';
+import { StatusChipComponent } from '@shared/components/status-chip/status-chip.component';
+
+import { PriorityBadgeComponent } from '@shared/components/priority-badge/priority-badge.component';
+
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { EventLifecycleComponent } from '../event-lifecycle/event-lifecycle.component';
-import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { getAvailableActions, type EventStatus, type EventScheduleRequest, type Event as EventModel } from '../../models/event.model';
-import { ToastService } from '../../../shared/components/toast/toast.service';
+import { ToastService } from '@shared/components/toast/toast.service';
 import {
   REMINDER_STATUS_LABELS,
   REMINDER_STATUS_COLORS,
   REMINDER_CHANNEL_LABELS,
 } from '../../../reminders/models/reminder.model';
+import { EventScheduleRequest, getAvailableActions } from '../../models/event.model';
 
 @Component({
   selector: 'app-event-detail',
@@ -37,7 +39,7 @@ import {
       }
 
       @if (store.error(); as error) {
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4" role="alert">
           <p class="text-red-800">{{ error }}</p>
           <button
             type="button"
@@ -121,7 +123,7 @@ import {
             <!-- Escalation Warning -->
             @if (remindersStore.escalatedCount() > 0) {
               <div class="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-                <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg aria-hidden="true" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
@@ -174,7 +176,7 @@ import {
                         class="w-10 h-10 rounded-full flex items-center justify-center"
                         [class]="getReminderStatusIconClass(reminder.status)"
                       >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
@@ -188,7 +190,7 @@ import {
                           {{ getReminderStatusLabel(reminder.status) }}
                         </p>
                         <p class="text-xs text-gray-500">
-                          {{ getReminderChannelLabel(reminder.channel) }} •
+                          {{ getReminderChannelLabel(reminder.channel ?? 'in_app') }} •
                           {{ reminder.scheduled_for | date:'short' }}
                           @if (reminder.acknowledged_at) {
                             • Acknowledged {{ reminder.acknowledged_at | date:'short' }}
@@ -290,7 +292,7 @@ import {
 
       <!-- Schedule Modal Placeholder -->
       @if (showScheduleModal()) {
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div #scheduleModal class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog" aria-modal="true" aria-label="Schedule event">
           <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Schedule Event</h3>
             <div class="space-y-4">
@@ -351,6 +353,7 @@ export class EventDetailComponent implements OnInit, OnDestroy {
   readonly remindersStore = inject(RemindersStore);
   readonly router = inject(Router);
   readonly toast = inject(ToastService);
+  private readonly el = inject(ElementRef);
 
   readonly eventId = input.required<string>();
 
@@ -480,7 +483,7 @@ export class EventDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    let result: EventModel | null = null;
+    let result: import('../../models/event.model').Event | null = null;
 
     switch (action) {
       case 'request_approval':
@@ -561,4 +564,37 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     const form = this.scheduleForm();
     return form.starts_at && form.ends_at;
   };
+
+  @HostListener('keydown', ['$event'])
+  protected onKeydown(event: KeyboardEvent): void {
+    if (!this.showScheduleModal()) return;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.showScheduleModal.set(false);
+      return;
+    }
+
+    if (event.key !== 'Tab') return;
+
+    const focusable = this.el.nativeElement.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    ) as NodeListOf<HTMLElement>;
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (event.shiftKey) {
+      if (document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+  }
 }

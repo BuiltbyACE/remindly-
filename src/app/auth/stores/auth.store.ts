@@ -1,6 +1,6 @@
 import { signalStore, withState, withComputed, withMethods, patchState } from '@ngrx/signals';
 import { computed, inject } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { AuthService, UserProfile } from '../services/auth.service';
 import { RbacStore } from './rbac.store';
 
@@ -36,7 +36,7 @@ export const AuthStore = signalStore(
       if (!store.accessToken()) return;
       patchState(store, { isLoading: true });
       try {
-        const user = await firstValueFrom(authService.getCurrentUser());
+        const user = await lastValueFrom(authService.getCurrentUser());
         patchState(store, { user, isLoading: false });
         await rbacStore.hydratePermissions();
       } catch {
@@ -47,13 +47,13 @@ export const AuthStore = signalStore(
     async login(email: string, password: string): Promise<void> {
       patchState(store, { isLoading: true, error: null });
       try {
-        const result = await firstValueFrom(authService.login(email, password));
+        const result = await lastValueFrom(authService.login(email, password));
         patchState(store, {
           accessToken: result.access_token,
           user: result.user,
           isLoading: false,
         });
-        // Persist non-sensitive user info to sessionStorage for page reload recovery
+        localStorage.setItem('remindly_token', result.access_token);
         sessionStorage.setItem('remindly_user', JSON.stringify(result.user));
         await rbacStore.hydratePermissions();
       } catch (err: unknown) {
@@ -65,27 +65,33 @@ export const AuthStore = signalStore(
 
     clearSession(): void {
       patchState(store, { accessToken: null, user: null, error: null });
+      localStorage.removeItem('remindly_token');
       sessionStorage.removeItem('remindly_user');
     },
 
     persistToStorage(user: UserProfile): void {
-      // Store non-sensitive user info in sessionStorage
       sessionStorage.setItem('remindly_user', JSON.stringify(user));
     },
-
+  })),
+  withMethods((store) => ({
     hydrateFromStorage(): boolean {
-      // Restore user from sessionStorage on page reload
+      const token = localStorage.getItem('remindly_token');
+      if (!token) return false;
+
+      patchState(store, { accessToken: token });
+
       const stored = sessionStorage.getItem('remindly_user');
       if (stored) {
         try {
           const user = JSON.parse(stored) as UserProfile;
           patchState(store, { user });
-          return true;
         } catch {
           sessionStorage.removeItem('remindly_user');
         }
       }
-      return false;
+
+      store.hydrateUser();
+      return true;
     },
   })),
 );

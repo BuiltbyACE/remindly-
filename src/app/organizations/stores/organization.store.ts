@@ -1,6 +1,6 @@
 import { signalStore, withState, withComputed, withMethods, patchState } from '@ngrx/signals';
 import { computed, inject } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { OrganizationService, Organization } from '../services/organization.service';
 import { RbacStore } from '../../auth/stores/rbac.store';
 
@@ -26,7 +26,7 @@ export const OrganizationStore = signalStore(
   withMethods((store, orgService = inject(OrganizationService), rbacStore = inject(RbacStore)) => ({
     async loadOrganizations(): Promise<void> {
       patchState(store, { isLoading: true });
-      const orgs = await firstValueFrom(orgService.listOrganizations());
+      const orgs = await lastValueFrom(orgService.listOrganizations());
       const firstId = orgs[0]?.id ?? null;
       patchState(store, {
         organizations: orgs,

@@ -41,7 +41,7 @@ export class EventMapper {
       requires_acknowledgement: Boolean(event['requires_acknowledgement'] ?? false),
       allow_delegation: Boolean(event['allow_delegation'] ?? false),
       reminder_policy_id: event['reminder_policy_id'] ? String(event['reminder_policy_id']) : null,
-      created_by: String(event['created_by'] ?? ''),
+      created_by: String(event['creator_id'] ?? ''),
       version: Number(event['version'] ?? 1),
       created_at: String(event['created_at'] ?? new Date().toISOString()),
       updated_at: event['updated_at'] ? String(event['updated_at']) : null,
@@ -132,7 +132,7 @@ export class EventMapper {
   }
 
   private static parseStatus(value: unknown): Event['status'] {
-    const validStatuses = ['draft', 'pending_approval', 'approved', 'scheduled', 'active', 'completed', 'cancelled'] as const;
+    const validStatuses = ['draft', 'pending_approval', 'approved', 'scheduled', 'active', 'completed', 'cancelled', 'escalated'] as const;
     const status = String(value ?? 'draft');
     return validStatuses.includes(status as typeof validStatuses[number])
       ? (status as typeof validStatuses[number])

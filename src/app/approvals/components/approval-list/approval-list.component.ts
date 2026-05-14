@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, computed, inject, input, output, si
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { ApprovalsStore } from '../../stores/approvals.store';
-import { BulkActionBarComponent, type BulkAction } from '../../../shared/components/bulk-action-bar/bulk-action-bar.component';
+import { BulkActionBarComponent, type BulkAction } from '@shared/components/bulk-action-bar/bulk-action-bar.component';
 import { APPROVAL_STATUS_LABELS, APPROVAL_STATUS_COLORS, type Approval, type ApprovalStatus } from '../../models/approval.model';
 
 @Component({
@@ -80,7 +80,7 @@ import { APPROVAL_STATUS_LABELS, APPROVAL_STATUS_COLORS, type Approval, type App
       @else if (store.error(); as error) {
         <div class="p-6 text-center">
           <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3">
-            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg aria-hidden="true" class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -99,7 +99,7 @@ import { APPROVAL_STATUS_LABELS, APPROVAL_STATUS_COLORS, type Approval, type App
       @else if (filteredApprovals().length === 0) {
         <div class="p-8 text-center">
           <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg aria-hidden="true" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -165,7 +165,7 @@ import { APPROVAL_STATUS_LABELS, APPROVAL_STATUS_COLORS, type Approval, type App
                     class="px-2.5 py-1.5 text-xs font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                     aria-label="Approve"
                   >
-                    <svg class="w-3.5 h-3.5 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="w-3.5 h-3.5 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                     <span class="hidden lg:inline">Approve</span>
@@ -176,7 +176,7 @@ import { APPROVAL_STATUS_LABELS, APPROVAL_STATUS_COLORS, type Approval, type App
                     class="px-2.5 py-1.5 text-xs font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                     aria-label="Reject"
                   >
-                    <svg class="w-3.5 h-3.5 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="w-3.5 h-3.5 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                     <span class="hidden lg:inline">Reject</span>
@@ -189,7 +189,7 @@ import { APPROVAL_STATUS_LABELS, APPROVAL_STATUS_COLORS, type Approval, type App
                   title="View Event"
                   aria-label="View event"
                 >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>

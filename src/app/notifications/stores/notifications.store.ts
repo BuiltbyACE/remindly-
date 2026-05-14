@@ -7,7 +7,7 @@ import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
 import { lastValueFrom, Subscription } from 'rxjs';
 import { NotificationsService } from '../services/notifications.service';
-import { ToastService } from '../../shared/components/toast/toast.service';
+import { ToastService } from '@shared/components/toast/toast.service';
 import { WebSocketStore } from '../../websocket/websocket.store';
 import type {
   Notification,

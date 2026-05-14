@@ -37,7 +37,7 @@ export interface TimelineItem {
                   class="h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white"
                   [class]="getIconBgClass(item)">
                   @if (item.icon) {
-                    <svg class="h-5 w-5" [class]="item.iconColor || 'text-gray-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="h-5 w-5" [class]="item.iconColor || 'text-gray-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon" />
                     </svg>
                   } @else {

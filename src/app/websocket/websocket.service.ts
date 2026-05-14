@@ -92,6 +92,7 @@ export class WebSocketService {
 
       this.ws.onerror = (error) => {
         this.ngZone.run(() => {
+          console.error('[WebSocket] Connection error:', error);
         });
       };
 

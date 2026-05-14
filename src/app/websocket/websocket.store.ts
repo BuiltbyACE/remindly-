@@ -35,6 +35,16 @@ export const WebSocketStore = signalStore(
        * Initialize the store by subscribing to WebSocket service
        */
       initialize(): void {
+        // Guard against multiple calls — unsubscribe existing subscriptions first
+        if (statusSubscription) {
+          statusSubscription.unsubscribe();
+          statusSubscription = null;
+        }
+        if (messageSubscription) {
+          messageSubscription.unsubscribe();
+          messageSubscription = null;
+        }
+
         // Subscribe to connection status changes
         statusSubscription = webSocketService.status$.subscribe((status) => {
           patchState(store, { 

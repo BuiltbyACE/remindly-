@@ -9,14 +9,18 @@ export type ReminderChannel = 'in_app' | 'email' | 'sms' | 'push';
 export interface Reminder {
   id: string;
   event_id: string;
+  participant_id?: string;
   policy_id?: string;
   scheduled_for: string;
   status: ReminderStatus;
-  channel: ReminderChannel;
+  channel?: ReminderChannel;
   message?: string;
+  sent_at?: string;
   acknowledged_at?: string;
   acknowledged_by?: string;
   escalated_at?: string;
+  retry_count: number;
+  notification_id?: string;
   created_at: string;
   updated_at: string;
 }

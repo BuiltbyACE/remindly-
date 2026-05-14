@@ -5,8 +5,10 @@
  */
 
 import { Injectable, inject, NgZone } from '@angular/core';
-import { Subject, from, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Subject, from, of, lastValueFrom } from 'rxjs';
 import { catchError, switchMap, take } from 'rxjs/operators';
+import { API_CONFIG } from '../tokens/api-config.token';
 
 export interface QueuedAction {
   id: string;
@@ -35,6 +37,8 @@ const CACHE_STORE = 'cache';
 })
 export class OfflineQueueService {
   private readonly ngZone = inject(NgZone);
+  private readonly http = inject(HttpClient);
+  private readonly apiConfig = inject(API_CONFIG);
   private db: IDBDatabase | null = null;
   private isOnline = navigator.onLine;
   private actionQueue: QueuedAction[] = [];
@@ -67,7 +71,6 @@ export class OfflineQueueService {
 
     request.onsuccess = (event) => {
       this.db = (event.target as IDBOpenDBRequest).result;
-      console.log('IndexedDB initialized');
     };
 
     request.onupgradeneeded = (event) => {
@@ -95,7 +98,6 @@ export class OfflineQueueService {
     window.addEventListener('online', () => {
       this.ngZone.run(() => {
         this.isOnline = true;
-        console.log('Back online - starting sync');
         this.processQueue();
       });
     });
@@ -103,7 +105,6 @@ export class OfflineQueueService {
     window.addEventListener('offline', () => {
       this.ngZone.run(() => {
         this.isOnline = false;
-        console.log('Gone offline - queueing actions');
       });
     });
   }
@@ -199,20 +200,44 @@ export class OfflineQueueService {
   }
 
   /**
-   * Execute a queued action
-   * This would integrate with actual API calls
+   * Execute a queued action by calling the appropriate API endpoint
    */
   private async executeAction(action: QueuedAction): Promise<boolean> {
-    // This is a placeholder - actual implementation would call the appropriate service
-    console.log('Executing action:', action);
+    try {
+      const baseUrl = this.apiConfig.apiBaseUrl;
+      const resourcePath = this.getResourcePath(action.entity);
+      if (!resourcePath) return false;
 
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // 90% success rate for demo
-        resolve(Math.random() > 0.1);
-      }, 500);
-    });
+      const url = `${baseUrl}/api/v1/${resourcePath}`;
+
+      switch (action.type) {
+        case 'create':
+          await lastValueFrom(this.http.post(url, action.payload));
+          break;
+        case 'update':
+          await lastValueFrom(this.http.patch(url, action.payload));
+          break;
+        case 'delete':
+          await lastValueFrom(this.http.delete(url));
+          break;
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private getResourcePath(entity: string): string | null {
+    const entityPathMap: Record<string, string> = {
+      event: 'events',
+      approval: 'approvals',
+      notification: 'notifications',
+      reminder: 'reminders',
+      voice_command: 'voice/commands',
+      integration: 'integrations',
+    };
+    return entityPathMap[entity] ?? null;
   }
 
   /**

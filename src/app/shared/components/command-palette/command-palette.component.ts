@@ -3,7 +3,7 @@
  * ⌘K / Ctrl+K quick navigation and action center
  */
 
-import { Component, ChangeDetectionStrategy, inject, signal, effect, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, effect, computed, HostListener, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 
 export interface CommandItem {
@@ -24,21 +24,21 @@ interface DisplayCommand extends CommandItem {
 @Component({
   selector: 'app-command-palette',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '(document:keydown)': 'onKeydown($event)' },
   imports: [],
   template: `
     @if (isOpen()) {
-      <div 
+      <div #dialogOverlay
         class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity"
         (click)="close()">
         <div 
           class="fixed top-24 left-1/2 -translate-x-1/2 w-full max-w-2xl bg-white rounded-xl shadow-2xl overflow-hidden"
+          role="dialog" aria-modal="true" aria-label="Command palette"
           (click)="$event.stopPropagation()">
           
           <!-- Search Input -->
           <div class="border-b border-gray-200 p-4">
             <div class="relative">
-              <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
@@ -61,7 +61,7 @@ interface DisplayCommand extends CommandItem {
           <div class="max-h-96 overflow-y-auto py-2">
             @if (filteredCommands().length === 0) {
               <div class="px-4 py-8 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg aria-hidden="true" class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p class="mt-2 text-sm text-gray-500">No commands found</p>
@@ -86,7 +86,7 @@ interface DisplayCommand extends CommandItem {
                   [class.hover.bg-gray-50]="selectedIndex() !== cmd._flatIndex">
                   
                   @if (cmd.icon) {
-                    <svg class="h-5 w-5 flex-shrink-0" [class]="selectedIndex() === cmd._flatIndex ? 'text-blue-500' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="h-5 w-5 flex-shrink-0" [class]="selectedIndex() === cmd._flatIndex ? 'text-blue-500' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="cmd.icon" />
                     </svg>
                   }
@@ -132,6 +132,7 @@ interface DisplayCommand extends CommandItem {
 })
 export class CommandPaletteComponent {
   private readonly router = inject(Router);
+  private readonly el = inject(ElementRef);
   
   readonly isOpen = signal(false);
   readonly query = signal('');
@@ -260,11 +261,45 @@ export class CommandPaletteComponent {
     });
   }
 
+  @HostListener('keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
     // ⌘K or Ctrl+K to open
     if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
       event.preventDefault();
       this.toggle();
+      return;
+    }
+
+    if (!this.isOpen()) return;
+
+    // Escape closes
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.close();
+      return;
+    }
+
+    // Tab trapping
+    if (event.key === 'Tab') {
+      const focusable = this.el.nativeElement.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      ) as NodeListOf<HTMLElement>;
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey) {
+        if (document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
     }
   }
 

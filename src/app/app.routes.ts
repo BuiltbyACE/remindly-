@@ -56,8 +56,8 @@ export const routes: Routes = [
         loadChildren: () => import('./analytics/analytics.routes').then(m => m.ANALYTICS_ROUTES),
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: '**', loadComponent: () => import('./not-found/not-found.component').then(m => m.NotFoundComponent) },
     ],
   },
   { path: 'login', redirectTo: 'auth/login', pathMatch: 'full' },
-  { path: '**', redirectTo: 'dashboard' },
 ];

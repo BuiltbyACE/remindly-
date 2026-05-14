@@ -7,7 +7,7 @@ import { computed, inject } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
 import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
 import { VoiceService } from '../services/voice.service';
-import { ToastService } from '../../shared/components/toast/toast.service';
+import { ToastService } from '@shared/components/toast/toast.service';
 import { WebSocketStore } from '../../websocket/websocket.store';
 import type {
   VoiceCommandResponse,

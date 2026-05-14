@@ -33,6 +33,7 @@ export class StatusChipComponent {
       active: 'bg-green-100 text-green-800 border border-green-200',
       completed: 'bg-gray-100 text-gray-600 border border-gray-200',
       cancelled: 'bg-red-100 text-red-800 border border-red-200',
+      escalated: 'bg-orange-100 text-orange-800 border border-orange-200',
     };
     return classes[this.status()] ?? classes.draft;
   };

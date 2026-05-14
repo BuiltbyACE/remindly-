@@ -7,7 +7,7 @@ import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
 import { lastValueFrom, Subscription } from 'rxjs';
 import { RemindersService } from '../services/reminders.service';
-import { ToastService } from '../../shared/components/toast/toast.service';
+import { ToastService } from '@shared/components/toast/toast.service';
 import { WebSocketStore } from '../../websocket/websocket.store';
 import type {
   Reminder,
@@ -72,7 +72,7 @@ export const RemindersStore = signalStore(
 
             // Show toast for triggered reminders
             if (reminder.status === 'triggered') {
-              toastService.info(`Reminder: ${reminder.message || 'Event reminder triggered'}`);
+              toastService.info('Event reminder triggered');
             }
           }
         });

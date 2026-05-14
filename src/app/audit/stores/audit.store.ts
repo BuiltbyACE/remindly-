@@ -7,7 +7,7 @@ import { computed, inject } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { AuditService } from '../services/audit.service';
-import { ToastService } from '../../shared/components/toast/toast.service';
+import { ToastService } from '@shared/components/toast/toast.service';
 import type {
   AuditLogEntry,
   AuditFilterOptions,

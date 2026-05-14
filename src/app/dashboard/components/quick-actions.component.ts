@@ -40,18 +40,18 @@ const QUICK_ACTIONS: QuickAction[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink],
   template: `
-    <div class="bg-white rounded-xl p-4 shadow-sm border border-[var(--color-border)]">
-      <h2 class="text-sm font-semibold text-[var(--color-text-primary)] mb-3">Quick Actions</h2>
-      <div class="flex flex-wrap gap-2">
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+      <h2 class="text-base font-bold text-gray-900 mb-4">Quick Actions</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         @for (action of actions; track action.label) {
           <a
             [routerLink]="action.routerLink"
             [class]="getButtonClasses(action.variant)"
           >
-            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="action.icon" />
             </svg>
-            {{ action.label }}
+            <span>{{ action.label }}</span>
           </a>
         }
       </div>
@@ -62,12 +62,12 @@ export class QuickActionsComponent {
   readonly actions = QUICK_ACTIONS;
 
   getButtonClasses(variant: 'primary' | 'secondary'): string {
-    const baseClasses = 'inline-flex items-center px-3 py-2 rounded-lg text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
+    const baseClasses = 'flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-offset-2';
 
     if (variant === 'primary') {
-      return `${baseClasses} bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500`;
+      return `${baseClasses} bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-md`;
     }
 
-    return `${baseClasses} border border-[var(--color-border)] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-alt)] focus:ring-blue-500`;
+    return `${baseClasses} border-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 focus:ring-blue-500`;
   }
 }

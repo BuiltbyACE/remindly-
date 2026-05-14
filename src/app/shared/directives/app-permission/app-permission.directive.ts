@@ -12,38 +12,26 @@ import {
   inject,
   effect,
   signal,
-  OnDestroy,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { AuthService, type UserProfile } from '../../../auth/services/auth.service';
+import { RbacStore } from '../../../auth/stores/rbac.store';
 
 @Directive({
   selector: '[appPermission]',
-  standalone: true,
 })
-export class AppPermissionDirective implements OnDestroy {
+export class AppPermissionDirective {
   private readonly templateRef = inject(TemplateRef<unknown>);
   private readonly viewContainer = inject(ViewContainerRef);
-  private readonly authService = inject(AuthService);
+  private readonly rbacStore = inject(RbacStore);
 
   private readonly requiredPermissions = signal<string | string[] | null>(null);
   private readonly matchAny = signal<boolean>(false);
-  private readonly userSignal = toSignal(this.authService.getCurrentUser());
   private hasView = false;
 
-  /**
-   * Required permission(s) to show the content
-   * Can be a single permission string or array of permissions
-   */
-  @Input({ required: true })
-  set appPermission(permissions: string | string[]) {
-    this.requiredPermissions.set(permissions);
+  @Input()
+  set appPermission(permissions: string | string[] | undefined) {
+    this.requiredPermissions.set(permissions ?? null);
   }
 
-  /**
-   * When true, content shows if user has ANY of the listed permissions
-   * When false (default), user needs ALL listed permissions
-   */
   @Input()
   set appPermissionMatchAny(value: boolean) {
     this.matchAny.set(value ?? false);
@@ -52,20 +40,15 @@ export class AppPermissionDirective implements OnDestroy {
   constructor() {
     effect(() => {
       const permissions = this.requiredPermissions();
-      if (!permissions) return;
-
-      const user = this.userSignal();
-      if (!user) {
-        this.clearView();
+      if (!permissions) {
+        this.createView();
         return;
       }
 
-      const userPermissions = (user as UserProfile & { permissions?: string[] }).permissions ?? [];
       const required = Array.isArray(permissions) ? permissions : [permissions];
-
       const hasPermission = this.matchAny()
-        ? required.some(p => userPermissions.includes(p))
-        : required.every(p => userPermissions.includes(p));
+        ? this.rbacStore.hasAnyPermission()(required)
+        : required.every(p => this.rbacStore.hasPermission()(p));
 
       if (hasPermission) {
         this.createView();
@@ -73,10 +56,6 @@ export class AppPermissionDirective implements OnDestroy {
         this.clearView();
       }
     });
-  }
-
-  ngOnDestroy(): void {
-    this.clearView();
   }
 
   private createView(): void {
@@ -94,22 +73,15 @@ export class AppPermissionDirective implements OnDestroy {
   }
 }
 
-/**
- * Permission Denied Directive
- * Shows content only when user does NOT have the permission
- * Usage: *appPermissionDenied="'admin'"
- */
 @Directive({
   selector: '[appPermissionDenied]',
-  standalone: true,
 })
-export class AppPermissionDeniedDirective implements OnDestroy {
+export class AppPermissionDeniedDirective {
   private readonly templateRef = inject(TemplateRef<unknown>);
   private readonly viewContainer = inject(ViewContainerRef);
-  private readonly authService = inject(AuthService);
+  private readonly rbacStore = inject(RbacStore);
 
   private readonly deniedPermissions = signal<string | string[] | null>(null);
-  private readonly userSignal = toSignal(this.authService.getCurrentUser());
   private hasView = false;
 
   @Input({ required: true })
@@ -122,15 +94,8 @@ export class AppPermissionDeniedDirective implements OnDestroy {
       const permissions = this.deniedPermissions();
       if (!permissions) return;
 
-      const user = this.userSignal();
-      if (!user) {
-        this.createView();
-        return;
-      }
-
-      const userPermissions = (user as UserProfile & { permissions?: string[] }).permissions ?? [];
       const denied = Array.isArray(permissions) ? permissions : [permissions];
-      const hasAnyDenied = denied.some(p => userPermissions.includes(p));
+      const hasAnyDenied = denied.some(p => this.rbacStore.hasPermission()(p));
 
       if (!hasAnyDenied) {
         this.createView();
@@ -138,10 +103,6 @@ export class AppPermissionDeniedDirective implements OnDestroy {
         this.clearView();
       }
     });
-  }
-
-  ngOnDestroy(): void {
-    this.clearView();
   }
 
   private createView(): void {

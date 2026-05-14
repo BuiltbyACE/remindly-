@@ -9,7 +9,6 @@ export type PriorityLevel = 'critical' | 'high' | 'medium' | 'low' | 'normal' | 
 
 @Pipe({
   name: 'priorityLabel',
-  standalone: true,
 })
 export class PriorityLabelPipe implements PipeTransform {
   private readonly labels: Record<PriorityLevel | string, string> = {

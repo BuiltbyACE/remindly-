@@ -7,7 +7,7 @@ import { computed, inject, effect } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
 import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
 import { SettingsService } from '../services/settings.service';
-import { ToastService } from '../../shared/components/toast/toast.service';
+import { ToastService } from '@shared/components/toast/toast.service';
 import type {
   UserSettings,
   UserSettingsUpdate,
