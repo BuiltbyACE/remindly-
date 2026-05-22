@@ -8,6 +8,8 @@ import { lastValueFrom, Subscription } from 'rxjs';
 import { EventsService } from '../services/events.service';
 import { WebSocketStore } from '../../websocket/websocket.store';
 import { RemindersStore } from '../../reminders/stores/reminders.store';
+import { AuthStore } from '../../auth/stores/auth.store';
+import { RbacStore } from '../../auth/stores/rbac.store';
 import type {
   Event,
   EventListResponse,
@@ -36,11 +38,20 @@ export class EventsStore implements OnDestroy {
   private readonly eventsService = inject(EventsService);
   private readonly webSocketStore = inject(WebSocketStore);
   private readonly remindersStore = inject(RemindersStore);
+  private readonly authStore = inject(AuthStore);
+  private readonly rbacStore = inject(RbacStore);
   private wsSubscription: Subscription | null = null;
 
   constructor() {
     this.initializeWebSocketSubscriptions();
   }
+
+  // Secretary role checker
+  private readonly isSecretary = computed(() => {
+    const hasExecutivePerm = this.rbacStore.hasPermission()('audit.read');
+    const hasAdminPerm = this.rbacStore.hasPermission()('events.approve') && !hasExecutivePerm;
+    return !hasExecutivePerm && !hasAdminPerm;
+  });
 
   ngOnDestroy(): void {
     if (this.wsSubscription) {
@@ -151,14 +162,27 @@ export class EventsStore implements OnDestroy {
 
   /**
    * Load events with current filters and pagination
+   * For secretary role, filter events to only show their own events
    */
   async loadEvents(): Promise<void> {
-    this.patchState({ loading: true, error: null });
+    this.patchState({ loading: true, error: null, notFound: false });
 
     try {
       const currentState = this.state();
+      
+      // Prepare filters - add creator_id filter for secretary role
+      const secretaryFilters = { ...currentState.filters };
+      if (this.isSecretary()) {
+        // For secretary, only show their own events
+        // Assuming we can get user ID from auth store
+        const userId = this.authStore.user()?.id;
+        if (userId) {
+          secretaryFilters.creator_id = userId;
+        }
+      }
+      
       const response = await lastValueFrom(
-        this.eventsService.listEvents(currentState.filters, currentState.pagination)
+        this.eventsService.listEvents(secretaryFilters, currentState.pagination)
       );
 
       this.patchState({
@@ -171,13 +195,20 @@ export class EventsStore implements OnDestroy {
         loading: false,
       });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load events';
-      this.patchState({ error: message, loading: false });
+      // Handle 404 gracefully for secretary role - hide instead of show error
+      const is404 = !!(err && typeof err === 'object' && 'status' in err && 
+                    (err as { status: number }).status === 404);
+      this.patchState({ 
+        error: is404 ? null : (err instanceof Error ? err.message : 'Failed to load events'),
+        notFound: is404,  // This will be used to hide event instead of showing error
+        loading: false 
+      });
     }
   }
 
   /**
    * Select a specific event by ID
+   * For secretary role, handle 404 gracefully by hiding event instead of showing error
    */
   async selectEvent(eventId: string): Promise<void> {
     this.patchState({ loading: true, error: null });
@@ -189,10 +220,11 @@ export class EventsStore implements OnDestroy {
         loading: false,
       });
     } catch (err: unknown) {
-      const is404 = (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) as boolean;
+      const is404 = (err && typeof err === 'object' && 'status' in err && 
+                      (err as { status: number }).status === 404) as boolean;
       this.patchState({
         error: is404 ? null : (err instanceof Error ? err.message : 'Failed to load event'),
-        notFound: is404,
+        notFound: is404,  // Used to hide event in UI instead of showing error
         loading: false,
       });
     }

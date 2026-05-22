@@ -1,7 +1,8 @@
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
+import { MobileNavComponent } from '../mobile-nav/mobile-nav.component';
 import { ToastComponent } from '@shared/components/toast/toast.component';
 import { AuthStore } from '../../auth/stores/auth.store';
 import { OrganizationStore } from '../../organizations/stores/organization.store';
@@ -10,7 +11,7 @@ import { WebSocketStore } from '../../websocket/websocket.store';
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, SidebarComponent, TopbarComponent, ToastComponent],
+  imports: [RouterOutlet, SidebarComponent, TopbarComponent, MobileNavComponent, ToastComponent],
   styles: [`
     :host { display: contents; }
 
@@ -18,11 +19,11 @@ import { WebSocketStore } from '../../websocket/websocket.store';
     .shell {
       display: flex;
       height: 100vh;
-      overflow: hidden;           /* shell itself never scrolls */
+      overflow: hidden;
       background: var(--color-surface-alt);
     }
 
-    /* ── Sidebar: sticky column on desktop ── */
+    /* ── Sidebar: desktop only ── */
     .sidebar-col {
       flex-shrink: 0;
       width: 256px;
@@ -30,21 +31,10 @@ import { WebSocketStore } from '../../websocket/websocket.store';
       position: sticky;
       top: 0;
       z-index: 40;
-      transition: transform 300ms cubic-bezier(.4,0,.2,1);
     }
 
-    /* Mobile: sidebar slides off-canvas */
     @media (max-width: 1023px) {
-      .sidebar-col {
-        position: fixed;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 256px;
-      }
-      .sidebar-col.off {
-        transform: translateX(-100%);
-      }
+      .sidebar-col { display: none; }
     }
 
     /* ── Main area scrolls independently ── */
@@ -57,21 +47,30 @@ import { WebSocketStore } from '../../websocket/websocket.store';
       overflow: hidden;
     }
 
-    /* Topbar stays pinned at top of main area */
     app-topbar {
       flex-shrink: 0;
     }
 
     main {
       flex: 1;
-      overflow-y: auto;           /* only this scrolls */
+      overflow-y: auto;
       overflow-x: hidden;
       padding: 28px 32px 48px;
       scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Mobile: tighter padding + bottom nav room */
+    @media (max-width: 1023px) {
+      main {
+        padding: 12px 16px calc(80px + env(safe-area-inset-bottom, 16px));
+      }
     }
 
     @media (max-width: 640px) {
-      main { padding: 16px 16px 32px; }
+      main {
+        padding: 10px 14px calc(80px + env(safe-area-inset-bottom, 16px));
+      }
     }
 
     /* Mobile overlay backdrop */
@@ -84,33 +83,28 @@ import { WebSocketStore } from '../../websocket/websocket.store';
       display: none;
     }
     .backdrop.visible { display: block; }
+
+    @media (max-width: 1023px) {
+      .backdrop { display: none !important; }
+    }
   `],
   template: `
     <div class="shell">
-      <!-- Mobile backdrop -->
-      <div
-        class="backdrop"
-        [class.visible]="sidebarOpen() && !isDesktop()"
-        (click)="sidebarOpen.set(false)"
-        role="presentation"
-        aria-hidden="true"
-      ></div>
-
-      <!-- Sidebar column -->
-      <div
-        class="sidebar-col"
-        [class.off]="!sidebarOpen() && !isDesktop()"
-      >
-        <app-sidebar (close)="sidebarOpen.set(false)" />
+      <!-- Sidebar column (desktop only) -->
+      <div class="sidebar-col">
+        <app-sidebar />
       </div>
 
       <!-- Main content column -->
       <div class="main-area">
-        <app-topbar (toggleSidebar)="sidebarOpen.update(v => !v)" />
+        <app-topbar (toggleSidebar)="onToggleSidebar()" />
         <main id="main-content">
           <router-outlet />
         </main>
       </div>
+
+      <!-- Mobile bottom nav -->
+      <app-mobile-nav />
 
       <app-toast />
     </div>
@@ -121,10 +115,8 @@ export class ShellComponent implements OnInit, OnDestroy {
   private readonly orgStore = inject(OrganizationStore);
   private readonly wsStore = inject(WebSocketStore);
 
-  readonly sidebarOpen = signal(false);
-
-  protected isDesktop(): boolean {
-    return window.innerWidth >= 1024;
+  protected onToggleSidebar(): void {
+    // Sidebar is desktop-only; no toggle needed on mobile
   }
 
   async ngOnInit(): Promise<void> {

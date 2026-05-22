@@ -1,55 +1,85 @@
 :root {
-  /* ─── SafariStack Brand ──────────────────────────────── */
-  --blue-900:    #0D2137;   /* dark navy – sidebar, headings   */
-  --blue-800:    #1565C0;   /* primary blue – buttons, icons   */
-  --blue-600:    #1E88E5;   /* medium blue – links, accents    */
-  --blue-400:    #64B5F6;   /* light blue – subtle highlights  */
-  --blue-50:     #EFF6FF;   /* tint – card backgrounds         */
+  /* ─── Oceanic Palette ─────────────────────────────────── */
+  --ocean-950:    #071521;
+  --ocean-900:    #0A1929;
+  --ocean-800:    #0F2B4C;
+  --ocean-700:    #1A4263;
+  --ocean-600:    #25638B;
+  --ocean-500:    #3A82B5;
+  --ocean-400:    #5A9ECF;
+  --ocean-300:    #8BBDE3;
+  --ocean-200:    #B5D6F0;
+  --ocean-100:    #D9E9F7;
+  --ocean-50:     #EDF3FA;
 
-  /* ─── Neutral ───────────────────────────────────────── */
-  --white:       #FFFFFF;
-  --gray-50:     #F8FAFC;
-  --gray-100:    #F1F5F9;
-  --gray-200:    #E2E8F0;
-  --gray-300:    #CBD5E1;
-  --gray-500:    #64748B;
-  --gray-700:    #334155;
-  --gray-900:    #0F172A;
+  /* ─── Warm Neutrals ──────────────────────────────────── */
+  --warm-50:      #FAF8F5;
+  --warm-100:     #F5EDE4;
+  --warm-200:     #E8DCCE;
+  --warm-300:     #D6C8B4;
+  --warm-400:     #BFAD94;
+  --warm-500:     #A8937A;
 
-  /* ─── Semantic (all blue-toned) ─────────────────────── */
-  --color-brand:          var(--blue-800);
-  --color-brand-dark:     var(--blue-900);
-  --color-brand-light:    var(--blue-600);
+  /* ─── Pure Neutrals ──────────────────────────────────── */
+  --white:        #FFFFFF;
+  --ivory:        #FCFAF7;
+  --charcoal:     #1A1C1E;
+  --slate:        #2E343A;
+  --stone:        #5C666F;
+  --pewter:       #8C959E;
+  --mist:         #C8CFD6;
+  --cloud:        #E2E6EB;
+  --vapor:        #F0F2F5;
 
-  --color-critical:       #DC2626;
-  --color-success:        #16A34A;
-  --color-warning:        #D97706;
+  /* ─── Accents ─────────────────────────────────────────── */
+  --gold:         #C9A96E;
+  --gold-light:   #E8D6AE;
+  --gold-pale:    #F5EDD8;
+  --pine:         #2D7D46;
+  --pine-light:   #E2F0E6;
+  --coral:        #D4735E;
+  --coral-light:  #F5E0DB;
 
-  /* ─── Surface ───────────────────────────────────────── */
+  /* ─── Semantic ────────────────────────────────────────── */
+  --color-brand:          var(--ocean-700);
+  --color-brand-dark:     var(--ocean-900);
+  --color-brand-light:    var(--ocean-500);
+
+  --color-critical:       #B8543B;
+  --color-success:        var(--pine);
+  --color-warning:        #B8863A;
+
+  /* ─── Surface ──────────────────────────────────────────── */
   --color-surface:        var(--white);
-  --color-surface-alt:    var(--gray-50);
-  --color-border:         var(--gray-200);
-  --color-border-strong:  var(--gray-300);
+  --color-surface-alt:    var(--warm-50);
+  --color-surface-warm:   var(--ivory);
+  --color-border:         var(--cloud);
+  --color-border-strong:  var(--mist);
 
-  /* ─── Text ──────────────────────────────────────────── */
-  --color-text-primary:   var(--gray-900);
-  --color-text-secondary: var(--gray-500);
-  --color-text-muted:     var(--gray-300);
+  /* ─── Text ─────────────────────────────────────────────── */
+  --color-text-primary:   var(--charcoal);
+  --color-text-secondary: var(--stone);
+  --color-text-muted:     var(--pewter);
 
-  /* ─── Typography ────────────────────────────────────── */
-  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  /* ─── Typography ───────────────────────────────────────── */
+  --font-heading: 'Modern Antiqua', Georgia, serif;
+  --font-body:    'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:    'DM Mono', 'JetBrains Mono', monospace;
 
-  /* ─── Elevation ─────────────────────────────────────── */
-  --shadow-sm:   0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-  --shadow-md:   0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
-  --shadow-blue: 0 4px 16px rgba(21,101,192,.18);
+  /* ─── Elevation ────────────────────────────────────────── */
+  --shadow-sm:   0 1px 3px rgba(10,25,41,.06), 0 1px 2px rgba(10,25,41,.04);
+  --shadow-md:   0 4px 12px rgba(10,25,41,.08), 0 2px 4px rgba(10,25,41,.04);
+  --shadow-lg:   0 8px 30px rgba(10,25,41,.10), 0 4px 8px rgba(10,25,41,.06);
+  --shadow-blue: 0 4px 16px rgba(15,43,76,.18);
 
-  /* ─── Radius ─────────────────────────────────────────── */
+  /* ─── Radius ────────────────────────────────────────────── */
   --radius-sm:   6px;
   --radius-md:   10px;
   --radius-lg:   14px;
+  --radius-xl:   20px;
   --radius-full: 9999px;
 
-  /* ─── Transitions ─────────────────────────────────────── */
+  /* ─── Transitions ───────────────────────────────────────── */
   --transition: 150ms ease;
+  --transition-slow: 300ms cubic-bezier(.4,0,.2,1);
 }

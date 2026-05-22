@@ -68,7 +68,7 @@ export const AuthStore = signalStore(
 
     clearSession(): void {
       pushService.unregister();
-      rbacStore.reset();  // ← clear permissions so next user starts clean
+      rbacStore.reset();
       patchState(store, { accessToken: null, user: null, error: null });
       sessionStorage.removeItem('remindly_token');
       sessionStorage.removeItem('remindly_user');
@@ -79,7 +79,7 @@ export const AuthStore = signalStore(
       sessionStorage.setItem('remindly_user', JSON.stringify(user));
     },
   })),
-  withMethods((store) => ({
+  withMethods((store, rbacStore = inject(RbacStore)) => ({
     hydrateFromStorage(): boolean {
       const token = sessionStorage.getItem('remindly_token');
       if (!token) return false;
@@ -96,6 +96,7 @@ export const AuthStore = signalStore(
         }
       }
 
+      rbacStore.hydrateFromStorage();
       store.hydrateUser();
       return true;
     },

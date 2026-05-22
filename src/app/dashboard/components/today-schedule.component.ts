@@ -1,6 +1,8 @@
 import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { EventsStore } from '../../events/stores/events.store';
+import { AuthStore } from '../../auth/stores/auth.store';
+import { RbacStore } from '../../auth/stores/rbac.store';
 
 @Component({
   selector: 'app-today-schedule',
@@ -269,18 +271,50 @@ import { EventsStore } from '../../events/stores/events.store';
 })
 export class TodayScheduleComponent {
   readonly eventsStore = inject(EventsStore);
+  readonly authStore = inject(AuthStore);
+  readonly rbacStore = inject(RbacStore);
 
   readonly todaysEvents = computed(() => {
+    // Check if user is secretary
+    const hasExecutivePerm = this.rbacStore.hasPermission()('audit.read');
+    const hasAdminPerm = this.rbacStore.hasPermission()('events.approve') && !hasExecutivePerm;
+    const isSecretary = !hasExecutivePerm && !hasAdminPerm;
+    
+    let events = this.eventsStore.events();
+    
+    // For secretary, filter to only show their own events
+    if (isSecretary) {
+      const userId = this.authStore.user()?.id;
+      if (userId) {
+        events = events.filter(e => e.created_by === userId);
+      }
+    }
+    
     const today = new Date(); today.setHours(0,0,0,0);
     const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
-    return this.eventsStore.events()
+    return events
       .filter(e => { if (!e.starts_at) return false; const d = new Date(e.starts_at); return d >= today && d < tomorrow; })
       .sort((a, b) => new Date(a.starts_at ?? 0).getTime() - new Date(b.starts_at ?? 0).getTime());
   });
 
   readonly upcomingEvents = computed(() => {
+    // Check if user is secretary
+    const hasExecutivePerm = this.rbacStore.hasPermission()('audit.read');
+    const hasAdminPerm = this.rbacStore.hasPermission()('events.approve') && !hasExecutivePerm;
+    const isSecretary = !hasExecutivePerm && !hasAdminPerm;
+    
+    let events = this.eventsStore.events();
+    
+    // For secretary, filter to only show their own events
+    if (isSecretary) {
+      const userId = this.authStore.user()?.id;
+      if (userId) {
+        events = events.filter(e => e.created_by === userId);
+      }
+    }
+    
     const tomorrow = new Date(); tomorrow.setHours(0,0,0,0); tomorrow.setDate(tomorrow.getDate() + 1);
-    return this.eventsStore.events()
+    return events
       .filter(e => e.starts_at && new Date(e.starts_at) >= tomorrow)
       .sort((a, b) => new Date(a.starts_at ?? 0).getTime() - new Date(b.starts_at ?? 0).getTime());
   });

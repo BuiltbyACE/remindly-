@@ -66,16 +66,12 @@ export class ApprovalsComponent implements OnInit {
   readonly selectedApproval = signal<Approval | null>(null);
 
   ngOnInit(): void {
-    // Load approvals from events that have pending approvals
     this.loadApprovals();
   }
 
-  loadApprovals(): void {
-    // Get all events and load approvals for each event with pending status
+  async loadApprovals(): Promise<void> {
+    await this.eventsStore.loadEvents();
     const events = this.eventsStore.events();
-    
-    // For now, we'll load approvals for the first few events that might have approvals
-    // In a real scenario, we'd have an endpoint to get all pending approvals across events
     events.slice(0, 5).forEach(event => {
       this.approvalsStore.loadApprovals(event.id);
     });

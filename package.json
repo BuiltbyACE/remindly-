@@ -15,8 +15,7 @@
     "lint": "ng lint",
     "prettier:check": "prettier --check \"src/**/*.{ts,html,css,scss,json}\"",
     "prettier:write": "prettier --write \"src/**/*.{ts,html,css,scss,json}\"",
-    "api:generate": "openapi-typescript ./src/openapi/remindly_openapi.json -o ./src/app/api/types.generated.ts",
-    "api:fetch": "curl -o ./src/openapi/remindly_openapi.json http://localhost:8000/api/v1/openapi.json"
+
   },
   "private": true,
   "packageManager": "pnpm@11.1.1",

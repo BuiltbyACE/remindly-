@@ -41,6 +41,7 @@ export class EventMapper {
       requires_acknowledgement: Boolean(event['requires_acknowledgement'] ?? false),
       allow_delegation: Boolean(event['allow_delegation'] ?? false),
       reminder_policy_id: event['reminder_policy_id'] ? String(event['reminder_policy_id']) : null,
+      external_participants: this.parseStringArray(event['external_participants']),
       created_by: String(event['creator_id'] ?? ''),
       version: Number(event['version'] ?? 1),
       created_at: String(event['created_at'] ?? new Date().toISOString()),
@@ -86,26 +87,28 @@ export class EventMapper {
       timezone: request.timezone ?? 'UTC',
       requires_acknowledgement: request.requires_acknowledgement ?? false,
       allow_delegation: request.allow_delegation ?? false,
-    };
+      ...(request.external_participants ? { external_participants: request.external_participants } : {}),
+    } as ApiEventCreate;
   }
 
   /**
    * Convert domain update request to API format
    */
   static toApiUpdateRequest(request: EventUpdateRequest): ApiEventUpdate {
-    const apiRequest: ApiEventUpdate = {};
+    const apiRequest: Record<string, unknown> = {};
     
-    if (request.title !== undefined) apiRequest.title = request.title;
-    if (request.description !== undefined) apiRequest.description = request.description;
-    if (request.location !== undefined) apiRequest.location = request.location;
-    if (request.priority !== undefined) apiRequest.priority = request.priority as ApiEventPriority;
-    if (request.starts_at !== undefined) apiRequest.starts_at = request.starts_at;
-    if (request.ends_at !== undefined) apiRequest.ends_at = request.ends_at;
-    if (request.timezone !== undefined) apiRequest.timezone = request.timezone;
-    if (request.requires_acknowledgement !== undefined) apiRequest.requires_acknowledgement = request.requires_acknowledgement;
-    if (request.allow_delegation !== undefined) apiRequest.allow_delegation = request.allow_delegation;
+    if (request.title !== undefined) apiRequest['title'] = request.title;
+    if (request.description !== undefined) apiRequest['description'] = request.description;
+    if (request.location !== undefined) apiRequest['location'] = request.location;
+    if (request.priority !== undefined) apiRequest['priority'] = request.priority;
+    if (request.starts_at !== undefined) apiRequest['starts_at'] = request.starts_at;
+    if (request.ends_at !== undefined) apiRequest['ends_at'] = request.ends_at;
+    if (request.timezone !== undefined) apiRequest['timezone'] = request.timezone;
+    if (request.requires_acknowledgement !== undefined) apiRequest['requires_acknowledgement'] = request.requires_acknowledgement;
+    if (request.allow_delegation !== undefined) apiRequest['allow_delegation'] = request.allow_delegation;
+    if (request.external_participants !== undefined) apiRequest['external_participants'] = request.external_participants;
     
-    return apiRequest;
+    return apiRequest as ApiEventUpdate;
   }
 
   /**
@@ -144,5 +147,12 @@ export class EventMapper {
     return validStatuses.includes(status as typeof validStatuses[number])
       ? (status as typeof validStatuses[number])
       : 'draft';
+  }
+
+  private static parseStringArray(value: unknown): string[] {
+    if (Array.isArray(value)) {
+      return value.map(v => String(v)).filter(v => v.length > 0);
+    }
+    return [];
   }
 }

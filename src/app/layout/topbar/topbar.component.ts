@@ -1,5 +1,6 @@
-import { Component, ChangeDetectionStrategy, inject, output } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, ChangeDetectionStrategy, inject, signal, output } from '@angular/core';
+import { Router, RouterLink, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { AuthStore } from '../../auth/stores/auth.store';
 import { OrganizationStore } from '../../organizations/stores/organization.store';
 import { NotificationsStore } from '../../notifications/stores/notifications.store';
@@ -12,7 +13,7 @@ import { NotificationsStore } from '../../notifications/stores/notifications.sto
     :host { display: block; flex-shrink: 0; }
 
     header {
-      height: 60px;
+      height: 56px;
       background: rgba(255,255,255,.92);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
@@ -20,10 +21,18 @@ import { NotificationsStore } from '../../notifications/stores/notifications.sto
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 24px;
+      padding: 0 20px;
       position: sticky;
       top: 0;
       z-index: 20;
+    }
+
+    @media (max-width: 1023px) {
+      header {
+        height: 52px;
+        padding: 0 14px;
+        padding-top: env(safe-area-inset-top, 0px);
+      }
     }
 
     @media (prefers-color-scheme: dark) {
@@ -34,21 +43,35 @@ import { NotificationsStore } from '../../notifications/stores/notifications.sto
     }
 
     /* Left cluster */
-    .left { display: flex; align-items: center; gap: 12px; }
+    .left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+    .page-title {
+      display: none;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+    @media (max-width: 1023px) {
+      .page-title { display: block; }
+    }
 
     .hamburger {
       display: none;
       align-items: center; justify-content: center;
       width: 36px; height: 36px;
       border-radius: 10px;
-      border: 1px solid var(--color-border);
-      background: var(--color-surface);
+      border: none;
+      background: transparent;
       color: var(--color-text-secondary);
       cursor: pointer;
-      transition: background .15s, color .15s;
+      transition: background .15s;
     }
     @media (max-width: 1023px) { .hamburger { display: flex; } }
-    .hamburger:hover { background: var(--color-surface-alt); color: var(--color-text-primary); }
+    .hamburger:active { background: var(--warm-50); }
 
     /* Org switcher */
     .org-pill {
@@ -87,7 +110,7 @@ import { NotificationsStore } from '../../notifications/stores/notifications.sto
     }
 
     /* Right cluster */
-    .right { display: flex; align-items: center; gap: 4px; }
+    .right { display: flex; align-items: center; gap: 2px; }
 
     .icon-btn {
       position: relative;
@@ -106,6 +129,11 @@ import { NotificationsStore } from '../../notifications/stores/notifications.sto
       color: #1565C0;
     }
 
+    @media (max-width: 1023px) {
+      .icon-btn { width: 36px; height: 36px; }
+      .icon-btn svg { width: 18px; height: 18px; }
+    }
+
     /* Notification badge */
     .notif-badge {
       position: absolute;
@@ -122,12 +150,26 @@ import { NotificationsStore } from '../../notifications/stores/notifications.sto
       line-height: 1;
     }
 
+    @media (max-width: 1023px) {
+      .notif-badge {
+        top: 3px; right: 3px;
+        min-width: 15px; height: 15px;
+        font-size: 9px;
+        border-width: 1.5px;
+      }
+    }
+
     /* Divider */
     .divider {
       width: 1px;
-      height: 24px;
+      height: 22px;
       background: var(--color-border);
       margin: 0 4px;
+    }
+
+    @media (max-width: 1023px) {
+      .divider { height: 18px; margin: 0 2px; }
+      .org-pill { display: none; }
     }
 
     /* Logout red on hover */
@@ -137,12 +179,15 @@ import { NotificationsStore } from '../../notifications/stores/notifications.sto
     <header>
       <!-- Left -->
       <div class="left">
-        <!-- Hamburger (mobile only) -->
+        <!-- Page title (mobile) -->
+        <span class="page-title">{{ pageTitle() }}</span>
+
+        <!-- Hamburger (desktop only — toggles nothing now) -->
         <button
           type="button"
           class="hamburger"
-          (click)="toggleSidebar.emit()"
-          aria-label="Toggle sidebar"
+          aria-label="Menu"
+          style="display:none"
         >
           <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -216,6 +261,29 @@ export class TopbarComponent {
   readonly orgStore = inject(OrganizationStore);
   readonly notificationsStore = inject(NotificationsStore);
   readonly toggleSidebar = output<void>();
+
+  readonly pageTitle = signal('Home');
+
+  constructor() {
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(() => {
+        const url = this.router.url;
+        if (url === '/dashboard' || url === '/') { this.pageTitle.set('Home'); return; }
+        const segment = url.split('/')[1];
+        const titles: Record<string, string> = {
+          calendar: 'Calendar',
+          events: 'Events',
+          approvals: 'Approvals',
+          documents: 'Documents',
+          notifications: 'Alerts',
+          ai: 'AI Briefing',
+          settings: 'Settings',
+          admin: 'Admin',
+        };
+        this.pageTitle.set(titles[segment] || 'Remindly');
+      });
+  }
 
   async onOrgChange(event: Event): Promise<void> {
     const select = event.target as HTMLSelectElement;

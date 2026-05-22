@@ -154,6 +154,21 @@ import { EventScheduleRequest, getAvailableActions } from '../../models/event.mo
               </div>
             }
 
+            <!-- External Notification Note -->
+            @if (event.external_participants.length > 0) {
+              <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+                <svg aria-hidden="true" class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <div>
+                  <p class="text-sm font-medium text-blue-800">External Participants Notified</p>
+                  <p class="text-xs text-blue-600">
+                    {{ event.external_participants.length }} external participant(s) will receive email reminders when reminders are triggered.
+                  </p>
+                </div>
+              </div>
+            }
+
             <!-- Reminder List -->
             @if (remindersStore.loading()) {
               <div class="space-y-3">
@@ -285,6 +300,25 @@ import { EventScheduleRequest, getAvailableActions } from '../../models/event.mo
               </dd>
             </div>
             <div>
+              <dt class="text-sm font-medium text-gray-500">External Participants</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                @if (event.external_participants.length > 0) {
+                  <div class="flex flex-wrap gap-1.5">
+                    @for (email of event.external_participants; track email) {
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-md text-xs">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        {{ email }}
+                      </span>
+                    }
+                  </div>
+                } @else {
+                  <span class="text-gray-400">None</span>
+                }
+              </dd>
+            </div>
+            <div>
               <dt class="text-sm font-medium text-gray-500">Version</dt>
               <dd class="mt-1 text-sm text-gray-900">{{ event.version }}</dd>
             </div>
@@ -407,9 +441,22 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     const event = this.event();
     if (!event) return [];
     const hasPermission = this.rbacStore.hasPermission();
-    return getAvailableActions(event.status).filter(
-      action => hasPermission(this.ACTION_PERMISSIONS[action] ?? 'events.read')
-    );
+    const isExecutive = hasPermission('audit.read');
+
+    let actions = getAvailableActions(event.status);
+    if (isExecutive && event.status === 'draft') {
+      actions = [...actions, 'approve'];
+    }
+
+    return actions.filter(action => {
+      if (action === 'request_approval') {
+        return !isExecutive;
+      }
+      if (action === 'approve' || action === 'reject') {
+        return isExecutive || hasPermission(this.ACTION_PERMISSIONS[action]);
+      }
+      return hasPermission(this.ACTION_PERMISSIONS[action] ?? 'events.read');
+    });
   };
 
   ngOnInit(): void {

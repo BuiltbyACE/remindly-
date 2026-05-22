@@ -1,6 +1,8 @@
 import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApprovalsStore } from '../../approvals/stores/approvals.store';
+import { AuthStore } from '../../auth/stores/auth.store';
+import { RbacStore } from '../../auth/stores/rbac.store';
 import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skeleton-loader.component';
 import type { Approval } from '../../approvals/models/approval.model';
 
@@ -87,10 +89,23 @@ import type { Approval } from '../../approvals/models/approval.model';
 })
 export class PendingApprovalsComponent {
   readonly approvalsStore = inject(ApprovalsStore);
+  readonly authStore = inject(AuthStore);
+  readonly rbacStore = inject(RbacStore);
 
-  readonly pendingApprovals = computed<Approval[]>(() =>
-    this.approvalsStore.actionableApprovals()
-  );
+  readonly pendingApprovals = computed<Approval[]>(() => {
+    // Check if user is secretary
+    const hasExecutivePerm = this.rbacStore.hasPermission()('audit.read');
+    const hasAdminPerm = this.rbacStore.hasPermission()('events.approve') && !hasExecutivePerm;
+    const isSecretary = !hasExecutivePerm && !hasAdminPerm;
+    
+    if (isSecretary) {
+      // For secretary, use secretary-specific actionable approvals
+      return this.approvalsStore.secretaryActionableApprovals();
+    }
+    
+    // For non-secretaries, use regular actionable approvals
+    return this.approvalsStore.actionableApprovals();
+  });
 
   async approve(approval: Approval): Promise<void> {
     await this.approvalsStore.processApproval(approval.event_id, approval.id, 'approve');

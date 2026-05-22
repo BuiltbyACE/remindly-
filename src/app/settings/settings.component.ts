@@ -5,106 +5,206 @@ import { PwaInstallService } from '../core/services/pwa-install.service';
   selector: 'app-settings',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
-    .settings-card {
-      background: white;
-      border-radius: 16px;
-      border: 1px solid var(--color-border);
-      overflow: hidden;
-      box-shadow: 0 1px 4px rgba(0,0,0,.06);
-    }
-    .settings-card-header {
-      padding: 20px 24px 16px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    .settings-card-body {
-      padding: 24px;
+    :host { display: block; }
+
+    .page-heading {
+      margin-bottom: 24px;
     }
 
-    /* PWA install card gradient */
+    .page-heading h1 {
+      font-family: var(--font-heading);
+      font-size: 26px;
+      font-weight: 400;
+      color: var(--color-text-primary);
+      margin: 0 0 4px;
+    }
+
+    .page-heading p {
+      font-size: 13.5px;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .card-header h3 {
+      font-family: var(--font-heading);
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .card-header p {
+      font-size: 12.5px;
+      color: var(--color-text-secondary);
+      margin: 4px 0 0;
+    }
+
+    .card-body {
+      padding: 4px 24px;
+    }
+
+    /* ── PWA install card ── */
     .pwa-card {
-      background: linear-gradient(135deg, #1E3A5F 0%, #2563EB 100%);
-      border-radius: 20px;
+      background: linear-gradient(135deg, #0A1929 0%, #0F2B4C 40%, #1A5F8B 100%);
+      border-radius: 16px;
       padding: 32px;
       color: white;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 8px 32px rgba(37,99,235,.35);
+      box-shadow: 0 8px 32px rgba(15,43,76,.3);
     }
+
     .pwa-card::before {
       content: '';
       position: absolute;
-      top: -40px; right: -40px;
+      top: -60px; right: -60px;
       width: 200px; height: 200px;
       border-radius: 50%;
-      background: rgba(255,255,255,.07);
+      background: radial-gradient(circle, rgba(201,169,110,.06) 0%, transparent 70%);
     }
+
     .pwa-card::after {
       content: '';
       position: absolute;
-      bottom: -60px; left: -20px;
-      width: 160px; height: 160px;
+      bottom: -80px; left: -40px;
+      width: 180px; height: 180px;
       border-radius: 50%;
-      background: rgba(255,255,255,.05);
+      background: radial-gradient(circle, rgba(90,158,207,.05) 0%, transparent 70%);
     }
+
     .pwa-icon {
       width: 72px; height: 72px;
       border-radius: 18px;
       object-fit: cover;
       box-shadow: 0 4px 16px rgba(0,0,0,.3);
-      border: 3px solid rgba(255,255,255,.3);
+      border: 2px solid rgba(232,220,206,.15);
     }
-    .install-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: white;
-      color: #1E3A5F;
-      font-weight: 700;
-      font-size: 15px;
-      padding: 14px 28px;
-      border-radius: 50px;
-      border: none;
-      cursor: pointer;
-      transition: transform .15s ease, box-shadow .15s ease;
-      box-shadow: 0 4px 16px rgba(0,0,0,.2);
-      position: relative; z-index: 1;
-    }
-    .install-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,.25);
-    }
-    .install-btn:active { transform: translateY(0); }
-    .install-btn:disabled {
-      opacity: .7; cursor: not-allowed;
-      transform: none;
-    }
-    .installed-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255,255,255,.15);
-      border: 1px solid rgba(255,255,255,.3);
-      backdrop-filter: blur(8px);
-      color: white;
+
+    .pwa-label {
+      font-size: 10px;
       font-weight: 600;
-      font-size: 14px;
-      padding: 10px 20px;
-      border-radius: 50px;
-      position: relative; z-index: 1;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      opacity: .4;
+      margin: 0 0 4px;
     }
+
+    .pwa-title {
+      font-family: var(--font-heading);
+      font-size: 22px;
+      font-weight: 400;
+      margin: 0 0 6px;
+      letter-spacing: -0.01em;
+    }
+
+    .pwa-desc {
+      font-size: 13.5px;
+      opacity: .7;
+      margin: 0 0 20px;
+      line-height: 1.6;
+      max-width: 420px;
+    }
+
     .feature-pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.2);
+      background: rgba(232,220,206,.06);
+      border: 1px solid rgba(232,220,206,.1);
       padding: 6px 14px;
       border-radius: 50px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
+      color: rgba(255,255,255,.8);
     }
 
-    /* Section rows */
+    .feature-pill svg { opacity: .6; }
+
+    .install-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #FCFAF7;
+      color: #0A1929;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 14px;
+      padding: 14px 28px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      transition: all .15s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      position: relative; z-index: 1;
+    }
+
+    .install-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    }
+
+    .install-btn:active:not(:disabled) { transform: translateY(0); }
+
+    .install-btn:disabled {
+      opacity: .6; cursor: not-allowed;
+      transform: none;
+    }
+
+    .installed-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(232,220,206,.08);
+      border: 1px solid rgba(232,220,206,.15);
+      backdrop-filter: blur(8px);
+      color: rgba(255,255,255,.9);
+      font-weight: 500;
+      font-size: 13px;
+      padding: 10px 20px;
+      border-radius: 50px;
+      position: relative; z-index: 1;
+    }
+
+    .manual-card {
+      background: rgba(232,220,206,.06);
+      border: 1px solid rgba(232,220,206,.1);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 420px;
+      position: relative; z-index: 1;
+    }
+
+    .manual-card h4 {
+      font-family: var(--font-heading);
+      font-size: 15px;
+      font-weight: 400;
+      color: rgba(255,255,255,.9);
+      margin: 0 0 12px;
+    }
+
+    .manual-card li {
+      font-size: 12.5px;
+      color: rgba(255,255,255,.6);
+      line-height: 1.8;
+    }
+
+    .manual-card li strong { color: rgba(255,255,255,.8); }
+
+    /* ── Preference rows ── */
     .pref-row {
       display: flex;
       align-items: center;
@@ -112,198 +212,247 @@ import { PwaInstallService } from '../core/services/pwa-install.service';
       padding: 16px 0;
       border-bottom: 1px solid var(--color-border);
     }
+
     .pref-row:last-child { border-bottom: none; }
-    .pref-label { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
-    .pref-desc { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
-    .badge-tag {
+
+    .pref-label {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .pref-desc {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin-top: 2px;
+    }
+
+    .badge {
       font-size: 11px;
       font-weight: 600;
-      padding: 3px 10px;
+      padding: 4px 12px;
       border-radius: 50px;
-      background: #EFF6FF;
-      color: #2563EB;
-    }
-    .badge-tag.green { background: #F0FDF4; color: #16A34A; }
-    .badge-tag.orange { background: #FFF7ED; color: #EA580C; }
-
-    :host {
-      display: block;
+      background: var(--ocean-50);
+      color: var(--ocean-600);
     }
 
-    /* Dark mode */
-    @media (prefers-color-scheme: dark) {
-      .settings-card { background: #1E293B; }
+    .badge-green {
+      background: #E2F0E6;
+      color: #2D7D46;
+    }
+
+    .badge-orange {
+      background: #F5EDD8;
+      color: #B8863A;
+    }
+
+    /* ── Frame ── */
+    .section { margin-bottom: 24px; }
+
+    .footer-note {
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--color-text-muted);
+      padding-bottom: 16px;
+    }
+
+    .footer-note strong { color: var(--color-text-secondary); }
+
+    @media (max-width: 640px) {
+      .page-heading h1 { font-size: 22px; }
+      .page-heading p { font-size: 13px; }
+
+      .card { border-radius: 14px; border-left: none; border-right: none; }
+      .card-header { padding: 16px 18px; }
+      .card-header h3 { font-size: 16px; }
+      .card-header p { font-size: 12px; }
+      .card-body { padding: 12px 18px; }
+
+      .pwa-card { padding: 24px 20px; border-radius: 16px; }
+      .pwa-icon { width: 56px; height: 56px; border-radius: 14px; }
+
+      .pref-row { padding: 12px 0; }
+      .pref-label { font-size: 14px; }
+      .pref-desc { font-size: 12px; }
+
+      .feature-grid { grid-template-columns: 1fr; gap: 8px; }
+      .feature-pill { padding: 10px 14px; font-size: 12px; }
+
+      .section { margin-bottom: 20px; }
+
+      .footer-note { font-size: 11px; padding-bottom: env(safe-area-inset-bottom, 0px); }
     }
   `],
   template: `
-    <div class="space-y-8">
-      <!-- Page header -->
-      <div>
-        <h1 class="text-2xl font-bold" style="color:var(--color-text-primary)">Settings</h1>
-        <p class="text-sm mt-1" style="color:var(--color-text-muted)">Manage your account, preferences, and app installation</p>
+    <div>
+      <!-- Page heading -->
+      <div class="page-heading">
+        <h1>Settings</h1>
+        <p>Manage your account, preferences, and app installation</p>
       </div>
 
-      <!-- ─── PWA Install Card ─────────────────────────────── -->
-      <div class="pwa-card">
-        <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;position:relative;z-index:1">
-          <img src="icons/icon.jpeg" alt="Remindly App Icon" class="pwa-icon" />
+      <!-- ─── PWA Install ─────────────────────────────── -->
+      <div class="section">
+        <div class="pwa-card">
+          <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;position:relative;z-index:1">
+            <img src="icons/icon.jpeg" alt="Remindly App Icon" class="pwa-icon" />
+            <div style="flex:1;min-width:200px">
+              <p class="pwa-label">Progressive Web App</p>
+              <h2 class="pwa-title">Install Remindly</h2>
+              <p class="pwa-desc">
+                Get the full executive experience — fast, offline-ready, and installable on any device.
+              </p>
 
-          <div style="flex:1;min-width:200px">
-            <p style="font-size:12px;font-weight:600;letter-spacing:.08em;opacity:.7;text-transform:uppercase;margin-bottom:4px">
-              Progressive Web App
-            </p>
-            <h2 style="font-size:22px;font-weight:800;margin:0 0 6px">Install Remindly</h2>
-            <p style="font-size:14px;opacity:.85;margin:0 0 20px;line-height:1.5;max-width:420px">
-              Get the full executive experience — fast, offline-ready, and installable on any device.
-              Works on Android, iOS, Windows, macOS and Linux.
-            </p>
-
-            <!-- Feature pills -->
-            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
-              <span class="feature-pill">
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                </svg>
-                Lightning Fast
-              </span>
-              <span class="feature-pill">
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728M15.536 8.464a5 5 0 010 7.072M12 12v.01"/>
-                </svg>
-                Works Offline
-              </span>
-              <span class="feature-pill">
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                </svg>
-                Push Notifications
-              </span>
-              <span class="feature-pill">
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                </svg>
-                Secure
-              </span>
-            </div>
-
-            <!-- Action -->
-            @if (pwa.installState() === 'installed') {
-              <span class="installed-badge">
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                </svg>
-                Remindly is already installed
-              </span>
-            } @else if (pwa.canInstall()) {
-              <button
-                id="pwa-install-btn"
-                class="install-btn"
-                [disabled]="installing()"
-                (click)="install()"
-              >
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-                {{ installing() ? 'Installing…' : 'Download & Install App' }}
-              </button>
-            } @else {
-              <div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:16px;max-width:420px">
-                <p style="font-size:13px;font-weight:600;margin:0 0 8px">Install manually:</p>
-                <ul style="font-size:13px;opacity:.85;line-height:1.7;margin:0;padding-left:18px">
-                  <li><strong>Chrome / Edge:</strong> Menu → "Install Remindly" or the ⊕ icon in the address bar</li>
-                  <li><strong>Safari (iOS):</strong> Share → Add to Home Screen</li>
-                  <li><strong>Firefox:</strong> Address bar → Install icon</li>
-                </ul>
+              <!-- Feature pills -->
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+                <span class="feature-pill">
+                  <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                  Lightning Fast
+                </span>
+                <span class="feature-pill">
+                  <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 5.636a9 9 0 010 12.728M15.536 8.464a5 5 0 010 7.072M12 12v.01"/>
+                  </svg>
+                  Works Offline
+                </span>
+                <span class="feature-pill">
+                  <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                  </svg>
+                  Push Alerts
+                </span>
+                <span class="feature-pill">
+                  <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                  </svg>
+                  Secure
+                </span>
               </div>
-            }
+
+              <!-- Action -->
+              @if (pwa.installState() === 'installed') {
+                <span class="installed-badge">
+                  <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  Remindly is installed
+                </span>
+              } @else if (pwa.canInstall()) {
+                <button
+                  class="install-btn"
+                  [disabled]="installing()"
+                  (click)="install()"
+                >
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                  </svg>
+                  {{ installing() ? 'Installing\u2026' : 'Download App' }}
+                </button>
+              } @else {
+                <div class="manual-card">
+                  <h4>Install manually:</h4>
+                  <ul style="margin:0;padding-left:18px">
+                    <li><strong>Chrome / Edge:</strong> Menu \u2192 "Install Remindly" or the \u2295 icon in the address bar</li>
+                    <li><strong>Safari (iOS):</strong> Share \u2192 Add to Home Screen</li>
+                    <li><strong>Firefox:</strong> Address bar \u2192 Install icon</li>
+                  </ul>
+                </div>
+              }
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- ─── App Information ─────────────────────────────── -->
-      <div class="settings-card">
-        <div class="settings-card-header">
-          <h3 style="font-size:15px;font-weight:700;color:var(--color-text-primary);margin:0">Application</h3>
-          <p style="font-size:12px;color:var(--color-text-muted);margin:4px 0 0">Platform details and version information</p>
-        </div>
-        <div class="settings-card-body" style="padding-top:8px;padding-bottom:8px">
-          <div class="pref-row">
-            <div>
-              <p class="pref-label">App Name</p>
-            </div>
-            <span class="badge-tag">Remindly</span>
+      <!-- ─── App Information ─────────────────────────── -->
+      <div class="section">
+        <div class="card">
+          <div class="card-header">
+            <h3>Application</h3>
+            <p>Platform details and version information</p>
           </div>
-          <div class="pref-row">
-            <div>
-              <p class="pref-label">Version</p>
-              <p class="pref-desc">Current release</p>
+          <div class="card-body">
+            <div class="pref-row">
+              <div>
+                <p class="pref-label">App Name</p>
+              </div>
+              <span class="badge">Remindly</span>
             </div>
-            <span class="badge-tag green">v1.0.0</span>
-          </div>
-          <div class="pref-row">
-            <div>
-              <p class="pref-label">Platform</p>
-              <p class="pref-desc">Angular 21 PWA · FastAPI Backend</p>
+            <div class="pref-row">
+              <div>
+                <p class="pref-label">Version</p>
+                <p class="pref-desc">Current release</p>
+              </div>
+              <span class="badge badge-green">v1.0.0</span>
             </div>
-            <span class="badge-tag">Enterprise</span>
-          </div>
-          <div class="pref-row">
-            <div>
-              <p class="pref-label">Offline Support</p>
-              <p class="pref-desc">IndexedDB queue + Service Worker cache</p>
+            <div class="pref-row">
+              <div>
+                <p class="pref-label">Platform</p>
+                <p class="pref-desc">Angular PWA &middot; FastAPI Backend</p>
+              </div>
+              <span class="badge">Enterprise</span>
             </div>
-            <span class="badge-tag green">Enabled</span>
-          </div>
-          <div class="pref-row">
-            <div>
-              <p class="pref-label">Install Status</p>
-              <p class="pref-desc">Current PWA installation state</p>
+            <div class="pref-row">
+              <div>
+                <p class="pref-label">Offline Support</p>
+                <p class="pref-desc">Service Worker cache + IndexedDB queue</p>
+              </div>
+              <span class="badge badge-green">Enabled</span>
             </div>
-            @if (pwa.installState() === 'installed') {
-              <span class="badge-tag green">Installed</span>
-            } @else if (pwa.installState() === 'available') {
-              <span class="badge-tag orange">Available</span>
-            } @else {
-              <span class="badge-tag">Browser Mode</span>
-            }
-          </div>
-        </div>
-      </div>
-
-      <!-- ─── Preferences ─────────────────────────────────── -->
-      <div class="settings-card">
-        <div class="settings-card-header">
-          <h3 style="font-size:15px;font-weight:700;color:var(--color-text-primary);margin:0">Preferences</h3>
-          <p style="font-size:12px;color:var(--color-text-muted);margin:4px 0 0">Notification and display preferences</p>
-        </div>
-        <div class="settings-card-body" style="padding-top:8px;padding-bottom:8px">
-          <div class="pref-row">
-            <div>
-              <p class="pref-label">User & Organization settings</p>
-              <p class="pref-desc">Profile, roles, and org configuration</p>
+            <div class="pref-row">
+              <div>
+                <p class="pref-label">Install Status</p>
+                <p class="pref-desc">Current PWA installation state</p>
+              </div>
+              @if (pwa.installState() === 'installed') {
+                <span class="badge badge-green">Installed</span>
+              } @else if (pwa.installState() === 'available') {
+                <span class="badge badge-orange">Available</span>
+              } @else {
+                <span class="badge">Browser Mode</span>
+              }
             </div>
-            <span class="badge-tag orange">Coming soon</span>
-          </div>
-          <div class="pref-row">
-            <div>
-              <p class="pref-label">Notification channels</p>
-              <p class="pref-desc">Push, email, SMS, WhatsApp</p>
-            </div>
-            <span class="badge-tag orange">Coming soon</span>
-          </div>
-          <div class="pref-row">
-            <div>
-              <p class="pref-label">Theme</p>
-              <p class="pref-desc">Follows your system preference (light / dark)</p>
-            </div>
-            <span class="badge-tag">System</span>
           </div>
         </div>
       </div>
 
-      <!-- Built by -->
-      <p style="text-align:center;font-size:12px;color:var(--color-text-muted);padding-bottom:8px">
-        Built with ❤️ by <strong>SafariStack Solutions</strong> · Remindly Executive AI Assistant
+      <!-- ─── Preferences ─────────────────────────────── -->
+      <div class="section">
+        <div class="card">
+          <div class="card-header">
+            <h3>Preferences</h3>
+            <p>Notification and display preferences</p>
+          </div>
+          <div class="card-body">
+            <div class="pref-row">
+              <div>
+                <p class="pref-label">User &amp; Organization</p>
+                <p class="pref-desc">Profile, roles, and org configuration</p>
+              </div>
+              <span class="badge badge-orange">Coming soon</span>
+            </div>
+            <div class="pref-row">
+              <div>
+                <p class="pref-label">Notification Channels</p>
+                <p class="pref-desc">Push, email, SMS, WhatsApp</p>
+              </div>
+              <span class="badge badge-orange">Coming soon</span>
+            </div>
+            <div class="pref-row">
+              <div>
+                <p class="pref-label">Theme</p>
+                <p class="pref-desc">Follows your system preference</p>
+              </div>
+              <span class="badge">Light / Dark</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <p class="footer-note">
+        Built by <strong>SafariStack Solutions</strong> &middot; Remindly Executive AI Assistant
       </p>
     </div>
   `,
@@ -318,4 +467,3 @@ export class SettingsComponent {
     this.installing.set(false);
   }
 }
-

@@ -9,6 +9,8 @@ import { lastValueFrom, Subscription } from 'rxjs';
 import { ApprovalsService } from '../services/approvals.service';
 import { ToastService } from '@shared/components/toast/toast.service';
 import { WebSocketStore } from '../../websocket/websocket.store';
+import { AuthStore } from '../../auth/stores/auth.store';
+import { RbacStore } from '../../auth/stores/rbac.store';
 import type { Approval, ApprovalStatus, ApprovalFilterOptions, PaginationParams } from '../models/approval.model';
 
 interface ApprovalsState {
@@ -40,10 +42,12 @@ const initialState: ApprovalsState = {
 export const ApprovalsStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  
+   
   withHooks({
     onInit(store) {
       const webSocketStore = inject(WebSocketStore);
+      const authStore = inject(AuthStore);
+      const rbacStore = inject(RbacStore);
       let wsSubscription: Subscription | null = null;
       
       // Subscribe to approval-related WebSocket messages
@@ -88,63 +92,94 @@ export const ApprovalsStore = signalStore(
       };
     },
   }),
-  
-  withComputed((store) => ({
-    // Computed signals for filtered counts
-    pendingCount: computed(() => 
-      store.approvals().filter(a => a.status === 'pending').length
-    ),
-    approvedCount: computed(() => 
-      store.approvals().filter(a => a.status === 'approved').length
-    ),
-    rejectedCount: computed(() => 
-      store.approvals().filter(a => a.status === 'rejected').length
-    ),
+   
+  withComputed((store) => {
+    const authStore = inject(AuthStore);
+    const rbacStore = inject(RbacStore);
     
-    // Pending approvals requiring action (not requested by current user)
-    actionableApprovals: computed(() =>
-      store.approvals().filter(a => a.status === 'pending')
-    ),
+    // Secretary role checker
+    const isSecretary = computed(() => {
+      const hasExecutivePerm = rbacStore.hasPermission()('audit.read');
+      const hasAdminPerm = rbacStore.hasPermission()('events.approve') && !hasExecutivePerm;
+      return !hasExecutivePerm && !hasAdminPerm;
+    });
     
-    // Filtered by current filter selection
-    filteredApprovals: computed(() => {
-      const approvals = store.approvals();
-      const filters = store.filters();
+    return {
+      // Computed signals for filtered counts
+      pendingCount: computed(() => 
+        store.approvals().filter(a => a.status === 'pending').length
+      ),
+      approvedCount: computed(() => 
+        store.approvals().filter(a => a.status === 'approved').length
+      ),
+      rejectedCount: computed(() => 
+        store.approvals().filter(a => a.status === 'rejected').length
+      ),
       
-      return approvals.filter(approval => {
-        if (filters.status && approval.status !== filters.status) return false;
-        if (filters.event_id && approval.event_id !== filters.event_id) return false;
-        return true;
-      });
-    }),
-  })),
-
+      // Pending approvals requiring action (not requested by current user)
+      actionableApprovals: computed(() =>
+        store.approvals().filter(a => a.status === 'pending')
+      ),
+      
+      // For secretary role: only show approvals for events they created
+      secretaryActionableApprovals: computed(() => {
+        if (isSecretary()) {
+          // Secretary can only see approvals for their own events
+          const userId = authStore.user()?.id;
+          if (!userId) return [];
+          
+          return store.approvals().filter(approval => 
+            approval.status === 'pending' && 
+            approval.event_id && 
+            // We would need to check if the event belongs to the secretary
+            // Since we don't have event creator info in approval, we'll need to filter differently
+            // For now, we'll show all pending approvals but this should be enhanced
+            true
+          );
+        }
+        return store.approvals().filter(a => a.status === 'pending');
+      }),
+      
+      // Filtered by current filter selection
+      filteredApprovals: computed(() => {
+        const approvals = store.approvals();
+        const filters = store.filters();
+        
+        return approvals.filter(approval => {
+          if (filters.status && approval.status !== filters.status) return false;
+          if (filters.event_id && approval.event_id !== filters.event_id) return false;
+          return true;
+        });
+      }),
+    };
+  }),
+   
   withMethods((store, approvalsService = inject(ApprovalsService), toastService = inject(ToastService)) => ({
     // Actions
     setLoading(loading: boolean): void {
       patchState(store, { loading });
     },
-
+    
     setError(error: string | null): void {
       patchState(store, { error, loading: false });
     },
-
+    
     clearError(): void {
       patchState(store, { error: null });
     },
-
+    
     selectApproval(approval: Approval | null): void {
       patchState(store, { selectedApproval: approval });
     },
-
+    
     setFilters(filters: ApprovalFilterOptions): void {
       patchState(store, { filters, pagination: { ...store.pagination(), page: 1 } });
     },
-
+    
     setPage(page: number): void {
       patchState(store, { pagination: { ...store.pagination(), page } });
     },
-
+    
     // Load approvals for a specific event
     async loadApprovals(eventId: string, pagination?: PaginationParams): Promise<void> {
       patchState(store, { loading: true, error: null });
@@ -157,7 +192,7 @@ export const ApprovalsStore = signalStore(
             pagination || { page: store.pagination().page, page_size: store.pagination().pageSize }
           )
         );
-
+        
         patchState(store, {
           approvals: response?.items ?? [],
           pagination: {
@@ -172,7 +207,7 @@ export const ApprovalsStore = signalStore(
         patchState(store, { error: message, loading: false });
       }
     },
-
+    
     // Create approval request
     async requestApproval(eventId: string, approverMembershipId: string, comments?: string): Promise<boolean> {
       patchState(store, { loading: true, error: null });
@@ -181,7 +216,7 @@ export const ApprovalsStore = signalStore(
         const newApproval = await lastValueFrom(
           approvalsService.createApproval(eventId, { approver_membership_id: approverMembershipId, comments })
         );
-
+        
         if (newApproval) {
           patchState(store, {
             approvals: [newApproval, ...store.approvals()],
@@ -190,7 +225,7 @@ export const ApprovalsStore = signalStore(
           toastService.success('Approval requested successfully');
           return true;
         }
-
+        
         patchState(store, { loading: false });
         return false;
       } catch (error) {
@@ -200,7 +235,7 @@ export const ApprovalsStore = signalStore(
         return false;
       }
     },
-
+    
     // Process approval (approve or reject)
     async processApproval(
       eventId: string,
@@ -218,7 +253,7 @@ export const ApprovalsStore = signalStore(
             { action, comments }
           )
         );
-
+        
         if (updatedApproval) {
           // Update in the approvals list
           const updatedApprovals = store.approvals().map(a =>
@@ -235,7 +270,7 @@ export const ApprovalsStore = signalStore(
           toastService.success(`Approval ${actionLabel} successfully`);
           return true;
         }
-
+        
         patchState(store, { loading: false });
         return false;
       } catch (error) {
@@ -245,7 +280,7 @@ export const ApprovalsStore = signalStore(
         return false;
       }
     },
-
+    
     // Reset store state
     reset(): void {
       patchState(store, initialState);

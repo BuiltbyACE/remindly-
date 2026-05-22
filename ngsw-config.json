@@ -1,6 +1,12 @@
 {
   "$schema": "./node_modules/@angular/service-worker/config/schema.json",
   "index": "/index.html",
+  "navigationUrls": [
+    "/**",
+    "!/**/*.*",
+    "!/**/*__*",
+    "!/**/*__*_*"
+  ],
   "assetGroups": [
     {
       "name": "app",
@@ -139,6 +145,34 @@
       "cacheConfig": {
         "strategy": "performance",
         "maxSize": 20,
+        "maxAge": "1d"
+      }
+    },
+    {
+      "name": "admin-api",
+      "urls": ["/api/v1/admin/**"],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 50,
+        "maxAge": "1h"
+      }
+    },
+    {
+      "name": "documents-api",
+      "urls": ["/api/v1/documents/**"],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 50,
+        "maxAge": "1d",
+        "timeout": "5s"
+      }
+    },
+    {
+      "name": "push-api",
+      "urls": ["/api/v1/push/**"],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 10,
         "maxAge": "1d"
       }
     }

@@ -1,24 +1,15 @@
 import { Injectable, inject } from '@angular/core';
+import { SwPush } from '@angular/service-worker';
 import { lastValueFrom } from 'rxjs';
 import { BaseApiClient } from '../api/base-api.client';
 
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; i++) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
-
 @Injectable({ providedIn: 'root' })
 export class PushSubscriptionService extends BaseApiClient {
+  private readonly swPush = inject(SwPush);
   private vapidKey: string | null = null;
 
   async initialize(): Promise<void> {
-    if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+    if (!this.swPush.isEnabled) return;
     try {
       const response = await lastValueFrom(
         this.get<{ public_key: string }>('/api/v1/push/vapid-key')
@@ -30,17 +21,14 @@ export class PushSubscriptionService extends BaseApiClient {
   }
 
   async register(): Promise<void> {
-    if (!this.vapidKey) return;
-    if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
-
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') return;
+    if (!this.vapidKey || !this.swPush.isEnabled) return;
 
     try {
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(this.vapidKey).buffer as ArrayBuffer,
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') return;
+
+      const subscription = await this.swPush.requestSubscription({
+        serverPublicKey: this.vapidKey,
       });
       await lastValueFrom(
         this.post('/api/v1/push/subscribe', subscription.toJSON())
@@ -51,15 +39,14 @@ export class PushSubscriptionService extends BaseApiClient {
   }
 
   async unregister(): Promise<void> {
-    if (!('serviceWorker' in navigator)) return;
+    if (!this.swPush.isEnabled) return;
     try {
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
+      const subscription = await this.swPush.subscription.toPromise();
       if (subscription) {
         await lastValueFrom(
           this.post('/api/v1/push/unsubscribe', subscription.toJSON())
         );
-        await subscription.unsubscribe();
+        await this.swPush.unsubscribe();
       }
     } catch {
       // unsubscribe failed — non-critical

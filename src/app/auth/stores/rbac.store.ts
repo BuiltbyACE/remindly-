@@ -28,16 +28,34 @@ export const RbacStore = signalStore(
       }
       // Fallback: infer from permissions
       const perms = permissions() ?? [];
-      if (perms.includes('audit.read')) return 'Executive';
-      if (perms.includes('events.approve')) return 'Admin';
-      if (perms.includes('events.read')) return 'Secretary';
+      if (perms.includes('audit.read') || perms.includes('documents.approve')) return 'Executive';
+      if (perms.includes('events.approve') || perms.includes('documents.delete')) return 'Admin';
+      if (perms.includes('events.read') || perms.includes('documents.read')) return 'Secretary';
       return 'Member';
     }),
   })),
   withMethods((store, rbacService = inject(RbacService)) => ({
+    hydrateFromStorage(): boolean {
+      const cached = sessionStorage.getItem('remindly_permissions');
+      const cachedRoles = sessionStorage.getItem('remindly_roles');
+      if (cached) {
+        try {
+          const permissions = JSON.parse(cached) as string[];
+          const roleNames = cachedRoles ? JSON.parse(cachedRoles) as string[] : [];
+          patchState(store, { permissions, roleNames, isLoaded: true });
+          return true;
+        } catch {
+          sessionStorage.removeItem('remindly_permissions');
+          sessionStorage.removeItem('remindly_roles');
+        }
+      }
+      return false;
+    },
+
     async hydratePermissions(): Promise<void> {
       try {
         const permissions = await lastValueFrom(rbacService.getMyPermissions());
+        sessionStorage.setItem('remindly_permissions', JSON.stringify(permissions));
         patchState(store, { permissions, isLoaded: true });
       } catch {
         patchState(store, { permissions: [], isLoaded: true });
@@ -45,6 +63,7 @@ export const RbacStore = signalStore(
       // Separately fetch actual role names
       try {
         const roles = await lastValueFrom(rbacService.getMyRoles());
+        sessionStorage.setItem('remindly_roles', JSON.stringify(roles));
         patchState(store, { roleNames: roles });
       } catch {
         // getMyRoles may not exist on backend yet — silently ignore
@@ -54,6 +73,8 @@ export const RbacStore = signalStore(
 
     /** Must be called on logout to prevent permission bleed between users */
     reset(): void {
+      sessionStorage.removeItem('remindly_permissions');
+      sessionStorage.removeItem('remindly_roles');
       patchState(store, { permissions: [], roleNames: [], isLoaded: false });
     },
   })),

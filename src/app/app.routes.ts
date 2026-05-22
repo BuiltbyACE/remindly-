@@ -17,6 +17,11 @@ export const routes: Routes = [
         loadChildren: () => import('./dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES),
       },
       {
+        path: 'calendar',
+        loadChildren: () => import('./calendar/calendar.routes').then(m => m.CALENDAR_ROUTES),
+        canActivate: [permissionGuard('events.read', 'audit.read')],
+      },
+      {
         path: 'events',
         loadChildren: () => import('./events/events.routes').then(m => m.EVENTS_ROUTES),
         canActivate: [permissionGuard('events.read')],
@@ -29,11 +34,7 @@ export const routes: Routes = [
       {
         path: 'notifications',
         loadChildren: () => import('./notifications/notifications.routes').then(m => m.NOTIFICATIONS_ROUTES),
-      },
-      {
-        path: 'voice',
-        loadChildren: () => import('./voice/voice.routes').then(m => m.VOICE_ROUTES),
-        canActivate: [permissionGuard('voice.execute')],
+        canActivate: [permissionGuard('notifications.send')],
       },
       {
         path: 'ai',
@@ -42,14 +43,22 @@ export const routes: Routes = [
       {
         path: 'integrations',
         loadChildren: () => import('./integrations/integrations.routes').then(m => m.INTEGRATIONS_ROUTES),
+        canActivate: [permissionGuard('integrations.manage')],
       },
       {
         path: 'audit',
         loadChildren: () => import('./audit/audit.routes').then(m => m.AUDIT_ROUTES),
+        canActivate: [permissionGuard('audit.read')],
       },
       {
         path: 'settings',
         loadChildren: () => import('./settings/settings.routes').then(m => m.SETTINGS_ROUTES),
+        canActivate: [permissionGuard('organizations.manage')],
+      },
+      {
+        path: 'documents',
+        loadChildren: () => import('./documents/documents.routes').then(m => m.DOCUMENTS_ROUTES),
+        canActivate: [permissionGuard('documents.read')],
       },
       {
         path: 'analytics',

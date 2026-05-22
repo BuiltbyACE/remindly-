@@ -29,6 +29,7 @@ export interface Event {
   requires_acknowledgement: boolean;
   allow_delegation: boolean;
   reminder_policy_id: string | null;
+  external_participants: string[];
   created_by: string;
   version: number;
   created_at: string;
@@ -52,6 +53,7 @@ export interface EventCreateRequest {
   timezone?: string;
   requires_acknowledgement?: boolean;
   allow_delegation?: boolean;
+  external_participants?: string[];
 }
 
 export interface EventUpdateRequest {
@@ -64,6 +66,7 @@ export interface EventUpdateRequest {
   timezone?: string | null;
   requires_acknowledgement?: boolean | null;
   allow_delegation?: boolean | null;
+  external_participants?: string[] | null;
 }
 
 export interface EventScheduleRequest {
@@ -81,6 +84,7 @@ export interface EventTransitionRequest {
 export interface EventFilters {
   status: EventStatus | null;
   search: string | null;
+  creator_id?: string | null;
 }
 
 export interface EventPagination {
