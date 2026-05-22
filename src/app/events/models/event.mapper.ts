@@ -3,7 +3,6 @@
  * Converts between API DTOs and frontend domain models
  */
 
-import type { components } from '../../api/types.generated';
 import type {
   Event,
   EventCreateRequest,
@@ -12,12 +11,47 @@ import type {
   EventListResponse,
 } from './event.model';
 
-// Use generated types for API schemas
-type ApiEventCreate = components['schemas']['EventCreate'];
-type ApiEventUpdate = components['schemas']['EventUpdate'];
-type ApiEventScheduleRequest = components['schemas']['EventScheduleRequest'];
-type ApiEventTransitionRequest = components['schemas']['EventTransitionRequest'];
-type ApiEventPriority = components['schemas']['EventPriority'];
+// API DTO shapes (define locally instead of relying on generated types)
+interface ApiEventCreate {
+  [key: string]: unknown;
+  title: string;
+  description: string | null;
+  location: string | null;
+  priority: string;
+  starts_at: string | null;
+  ends_at: string | null;
+  timezone: string;
+  requires_acknowledgement: boolean;
+  allow_delegation: boolean;
+  external_participants?: string[];
+}
+
+interface ApiEventUpdate {
+  [key: string]: unknown;
+  title?: string;
+  description?: string | null;
+  location?: string | null;
+  priority?: string;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  timezone?: string;
+  requires_acknowledgement?: boolean;
+  allow_delegation?: boolean;
+  external_participants?: string[];
+}
+
+interface ApiEventScheduleRequest {
+  [key: string]: unknown;
+  starts_at: string;
+  ends_at: string;
+  timezone: string;
+  location: string | null;
+  expected_version: number;
+}
+
+interface ApiEventTransitionRequest {
+  expected_version: number;
+}
 
 export class EventMapper {
   /**
@@ -81,7 +115,7 @@ export class EventMapper {
       title: request.title,
       description: request.description ?? null,
       location: request.location ?? null,
-      priority: (request.priority ?? 'medium') as ApiEventPriority,
+      priority: (request.priority ?? 'medium') as string,
       starts_at: request.starts_at ?? null,
       ends_at: request.ends_at ?? null,
       timezone: request.timezone ?? 'UTC',
