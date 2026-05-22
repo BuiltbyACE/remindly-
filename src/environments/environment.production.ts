@@ -7,8 +7,10 @@
 
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://YOUR_BACKEND_URL',
-  wsBaseUrl: 'wss://YOUR_BACKEND_URL',
+  // apiBaseUrl: 'https://YOUR_BACKEND_URL',
+  apiBaseUrl: 'https://remindly-backend-u4mh.onrender.com',
+  // wsBaseUrl: 'wss://YOUR_BACKEND_URL',
+  wsBaseUrl: 'wss://remindly-backend-u4mh.onrender.com',
   appName: 'Remindly',
   appEnv: 'production',
   enableAnalytics: true,
