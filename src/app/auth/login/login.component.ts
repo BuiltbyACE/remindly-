@@ -291,19 +291,6 @@ import { RbacStore } from '../stores/rbac.store';
       cursor: not-allowed;
     }
 
-    /* ── Footer ── */
-    .footer {
-      text-align: center;
-      margin-top: 24px;
-    }
-
-    .footer-text {
-      font-size: 11px;
-      color: rgba(255,255,255,.3);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
     /* ── Divider ── */
     .divider {
       display: flex;
@@ -489,9 +476,6 @@ import { RbacStore } from '../stores/rbac.store';
           </form>
         </div>
 
-        <div class="footer">
-          <p class="footer-text">Development Environment</p>
-        </div>
       </div>
     </div>
   `,
