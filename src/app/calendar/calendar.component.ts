@@ -30,16 +30,16 @@ interface CalendarDay {
   template: `
     <div class="h-full flex flex-col bg-gray-50">
       <!-- Header -->
-      <div class="bg-white border-b border-gray-200 px-6 py-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-4">
+      <div class="bg-white border-b border-gray-200 px-4 py-3 lg:px-6 lg:py-4">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div class="flex flex-wrap items-center justify-between gap-3 lg:gap-4">
             <!-- View Toggle -->
-            <div class="flex items-center bg-gray-100 rounded-lg p-1">
+            <div class="flex items-center bg-gray-100 rounded-lg p-0.5 lg:p-1">
               @for (view of views; track view.value) {
                 <button
                   type="button"
                   (click)="setView(view.value)"
-                  class="px-4 py-2 text-sm font-medium rounded-md transition-all duration-200"
+                  class="px-2.5 py-1.5 lg:px-4 lg:py-2 text-xs lg:text-sm font-medium rounded-md transition-all duration-200"
                   [class.bg-white]="currentView() === view.value"
                   [class.text-gray-900]="currentView() === view.value"
                   [class.shadow-sm]="currentView() === view.value"
@@ -52,56 +52,58 @@ interface CalendarDay {
             </div>
 
             <!-- Navigation -->
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1 lg:gap-2">
               <button
                 type="button"
                 (click)="previousPeriod()"
-                class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                class="p-1.5 lg:p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 lg:w-5 lg:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
               <button
                 type="button"
                 (click)="goToToday()"
-                class="px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                class="px-2 py-1 lg:px-3 lg:py-1.5 text-xs lg:text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 Today
               </button>
               <button
                 type="button"
                 (click)="nextPeriod()"
-                class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                class="p-1.5 lg:p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 lg:w-5 lg:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
               </button>
             </div>
-
-            <!-- Current Period Title -->
-            <h2 class="text-xl font-semibold text-gray-900 min-w-[200px]">
-              {{ periodTitle() }}
-            </h2>
           </div>
 
-          <!-- Actions -->
-          <button
-            type="button"
-            (click)="showCreateModal.set(true)"
-            class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Add Event
-          </button>
+          <div class="flex items-center justify-between gap-4">
+            <!-- Current Period Title -->
+            <h2 class="text-base lg:text-xl font-semibold text-gray-900 truncate">
+              {{ periodTitle() }}
+            </h2>
+
+            <!-- Actions -->
+            <button
+              type="button"
+              (click)="showCreateModal.set(true)"
+              class="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl text-xs lg:text-sm font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              <span>Add Event</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Calendar Grid -->
-      <div class="flex-1 overflow-auto p-6">
+      <div class="flex-1 overflow-auto p-3 lg:p-6">
         @if (store.loading()) {
           <div class="h-full flex flex-col">
             <div class="grid grid-cols-7 gap-px mb-2">
@@ -111,12 +113,11 @@ interface CalendarDay {
             </div>
             <div class="grid grid-cols-7 gap-px flex-1 bg-gray-200 rounded-lg overflow-hidden">
               @for (i of [].constructor(35); track i) {
-                <div class="bg-white min-h-[120px] p-2">
+                <div class="bg-white min-h-[60px] lg:min-h-[120px] p-2">
                   <div class="w-6 h-6 bg-gray-200 rounded-full animate-pulse mb-2"></div>
-                  <div class="space-y-1.5">
+                  <div class="space-y-1.5 hidden lg:block">
                     <div class="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
                     <div class="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
-                    <div class="h-3 bg-gray-200 rounded animate-pulse w-2/3"></div>
                   </div>
                 </div>
               }
@@ -129,7 +130,7 @@ interface CalendarDay {
               <!-- Weekday Headers -->
               <div class="grid grid-cols-7 gap-px mb-2">
                 @for (day of weekDays; track day) {
-                  <div class="text-center text-sm font-semibold text-gray-500 py-2">
+                  <div class="text-center text-xs lg:text-sm font-semibold text-gray-500 py-1.5 lg:py-2">
                     {{ day }}
                   </div>
                 }
@@ -139,19 +140,24 @@ interface CalendarDay {
               <div class="grid grid-cols-7 gap-px flex-1 bg-gray-200 rounded-lg overflow-hidden">
                 @for (day of calendarDays(); track day.date.toISOString()) {
                   <div
-                    class="bg-white min-h-[120px] p-2 cursor-pointer hover:bg-gray-50 transition-colors"
+                    class="bg-white min-h-[50px] lg:min-h-[120px] p-1 lg:p-2 cursor-pointer hover:bg-gray-50 transition-colors flex flex-col justify-between"
                     [class.bg-gray-50]="!day.isCurrentMonth"
+                    [class.ring-2]="selectedDate().toDateString() === day.date.toDateString() && currentView() === 'month'"
+                    [class.ring-indigo-500]="selectedDate().toDateString() === day.date.toDateString() && currentView() === 'month'"
+                    [class.ring-inset]="selectedDate().toDateString() === day.date.toDateString() && currentView() === 'month'"
                     (click)="selectDate(day.date)"
                   >
                     <div class="flex items-center justify-between mb-1">
                       <span
-                        class="text-sm font-medium"
+                        class="text-xs lg:text-sm font-medium"
                         [class.text-gray-900]="day.isCurrentMonth"
                         [class.text-gray-400]="!day.isCurrentMonth"
                         [class.bg-indigo-100]="day.isToday"
                         [class.text-indigo-700]="day.isToday"
-                        [class.w-7]="day.isToday"
-                        [class.h-7]="day.isToday"
+                        [class.w-5]="day.isToday"
+                        [class.h-5]="day.isToday"
+                        [class.lg:w-7]="day.isToday"
+                        [class.lg:h-7]="day.isToday"
                         [class.rounded-full]="day.isToday"
                         [class.flex]="day.isToday"
                         [class.items-center]="day.isToday"
@@ -160,7 +166,9 @@ interface CalendarDay {
                         {{ day.date.getDate() }}
                       </span>
                     </div>
-                    <div class="space-y-1">
+                    
+                    <!-- Desktop Events List -->
+                    <div class="hidden lg:block space-y-1">
                       @for (event of day.events.slice(0, 3); track event.id) {
                         <div
                           class="text-xs px-2 py-1 rounded truncate cursor-pointer hover:opacity-80 transition-opacity"
@@ -183,6 +191,79 @@ interface CalendarDay {
                         </div>
                       }
                     </div>
+
+                    <!-- Mobile Event Dots -->
+                    <div class="flex lg:hidden justify-center gap-0.5 mt-auto pb-1">
+                      @for (event of day.events.slice(0, 3); track event.id) {
+                        <span
+                          class="w-1.5 h-1.5 rounded-full"
+                          [class.bg-blue-500]="event.priority === 'low'"
+                          [class.bg-yellow-500]="event.priority === 'medium'"
+                          [class.bg-orange-500]="event.priority === 'high'"
+                          [class.bg-red-500]="event.priority === 'critical'"
+                        ></span>
+                      }
+                      @if (day.events.length > 3) {
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Mobile Selected Date Agenda (Bottom list on mobile) -->
+              <div class="block lg:hidden mt-4 bg-white rounded-xl border border-gray-200 p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <h3 class="text-sm font-semibold text-gray-900">
+                    Agenda for {{ selectedDate() | date:'MMMM d' }}
+                  </h3>
+                  <button
+                    type="button"
+                    (click)="currentView.set('day')"
+                    class="text-xs text-indigo-600 hover:text-indigo-800 font-medium bg-indigo-50 px-2 py-1 rounded-md"
+                  >
+                    View Day
+                  </button>
+                </div>
+                @if (getEventsForDate(selectedDate()).length === 0) {
+                  <div class="text-center py-6 border border-dashed border-gray-100 rounded-lg">
+                    <p class="text-xs text-gray-400">No events scheduled for this day</p>
+                  </div>
+                } @else {
+                  <div class="space-y-2">
+                    @for (event of getEventsForDate(selectedDate()); track event.id) {
+                      <div
+                        (click)="openEvent(event, $event)"
+                        class="p-3 rounded-lg border border-gray-100 bg-gray-50 flex items-center justify-between gap-3 cursor-pointer hover:bg-gray-100 transition-colors"
+                      >
+                        <div class="min-w-0">
+                          <h4 class="text-xs font-semibold text-gray-900 truncate">{{ event.title }}</h4>
+                          @if (event.starts_at) {
+                            <p class="text-[10px] text-gray-500 mt-0.5">
+                              {{ event.starts_at | date:'shortTime' }}
+                              @if (event.location) {
+                                · {{ event.location }}
+                              }
+                            </p>
+                          }
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                          <span
+                            class="px-1.5 py-0.5 text-[9px] font-semibold rounded-full uppercase"
+                            [class.bg-blue-50]="event.priority === 'low'"
+                            [class.text-blue-700]="event.priority === 'low'"
+                            [class.bg-yellow-50]="event.priority === 'medium'"
+                            [class.text-yellow-700]="event.priority === 'medium'"
+                            [class.bg-orange-50]="event.priority === 'high'"
+                            [class.text-orange-700]="event.priority === 'high'"
+                            [class.bg-red-50]="event.priority === 'critical'"
+                            [class.text-red-700]="event.priority === 'critical'"
+                          >
+                            {{ event.priority }}
+                          </span>
+                        </div>
+                      </div>
+                    }
                   </div>
                 }
               </div>
@@ -194,10 +275,10 @@ interface CalendarDay {
               <!-- Time Column + Day Columns -->
               <div class="flex flex-1 overflow-hidden rounded-lg border border-gray-200">
                 <!-- Time Labels -->
-                <div class="w-16 flex-shrink-0 bg-white border-r border-gray-200">
+                <div class="w-12 lg:w-16 flex-shrink-0 bg-white border-r border-gray-200">
                   <div class="h-12 border-b border-gray-200"></div>
                   @for (hour of hours; track hour) {
-                    <div class="h-16 px-2 text-xs text-gray-400 text-right border-b border-gray-100">
+                    <div class="h-16 px-1 lg:px-2 text-[10px] lg:text-xs text-gray-400 text-right border-b border-gray-100">
                       {{ hour }}:00
                     </div>
                   }
@@ -206,12 +287,12 @@ interface CalendarDay {
                 <!-- Day Columns -->
                 <div class="flex flex-1 overflow-x-auto">
                   @for (day of weekDaysData(); track day.date.toISOString()) {
-                    <div class="flex-1 min-w-[120px] border-r border-gray-200 bg-white">
+                    <div class="flex-1 min-w-[80px] lg:min-w-[120px] border-r border-gray-200 bg-white">
                       <!-- Day Header -->
-                      <div class="h-12 px-2 py-2 border-b border-gray-200 text-center">
-                        <div class="text-xs text-gray-500">{{ day.date | date:'EEE' }}</div>
+                      <div class="h-12 px-1 py-1.5 border-b border-gray-200 text-center">
+                        <div class="text-[10px] text-gray-500">{{ day.date | date:'EEE' }}</div>
                         <div
-                          class="text-lg font-semibold"
+                          class="text-sm lg:text-lg font-semibold"
                           [class.text-indigo-600]="day.isToday"
                           [class.text-gray-900]="!day.isToday"
                         >
@@ -228,7 +309,7 @@ interface CalendarDay {
                         <!-- Events -->
                         @for (event of day.events; track event.id) {
                           <div
-                            class="absolute left-1 right-1 px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+                            class="absolute left-0.5 right-0.5 px-1 py-0.5 rounded text-[10px] lg:text-xs cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
                             [class.bg-blue-100]="event.priority === 'low'"
                             [class.text-blue-800]="event.priority === 'low'"
                             [class.bg-yellow-100]="event.priority === 'medium'"
@@ -243,7 +324,7 @@ interface CalendarDay {
                           >
                             <div class="font-medium truncate">{{ event.title }}</div>
                             @if (getEventHeight(event) > 30) {
-                              <div class="text-xs opacity-75 truncate">
+                              <div class="text-[8px] lg:text-xs opacity-75 truncate">
                                 {{ event.starts_at ? (event.starts_at | date:'shortTime') : '' }}
                               </div>
                             }
@@ -260,25 +341,25 @@ interface CalendarDay {
           @case ('day') {
             <div class="h-full flex flex-col rounded-lg border border-gray-200 bg-white">
               <!-- Day Header -->
-              <div class="px-6 py-4 border-b border-gray-200 text-center">
-                <div class="text-sm text-gray-500">{{ selectedDate() | date:'EEEE' }}</div>
-                <div class="text-3xl font-bold" [class.text-indigo-600]="isToday(selectedDate())">
+              <div class="px-4 py-3 lg:px-6 lg:py-4 border-b border-gray-200 text-center">
+                <div class="text-xs lg:text-sm text-gray-500">{{ selectedDate() | date:'EEEE' }}</div>
+                <div class="text-xl lg:text-3xl font-bold" [class.text-indigo-600]="isToday(selectedDate())">
                   {{ selectedDate() | date:'d' }}
                 </div>
-                <div class="text-gray-500">{{ selectedDate() | date:'MMMM yyyy' }}</div>
+                <div class="text-xs lg:text-gray-500">{{ selectedDate() | date:'MMMM yyyy' }}</div>
               </div>
 
               <!-- Time Slots -->
               <div class="flex-1 overflow-y-auto">
                 @for (hour of hours; track hour) {
                   <div class="flex border-b border-gray-100">
-                    <div class="w-16 px-2 py-3 text-xs text-gray-400 text-right flex-shrink-0">
+                    <div class="w-12 lg:w-16 px-1 lg:px-2 py-3 text-[10px] lg:text-xs text-gray-400 text-right flex-shrink-0">
                       {{ hour }}:00
                     </div>
                     <div class="flex-1 py-2 hover:bg-gray-50 cursor-pointer border-l border-gray-100" (click)="selectDateTime(selectedDate(), hour)">
                       @for (event of getDayEvents(hour); track event.id) {
                         <div
-                          class="mx-2 mb-1 px-3 py-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                          class="mx-1 lg:mx-2 mb-1 px-2 py-1.5 lg:px-3 lg:py-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                           [class.bg-blue-100]="event.priority === 'low'"
                           [class.text-blue-800]="event.priority === 'low'"
                           [class.bg-yellow-100]="event.priority === 'medium'"
@@ -289,8 +370,8 @@ interface CalendarDay {
                           [class.text-red-800]="event.priority === 'critical'"
                           (click)="openEvent(event, $event)"
                         >
-                          <div class="font-medium">{{ event.title }}</div>
-                          <div class="text-xs opacity-75">
+                          <div class="font-medium text-xs lg:text-sm">{{ event.title }}</div>
+                          <div class="text-[10px] lg:text-xs opacity-75">
                             {{ event.starts_at ? (event.starts_at | date:'shortTime') : '' }}
                             @if (event.location) {
                               · {{ event.location }}
@@ -310,8 +391,8 @@ interface CalendarDay {
 
       <!-- Create Event Modal -->
       @if (showCreateModal()) {
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" (click)="closeModal($event)">
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 modal-overlay" (click)="closeModal($event)">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto modal" (click)="$event.stopPropagation()">
             <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4 rounded-t-2xl">
               <h3 class="text-lg font-semibold text-white">Create Event</h3>
               <p class="text-indigo-100 text-sm">Add a new event to your calendar</p>
@@ -492,7 +573,7 @@ export class CalendarComponent implements OnInit {
            date.getFullYear() === today.getFullYear();
   }
 
-  private getEventsForDate(date: Date): Event[] {
+  protected getEventsForDate(date: Date): Event[] {
     return this.events().filter(event => {
       if (!event.starts_at) return false;
       const eventDate = new Date(event.starts_at);
@@ -504,7 +585,7 @@ export class CalendarComponent implements OnInit {
 
   selectDate(date: Date): void {
     this.selectedDate.set(date);
-    if (this.currentView() === 'month') {
+    if (this.currentView() === 'month' && window.innerWidth >= 1024) {
       this.currentView.set('day');
     }
   }

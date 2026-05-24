@@ -8,6 +8,10 @@ export const routes: Routes = [
     loadChildren: () => import('./auth/auth.routes').then(m => m.AUTH_ROUTES),
   },
   {
+    path: 'admin',
+    loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./layout/shell/shell.component').then(m => m.ShellComponent),

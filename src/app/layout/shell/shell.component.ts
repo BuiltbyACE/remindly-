@@ -120,7 +120,7 @@ export class ShellComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    this.authStore.hydrateUser();
+    await this.authStore.hydrateUser();
     await this.orgStore.loadOrganizations();
     const activeOrgId = this.orgStore.activeOrganization()?.id;
     this.wsStore.connect(activeOrgId);

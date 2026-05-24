@@ -1,9 +1,10 @@
-import { Component, ChangeDetectionStrategy, inject, signal, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, output } from '@angular/core';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthStore } from '../../auth/stores/auth.store';
 import { OrganizationStore } from '../../organizations/stores/organization.store';
 import { NotificationsStore } from '../../notifications/stores/notifications.store';
+import { WebSocketStore } from '../../websocket/websocket.store';
 
 @Component({
   selector: 'app-topbar',
@@ -111,6 +112,35 @@ import { NotificationsStore } from '../../notifications/stores/notifications.sto
 
     /* Right cluster */
     .right { display: flex; align-items: center; gap: 2px; }
+
+    .ws-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .ws-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+
+    .ws-dot.connected { background: #22C55E; box-shadow: 0 0 4px rgba(34,197,94,.4); }
+    .ws-dot.disconnected { background: #EF4444; }
+    .ws-dot.connecting { background: #F59E0B; animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
 
     .icon-btn {
       position: relative;
@@ -236,6 +266,15 @@ import { NotificationsStore } from '../../notifications/stores/notifications.sto
           }
         </a>
 
+        <!-- WebSocket status -->
+        <div class="ws-indicator">
+          <span class="ws-dot" [class.connected]="wsStatus() === 'connected'"
+                [class.disconnected]="wsStatus() === 'disconnected'"
+                [class.connecting]="wsStatus() === 'connecting' || wsStatus() === 'reconnecting'">
+          </span>
+          {{ wsStatus() === 'connected' ? 'Live' : wsStatus() }}
+        </div>
+
         <div class="divider"></div>
 
         <!-- Logout -->
@@ -260,7 +299,10 @@ export class TopbarComponent {
   private readonly router = inject(Router);
   readonly orgStore = inject(OrganizationStore);
   readonly notificationsStore = inject(NotificationsStore);
+  private readonly wsStore = inject(WebSocketStore);
   readonly toggleSidebar = output<void>();
+
+  readonly wsStatus = computed(() => this.wsStore.connectionStatus());
 
   readonly pageTitle = signal('Home');
 
@@ -291,6 +333,11 @@ export class TopbarComponent {
   }
 
   async logout(): Promise<void> {
+    try {
+      if (Notification.permission === 'granted') {
+        new Notification('Remindly', { body: 'Logged out successfully', icon: '/icons/icon-192x192.png' });
+      }
+    } catch { /* notification not supported */ }
     this.authStore.clearSession();
     await this.router.navigate(['/auth/login']);
   }

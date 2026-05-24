@@ -1,12 +1,9 @@
-/**
- * Events Store
- * Lightweight signal-based state management for Events domain
- */
-
 import { Injectable, inject, computed, signal, OnDestroy } from '@angular/core';
 import { lastValueFrom, Subscription } from 'rxjs';
+import { filter as rxFilter } from 'rxjs/operators';
 import { EventsService } from '../services/events.service';
 import { WebSocketStore } from '../../websocket/websocket.store';
+import { WebSocketService } from '../../websocket/websocket.service';
 import { RemindersStore } from '../../reminders/stores/reminders.store';
 import { AuthStore } from '../../auth/stores/auth.store';
 import { RbacStore } from '../../auth/stores/rbac.store';
@@ -37,10 +34,11 @@ export interface EventsState {
 export class EventsStore implements OnDestroy {
   private readonly eventsService = inject(EventsService);
   private readonly webSocketStore = inject(WebSocketStore);
+  private readonly webSocketService = inject(WebSocketService);
   private readonly remindersStore = inject(RemindersStore);
   private readonly authStore = inject(AuthStore);
   private readonly rbacStore = inject(RbacStore);
-  private wsSubscription: Subscription | null = null;
+  private readonly subscriptions: Subscription[] = [];
 
   constructor() {
     this.initializeWebSocketSubscriptions();
@@ -54,10 +52,8 @@ export class EventsStore implements OnDestroy {
   });
 
   ngOnDestroy(): void {
-    if (this.wsSubscription) {
-      this.wsSubscription.unsubscribe();
-      this.wsSubscription = null;
-    }
+    for (const sub of this.subscriptions) sub.unsubscribe();
+    this.subscriptions.length = 0;
   }
 
   /**
@@ -72,47 +68,120 @@ export class EventsStore implements OnDestroy {
    * Initialize WebSocket subscriptions for real-time updates
    */
   private initializeWebSocketSubscriptions(): void {
-    // Subscribe to event-related WebSocket messages
-    // Backend emits 'event.updated' for all event changes (create, update, status change)
-    // See app/websocket/enums.py — WebSocketMessageType.EVENT_UPDATED
-    this.wsSubscription = this.webSocketStore
-      .messagesOfType('event.updated')
-      .subscribe((message) => {
-        this.handleWebSocketMessage(message);
-      });
+    // Re-fetch events on WebSocket reconnect to catch missed updates
+    this.subscriptions.push(
+      this.webSocketService.connectionAck$.pipe(
+        rxFilter(() => this.state().events.length > 0)
+      ).subscribe(() => {
+        this.silentRefresh();
+      })
+    );
+
+    // Subscribe to event.updated (create, update, status change)
+    this.subscriptions.push(
+      this.webSocketStore
+        .messagesOfType('event.updated')
+        .subscribe((message) => {
+          this.handleWebSocketMessage(message);
+        })
+    );
+
+    // Subscribe to event.deleted
+    this.subscriptions.push(
+      this.webSocketStore
+        .messagesOfType('event.deleted')
+        .subscribe((message) => {
+          this.handleDeleteWebSocketMessage(message);
+        })
+    );
   }
 
   /**
    * Handle WebSocket messages for events (upsert: adds new or updates existing)
+   * Backend WS payload format: { event_id, title, status, version }
    */
   private handleWebSocketMessage(message: { type: string; payload: unknown }): void {
-    const event = message.payload as Event;
-    const currentEvents = this.state().events;
-    const existingIndex = currentEvents.findIndex(e => e.id === event.id);
+    const payload = message.payload as Record<string, unknown>;
+    const eventId = payload['event_id'] as string | undefined;
+    if (!eventId) return;
 
-    if (existingIndex >= 0) {
-      // Update existing event
-      const updatedEvents = currentEvents.map(e =>
-        e.id === event.id ? event : e
+    const current = this.state();
+    const existingIndex = current.events.findIndex(e => e.id === eventId);
+    const isSelected = current.selectedEvent?.id === eventId;
+
+    if (existingIndex < 0 && !isSelected) return;
+
+    const source = existingIndex >= 0 ? current.events[existingIndex] : current.selectedEvent!;
+    const merged: Event = {
+      ...source,
+      title: (payload['title'] as string) ?? source.title,
+      status: (payload['status'] as string) ?? source.status,
+      version: (payload['version'] as number) ?? source.version,
+    } as Event;
+
+    const updatedEvents = existingIndex >= 0
+      ? current.events.map(e => e.id === eventId ? merged : e)
+      : current.events;
+
+    this.patchState({
+      events: updatedEvents,
+      selectedEvent: isSelected ? merged : current.selectedEvent,
+    });
+  }
+
+  /**
+   * Handle event.deleted messages — remove from list and clear selection if needed
+   * Backend WS payload format: { event_id, title }
+   */
+  private handleDeleteWebSocketMessage(message: { type: string; payload: unknown }): void {
+    const payload = message.payload as Record<string, unknown>;
+    const eventId = payload['event_id'] as string | undefined;
+    if (!eventId) return;
+
+    const current = this.state();
+
+    const updatedEvents = current.events.filter(e => e.id !== eventId);
+
+    const updatedSelected =
+      current.selectedEvent?.id === eventId
+        ? null
+        : current.selectedEvent;
+
+    this.patchState({
+      events: updatedEvents,
+      selectedEvent: updatedSelected,
+      pagination: {
+        ...current.pagination,
+        total: Math.max(0, current.pagination.total - 1),
+      },
+    });
+  }
+
+  /**
+   * Silently re-fetch events without showing loading state
+   * Used after WebSocket reconnect to catch missed updates
+   */
+  private async silentRefresh(): Promise<void> {
+    try {
+      const currentState = this.state();
+      const secretaryFilters = { ...currentState.filters };
+      if (this.isSecretary()) {
+        const userId = this.authStore.user()?.id;
+        if (userId) secretaryFilters.creator_id = userId;
+      }
+      const response = await lastValueFrom(
+        this.eventsService.listEvents(secretaryFilters, currentState.pagination)
       );
-      const updatedSelected =
-        this.state().selectedEvent?.id === event.id
-          ? event
-          : this.state().selectedEvent;
-
       this.patchState({
-        events: updatedEvents,
-        selectedEvent: updatedSelected,
-      });
-    } else {
-      // Add new event
-      this.patchState({
-        events: [event, ...currentEvents],
+        events: response.events,
         pagination: {
-          ...this.state().pagination,
-          total: this.state().pagination.total + 1,
+          limit: response.limit,
+          offset: response.offset,
+          total: response.total,
         },
       });
+    } catch {
+      // silent failure — stale data is better than no data
     }
   }
 
@@ -246,10 +315,18 @@ export class EventsStore implements OnDestroy {
     try {
       const event = await lastValueFrom(this.eventsService.createEvent(request));
       
-      // Refresh the list to include the new event
-      await this.loadEvents();
+      const current = this.state();
+      this.patchState({
+        events: [event, ...current.events],
+        selectedEvent: event,
+        loading: false,
+      });
       
-      this.patchState({ loading: false });
+      this.showNativeNotification('Remindly', 'Event created successfully');
+      
+      // Refresh list in background
+      this.loadEvents();
+      
       return event;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to create event';
@@ -277,15 +354,14 @@ export class EventsStore implements OnDestroy {
         this.eventsService.updateEvent(eventId, request, currentEvent.version)
       );
 
-      // Update selected event if it's the same
-      if (this.state().selectedEvent?.id === eventId) {
-        this.patchState({ selectedEvent: event });
-      }
-
-      // Refresh the list
-      await this.loadEvents();
-
+      this.updateEventInState(event);
       this.patchState({ loading: false });
+
+      this.showNativeNotification('Remindly', 'Event updated successfully');
+
+      // Refresh list in background
+      this.loadEvents();
+
       return event;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to update event';
@@ -303,15 +379,21 @@ export class EventsStore implements OnDestroy {
     try {
       await lastValueFrom(this.eventsService.deleteEvent(eventId));
 
-      // Clear selection if deleted event was selected
-      if (this.state().selectedEvent?.id === eventId) {
-        this.patchState({ selectedEvent: null });
-      }
+      const current = this.state();
+      const updatedEvents = current.events.filter(e => e.id !== eventId);
+      const updatedSelected = current.selectedEvent?.id === eventId ? null : current.selectedEvent;
 
-      // Refresh the list
-      await this.loadEvents();
+      this.patchState({
+        events: updatedEvents,
+        selectedEvent: updatedSelected,
+        loading: false,
+      });
 
-      this.patchState({ loading: false });
+      this.showNativeNotification('Remindly', 'Event deleted successfully');
+
+      // Refresh list in background
+      this.loadEvents();
+
       return true;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to delete event';
@@ -353,6 +435,12 @@ export class EventsStore implements OnDestroy {
 
       this.updateEventInState(event);
       this.patchState({ loading: false });
+
+      this.showNativeNotification('Remindly', 'Event scheduled successfully');
+
+      // Refresh list in background
+      this.loadEvents();
+
       return event;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to schedule event';
@@ -476,6 +564,15 @@ export class EventsStore implements OnDestroy {
     this.state.update(current => ({ ...current, ...partial }));
   }
 
+  private showNativeNotification(title: string, body: string): void {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, {
+        body,
+        icon: '/icons/icon-192x192.png',
+      });
+    }
+  }
+
   private async executeTransition(
     eventId: string,
     action: string,
@@ -495,6 +592,20 @@ export class EventsStore implements OnDestroy {
 
       this.updateEventInState(updatedEvent);
       this.patchState({ loading: false });
+
+      const actionLabels: Record<string, string> = {
+        'request-approval': 'Approval requested successfully',
+        'approve': 'Event approved successfully',
+        'activate': 'Event activated successfully',
+        'complete': 'Event completed successfully',
+        'cancel': 'Event cancelled successfully',
+      };
+      const label = actionLabels[action] || `${action} action completed successfully`;
+      this.showNativeNotification('Remindly', label);
+
+      // Refresh list in background
+      this.loadEvents();
+
       return updatedEvent;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : `Failed to ${action} event`;

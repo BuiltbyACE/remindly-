@@ -83,6 +83,18 @@ export const SettingsStore = signalStore(
         localStorage.setItem('theme', theme);
       });
 
+      // Schedule daily digest with service worker when preferences change
+      effect(() => {
+        const prefs = store.notificationPrefs();
+        if (!prefs?.daily_digest) return;
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({
+            type: 'schedule-daily-digest',
+            time: prefs.daily_digest_time || '08:00',
+          });
+        }
+      });
+
       // Load settings on init
       const settingsService = inject(SettingsService);
       settingsService.getSettings().subscribe({

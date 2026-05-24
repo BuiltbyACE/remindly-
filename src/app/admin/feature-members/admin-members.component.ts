@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminStore } from '../stores/admin.store';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-admin-members',
@@ -52,6 +53,8 @@ import { AdminStore } from '../stores/admin.store';
     .btn-primary { background: var(--ocean-700); color: #fff; }
     .btn-primary:hover { background: var(--ocean-800); }
     .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-ghost { background: transparent; color: var(--color-text-secondary); padding: 6px; border: none; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; }
+    .btn-ghost:hover { color: var(--color-text-primary); background: var(--warm-50); }
     .btn-danger { background: transparent; color: var(--color-critical); padding: 6px 10px; font-size: 12px; }
     .btn-danger:hover { background: #FDF6F4; }
     .btn-cancel {
@@ -145,6 +148,26 @@ import { AdminStore } from '../stores/admin.store';
   `],
   template: `
     <div>
+      @if (id) {
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+          <button class="btn btn-ghost" (click)="location.back()" style="padding:6px">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <div>
+            <h2 style="font-family:var(--font-heading);font-size:20px;font-weight:400;margin:0;color:var(--color-text-primary)">Organization Members</h2>
+            @if (selectedOrgId()) {
+              @for (org of store.organizations(); track org.id) {
+                @if (org.id === selectedOrgId()) {
+                  <p style="font-size:13px;color:var(--color-text-secondary);margin:2px 0 0">{{ org.name }}</p>
+                }
+              }
+            }
+          </div>
+        </div>
+      }
+
       <div class="toolbar">
         <div class="org-select">
           <select [value]="selectedOrgId()" (change)="onOrgChange($event)">
@@ -258,14 +281,22 @@ import { AdminStore } from '../stores/admin.store';
 })
 export class AdminMembersComponent implements OnInit {
   readonly store = inject(AdminStore);
+  readonly location = inject(Location);
   readonly selectedOrgId = signal('');
   readonly showAddModal = signal(false);
   readonly addUserId = signal('');
   readonly addRoleSlug = signal('');
 
+  @Input() id?: string;
+
   ngOnInit(): void {
     this.store.loadOrganizations();
     this.store.loadUsers();
+    this.store.loadRoles();
+    if (this.id) {
+      this.selectedOrgId.set(this.id);
+      this.store.loadMembers(this.id);
+    }
   }
 
   onOrgChange(event: Event): void {

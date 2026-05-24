@@ -62,7 +62,8 @@ import type { DocumentStatus } from '../../models/document.model';
       @if (!store.loading() && !store.error()) {
         <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           @if (store.hasDocuments()) {
-            <div class="overflow-x-auto">
+            <!-- Desktop Table View -->
+            <div class="hidden lg:block overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                   <tr>
@@ -117,6 +118,58 @@ import type { DocumentStatus } from '../../models/document.model';
                   }
                 </tbody>
               </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div class="block lg:hidden divide-y divide-gray-200">
+              @for (doc of store.documents(); track doc.id) {
+                <div class="p-4 hover:bg-gray-50 transition-colors flex items-start justify-between gap-3">
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="inline-flex px-2 py-0.5 text-[10px] font-semibold rounded-full uppercase"
+                        [class.bg-yellow-50]="doc.status === 'pending_approval'"
+                        [class.text-yellow-700]="doc.status === 'pending_approval'"
+                        [class.bg-green-50]="doc.status === 'approved'"
+                        [class.text-green-700]="doc.status === 'approved'"
+                        [class.bg-red-50]="doc.status === 'rejected'"
+                        [class.text-red-700]="doc.status === 'rejected'">
+                        {{ doc.status.replace('_', ' ') }}
+                      </span>
+                      <span class="text-[10px] text-gray-400">
+                        {{ doc.created_at | date:'shortDate' }}
+                      </span>
+                    </div>
+
+                    <h3 class="text-sm font-semibold text-gray-900 mb-1">
+                      <a [routerLink]="['/documents', doc.id]" class="text-blue-600 hover:text-blue-800">
+                        {{ doc.title }}
+                      </a>
+                    </h3>
+                    @if (doc.description) {
+                      <p class="text-xs text-gray-500 line-clamp-2 mb-2">{{ doc.description }}</p>
+                    }
+
+                    <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                      <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      <span class="truncate max-w-[150px]">{{ doc.file_name }}</span>
+                      <span class="text-[10px] text-gray-400">({{ formatFileSize(doc.file_size) }})</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-1">Uploaded by: {{ doc.uploaded_by_name }}</p>
+                  </div>
+
+                  <div class="flex-shrink-0 self-center">
+                    <a [routerLink]="['/documents', doc.id]"
+                       class="p-2 text-blue-600 hover:text-blue-800 bg-blue-50 rounded-lg inline-flex items-center justify-center transition-colors">
+                      <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              }
             </div>
           } @else {
             <div class="p-8 text-center">

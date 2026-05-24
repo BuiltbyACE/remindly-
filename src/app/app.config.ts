@@ -36,8 +36,7 @@ export const appConfig: ApplicationConfig = {
       ]),
     ),
     provideServiceWorker('sw.js', {
-      enabled: !isDevMode(),
-      registrationStrategy: 'registerWhenStable:30000',
+      registrationStrategy: 'registerImmediately',
     }),
     {
       provide: API_CONFIG,

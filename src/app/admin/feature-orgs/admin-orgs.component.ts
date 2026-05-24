@@ -1,12 +1,13 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AdminStore } from '../stores/admin.store';
 import type { AdminOrganization } from '../models/admin.model';
 
 @Component({
   selector: 'app-admin-orgs',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   styles: [`
     :host { display: block; }
 
@@ -59,7 +60,7 @@ import type { AdminOrganization } from '../models/admin.model';
 
     .btn-primary { background: var(--ocean-700); color: #fff; }
     .btn-primary:hover { background: var(--ocean-800); }
-    .btn-ghost { background: transparent; color: var(--color-text-secondary); padding: 6px; }
+    .btn-ghost { background: transparent; color: var(--color-text-secondary); padding: 6px; text-decoration: none; display: inline-flex; align-items: center; border: none; border-radius: 6px; cursor: pointer; }
     .btn-ghost:hover { color: var(--color-text-primary); background: var(--warm-50); }
     .btn-danger { background: transparent; color: var(--color-critical); padding: 6px; }
     .btn-danger:hover { background: #FDF6F4; }
@@ -185,7 +186,7 @@ import type { AdminOrganization } from '../models/admin.model';
                 <th>Type</th>
                 <th>Members</th>
                 <th>Status</th>
-                <th></th>
+                <th style="width:80px"></th>
               </tr>
             </thead>
             <tbody>
@@ -203,6 +204,11 @@ import type { AdminOrganization } from '../models/admin.model';
                     }
                   </td>
                   <td style="text-align:right">
+                    <a [routerLink]="['/admin/organizations', org.id, 'members']" class="btn btn-ghost" title="View members">
+                      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/>
+                      </svg>
+                    </a>
                     <button class="btn btn-ghost" (click)="deactivate(org)" title="Deactivate org">
                       <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>

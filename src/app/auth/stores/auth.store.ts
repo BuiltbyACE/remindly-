@@ -4,6 +4,8 @@ import { lastValueFrom } from 'rxjs';
 import { AuthService, UserProfile } from '../services/auth.service';
 import { RbacStore } from './rbac.store';
 import { PushSubscriptionService } from '../../push/push-subscription.service';
+import { ToastService } from '../../shared/components/toast/toast.service';
+import { SettingsService } from '../../settings/services/settings.service';
 
 interface AuthState {
   accessToken: string | null;
@@ -28,7 +30,7 @@ export const AuthStore = signalStore(
       return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     }),
   })),
-  withMethods((store, authService = inject(AuthService), rbacStore = inject(RbacStore), pushService = inject(PushSubscriptionService)) => ({
+  withMethods((store, authService = inject(AuthService), rbacStore = inject(RbacStore), pushService = inject(PushSubscriptionService), toastService = inject(ToastService), settingsService = inject(SettingsService)) => ({
     setToken(token: string): void {
       patchState(store, { accessToken: token });
     },
@@ -40,6 +42,16 @@ export const AuthStore = signalStore(
         const user = await lastValueFrom(authService.getCurrentUser());
         patchState(store, { user, isLoading: false });
         await rbacStore.hydratePermissions();
+        
+        // Initialize and register push in the background (non-blocking)
+        pushService.initialize().then(() => {
+          pushService.register();
+        });
+
+        // Request notification permission if not yet granted (non-blocking)
+        if (Notification.permission === 'default') {
+          Notification.requestPermission().catch(() => {});
+        }
       } catch {
         patchState(store, { isLoading: false });
       }
@@ -57,8 +69,38 @@ export const AuthStore = signalStore(
         sessionStorage.setItem('remindly_token', result.access_token);
         sessionStorage.setItem('remindly_user', JSON.stringify(result.user));
         await rbacStore.hydratePermissions();
-        await pushService.initialize();
-        await pushService.register();
+        
+        // Initialize and register push in the background (non-blocking)
+        pushService.initialize().then(() => {
+          pushService.register();
+        });
+
+        const name = result.user.full_name;
+        const notificationPerm = Notification.permission === 'default'
+          ? await Notification.requestPermission()
+          : Notification.permission;
+        console.log('[AuthStore] Notification permission:', notificationPerm);
+        if (notificationPerm === 'granted') {
+          new Notification('Welcome to Remindly', {
+            body: `Logged in as ${name}`,
+            icon: '/icons/icon-192x192.png',
+          });
+        } else if (notificationPerm === 'denied') {
+          toastService.warning('Notifications are blocked. Enable them in your browser settings for reminder alerts.');
+        }
+        toastService.success(`Welcome back, ${name}!`);
+
+        // Enable daily digest by default
+        try {
+          await lastValueFrom(
+            settingsService.updateNotificationPreferences({
+              daily_digest: true,
+              daily_digest_time: '08:00',
+            })
+          );
+        } catch {
+          // Non-critical — user can enable manually in settings
+        }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Login failed';
         patchState(store, { isLoading: false, error: message });
@@ -97,7 +139,6 @@ export const AuthStore = signalStore(
       }
 
       rbacStore.hydrateFromStorage();
-      store.hydrateUser();
       return true;
     },
   })),

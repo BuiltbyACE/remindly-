@@ -80,6 +80,7 @@ export interface NotificationPreferences {
   approval_processed: boolean;
   reminder_escalated: boolean;
   daily_digest: boolean;
+  daily_digest_time: string;
   weekly_digest: boolean;
   urgent_only: boolean;
   quiet_hours_start: string | null;
@@ -131,7 +132,8 @@ export const DEFAULT_NOTIFICATION_PREFS: NotificationPreferences = {
   approval_requested: true,
   approval_processed: true,
   reminder_escalated: true,
-  daily_digest: false,
+  daily_digest: true,
+  daily_digest_time: '08:00',
   weekly_digest: true,
   urgent_only: false,
   quiet_hours_start: null,

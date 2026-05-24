@@ -54,8 +54,28 @@ h1, h2, h3, h4, h5, h6 {
   ::-webkit-scrollbar-thumb:hover { background: var(--pewter); }
 }
 
-/* Mobile touch-friendly tap targets */
+/* Mobile touch-friendly and PWA native-feel enhancements */
 @media (max-width: 1023px) {
+  * {
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  input, select, textarea, [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  img {
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
   button, a, select, input[type="checkbox"], input[type="radio"], label {
     cursor: default;
   }
@@ -245,37 +265,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* ───── Event Lifecycle Mobile ────────────────────── */
-@media (max-width: 640px) {
-  app-event-lifecycle {
-    /* Make steps smaller */
-    [class*="w-12"][class*="h-12"] {
-      width: 36px !important;
-      height: 36px !important;
-      border-radius: 10px !important;
-    }
 
-    [class*="w-12"] svg {
-      width: 16px !important;
-      height: 16px !important;
-    }
-
-    /* Reduce track height */
-    [class*="h-1.5"] {
-      height: 3px !important;
-      top: 18px !important;
-    }
-
-    /* Smaller labels */
-    [class*="mt-3"][class*="text-sm"] {
-      margin-top: 6px !important;
-      font-size: 9px !important;
-    }
-
-    /* Reduce wrapper padding */
-    [class*="py-6"] { padding-top: 12px !important; padding-bottom: 12px !important; }
-  }
-}
 
 /* ───── Event Form Mobile ─────────────────────────── */
 @media (max-width: 640px) {

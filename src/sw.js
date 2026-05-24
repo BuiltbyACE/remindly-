@@ -7,8 +7,8 @@ self.addEventListener('push', (event) => {
   const notification = data.notification;
   const options = {
     body: notification.body || '',
-    icon: notification.icon || '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
+    icon: notification.icon || '/icons/icon-192x192.png',
+    badge: '/icons/icon-192x192.png',
     tag: notification.tag || 'remindly-' + Date.now(),
     data: notification.data || { url: '/' },
     vibrate: [200, 100, 200],
@@ -21,6 +21,37 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(notification.title, options)
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'schedule-daily-digest') {
+    const [hours, minutes] = (event.data.time || '08:00').split(':').map(Number);
+
+    const now = new Date();
+    const target = new Date(now);
+    target.setHours(hours, minutes, 0, 0);
+
+    if (target <= now) {
+      target.setDate(target.getDate() + 1);
+    }
+
+    const msUntilNext = target.getTime() - now.getTime();
+
+    setTimeout(() => {
+      self.registration.showNotification('Remindly Daily Digest', {
+        body: 'Good morning — here is your daily schedule and briefings.',
+        icon: '/icons/icon-192x192.png',
+        badge: '/icons/icon-192x192.png',
+        tag: 'daily-digest',
+        data: { url: '/dashboard' },
+        vibrate: [200, 100, 200],
+        requireInteraction: true,
+        actions: [
+          { action: 'open', title: 'View Schedule' },
+        ],
+      });
+    }, msUntilNext);
+  }
 });
 
 self.addEventListener('notificationclick', (event) => {

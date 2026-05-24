@@ -205,6 +205,27 @@ import type { AdminUser, AdminRole, AdminCreateUserRequest } from '../models/adm
       box-shadow: 0 0 0 3px rgba(90,158,207,.12);
     }
 
+    .input-wrap { position: relative; }
+
+    .input-wrap input { padding-right: 36px; }
+
+    .toggle-pw {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      padding: 6px;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      display: flex;
+      border-radius: 6px;
+      transition: color 0.15s;
+    }
+
+    .toggle-pw:hover { color: var(--ocean-600); }
+
     .modal-actions {
       display: flex;
       gap: 8px;
@@ -307,12 +328,25 @@ import type { AdminUser, AdminRole, AdminCreateUserRequest } from '../models/adm
       </div>
     </div>
 
+    <!-- Success Modal -->
+    @if (showSuccessModal()) {
+      <div class="modal-overlay" (click)="showSuccessModal.set(false)">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h3>User Created</h3>
+          <p>{{ createdUserName() }} can now log in with the provided password.</p>
+          <div class="modal-actions">
+            <button class="btn btn-primary" (click)="showSuccessModal.set(false)">Done</button>
+          </div>
+        </div>
+      </div>
+    }
+
     <!-- Create User Modal -->
     @if (showCreateModal()) {
       <div class="modal-overlay" (click)="showCreateModal.set(false)">
         <div class="modal" (click)="$event.stopPropagation()">
           <h3>Add User</h3>
-          <p>Create a new user and send an invite</p>
+          <p>Create a new user</p>
 
           <div class="field">
             <label for="name">Full Name</label>
@@ -321,6 +355,24 @@ import type { AdminUser, AdminRole, AdminCreateUserRequest } from '../models/adm
           <div class="field">
             <label for="email">Email</label>
             <input id="email" type="email" [(ngModel)]="formEmail" placeholder="jane@company.com" />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <input id="password" [type]="showPassword() ? 'text' : 'password'" [(ngModel)]="formPassword" placeholder="Set a password for the user" />
+              <button type="button" class="toggle-pw" (click)="showPassword.update(v => !v)" aria-label="Toggle password visibility">
+                @if (showPassword()) {
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                  </svg>
+                } @else {
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                }
+              </button>
+            </div>
           </div>
           <div class="field">
             <label for="org">Organization</label>
@@ -344,7 +396,7 @@ import type { AdminUser, AdminRole, AdminCreateUserRequest } from '../models/adm
           <div class="modal-actions">
             <button class="btn-cancel" (click)="showCreateModal.set(false)">Cancel</button>
             <button class="btn btn-primary" [disabled]="!canSubmit()" (click)="submitCreate()">
-              @if (store.loading()) { Creating... } @else { Create & Invite }
+              @if (store.loading()) { Creating... } @else { Create User }
             </button>
           </div>
         </div>
@@ -356,14 +408,19 @@ export class AdminUsersComponent implements OnInit {
   readonly store = inject(AdminStore);
   readonly searchQuery = signal('');
   readonly showCreateModal = signal(false);
+  readonly showSuccessModal = signal(false);
+  readonly createdUserName = signal('');
   readonly formName = signal('');
   readonly formEmail = signal('');
+  readonly formPassword = signal('');
+  readonly showPassword = signal(false);
   readonly formOrgId = signal('');
   readonly formRoleSlug = signal('');
 
   ngOnInit(): void {
     this.store.loadUsers();
     this.store.loadOrganizations();
+    this.store.loadRoles();
   }
 
   onSearch(event: Event): void {
@@ -373,21 +430,26 @@ export class AdminUsersComponent implements OnInit {
   }
 
   canSubmit(): boolean {
-    return !!this.formName() && !!this.formEmail() && !!this.formOrgId() && !!this.formRoleSlug();
+    return !!this.formName() && !!this.formEmail() && !!this.formPassword() && !!this.formOrgId() && !!this.formRoleSlug();
   }
 
   async submitCreate(): Promise<void> {
     if (!this.canSubmit()) return;
-    const success = await this.store.createUser({
+    const name = this.formName();
+    const result = await this.store.createUser({
       email: this.formEmail(),
-      full_name: this.formName(),
+      full_name: name,
+      password: this.formPassword(),
       organization_id: this.formOrgId(),
       role_slug: this.formRoleSlug(),
     });
-    if (success) {
+    if (result) {
       this.showCreateModal.set(false);
+      this.createdUserName.set(name);
+      this.showSuccessModal.set(true);
       this.formName.set('');
       this.formEmail.set('');
+      this.formPassword.set('');
       this.formOrgId.set('');
       this.formRoleSlug.set('');
     }

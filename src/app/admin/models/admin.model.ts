@@ -33,6 +33,7 @@ export interface AdminOrganization {
   is_active: boolean;
   member_count?: number;
   created_at: string;
+  updated_at?: string | null;
 }
 
 export interface AdminMember {
@@ -56,6 +57,7 @@ export interface AdminRole {
 export interface AdminCreateUserRequest {
   email: string;
   full_name: string;
+  password: string;
   organization_id: string;
   role_slug: string;
 }
@@ -73,6 +75,7 @@ export interface AdminUpdateUserRequest {
 
 export interface AdminUpdateOrganizationRequest {
   name?: string | null;
+  slug?: string | null;
   organization_type?: string | null;
   is_active?: boolean | null;
 }

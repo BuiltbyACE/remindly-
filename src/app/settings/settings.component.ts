@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { PwaInstallService } from '../core/services/pwa-install.service';
+import { SettingsStore } from './stores/settings.store';
 
 @Component({
   selector: 'app-settings',
@@ -246,6 +247,75 @@ import { PwaInstallService } from '../core/services/pwa-install.service';
       color: #B8863A;
     }
 
+    /* ── Toggle switch ── */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: var(--color-border);
+      border-radius: 22px;
+      transition: .2s;
+    }
+
+    .slider::before {
+      content: '';
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: .2s;
+    }
+
+    .switch input:checked + .slider {
+      background: var(--ocean-500, #2563eb);
+    }
+
+    .switch input:checked + .slider::before {
+      transform: translateX(18px);
+    }
+
+    .switch input:disabled + .slider {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    .time-input {
+      padding: 4px 10px;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+      font-size: 13px;
+      font-family: var(--font-body);
+      outline: none;
+    }
+
+    .time-input:focus {
+      border-color: var(--ocean-500, #2563eb);
+    }
+
+    .time-input:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
     /* ── Frame ── */
     .section { margin-bottom: 24px; }
 
@@ -427,17 +497,50 @@ import { PwaInstallService } from '../core/services/pwa-install.service';
           <div class="card-body">
             <div class="pref-row">
               <div>
-                <p class="pref-label">User &amp; Organization</p>
-                <p class="pref-desc">Profile, roles, and org configuration</p>
+                <p class="pref-label">Daily Digest</p>
+                <p class="pref-desc">Receive a push notification each morning with your daily schedule</p>
               </div>
-              <span class="badge badge-orange">Coming soon</span>
+              <div style="display:flex;align-items:center;gap:10px">
+                <input type="time"
+                  class="time-input"
+                  [value]="(settingsStore.notificationPrefs()?.daily_digest_time ?? '08:00')"
+                  (change)="setDailyDigestTime(($any($event).target).value)"
+                  [disabled]="!settingsStore.notificationPrefs()?.daily_digest"
+                />
+                <label class="switch">
+                  <input type="checkbox"
+                    [checked]="settingsStore.notificationPrefs()?.daily_digest ?? false"
+                    (change)="toggleDailyDigest(($any($event).target).checked)"
+                  />
+                  <span class="slider"></span>
+                </label>
+              </div>
             </div>
             <div class="pref-row">
               <div>
-                <p class="pref-label">Notification Channels</p>
-                <p class="pref-desc">Push, email, SMS, WhatsApp</p>
+                <p class="pref-label">Weekly Digest</p>
+                <p class="pref-desc">Weekly summary of completed events and upcoming items</p>
               </div>
-              <span class="badge badge-orange">Coming soon</span>
+              <label class="switch">
+                <input type="checkbox"
+                  [checked]="settingsStore.notificationPrefs()?.weekly_digest ?? false"
+                  (change)="toggleWeeklyDigest(($any($event).target).checked)"
+                />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="pref-row">
+              <div>
+                <p class="pref-label">Event Reminders</p>
+                <p class="pref-desc">Push notifications before scheduled events</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox"
+                  [checked]="settingsStore.notificationPrefs()?.event_reminder ?? false"
+                  (change)="toggleEventReminders(($any($event).target).checked)"
+                />
+                <span class="slider"></span>
+              </label>
             </div>
             <div class="pref-row">
               <div>
@@ -459,11 +562,28 @@ import { PwaInstallService } from '../core/services/pwa-install.service';
 })
 export class SettingsComponent {
   readonly pwa = inject(PwaInstallService);
+  readonly settingsStore = inject(SettingsStore);
   readonly installing = signal(false);
 
   async install(): Promise<void> {
     this.installing.set(true);
     await this.pwa.promptInstall();
     this.installing.set(false);
+  }
+
+  async toggleDailyDigest(enabled: boolean): Promise<void> {
+    await this.settingsStore.updateNotificationPreferences({ daily_digest: enabled });
+  }
+
+  async setDailyDigestTime(time: string): Promise<void> {
+    await this.settingsStore.updateNotificationPreferences({ daily_digest_time: time });
+  }
+
+  async toggleWeeklyDigest(enabled: boolean): Promise<void> {
+    await this.settingsStore.updateNotificationPreferences({ weekly_digest: enabled });
+  }
+
+  async toggleEventReminders(enabled: boolean): Promise<void> {
+    await this.settingsStore.updateNotificationPreferences({ event_reminder: enabled });
   }
 }
