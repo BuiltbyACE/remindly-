@@ -109,7 +109,12 @@ export class EventsStore implements OnDestroy {
     const existingIndex = current.events.findIndex(e => e.id === eventId);
     const isSelected = current.selectedEvent?.id === eventId;
 
-    if (existingIndex < 0 && !isSelected) return;
+    if (existingIndex < 0 && !isSelected) {
+      // The event is not in our list (probably a brand new event created by someone else).
+      // Since the WebSocket payload doesn't contain the full Event object, we refresh the list.
+      this.silentRefresh();
+      return;
+    }
 
     const source = existingIndex >= 0 ? current.events[existingIndex] : current.selectedEvent!;
     const merged: Event = {
@@ -566,10 +571,14 @@ export class EventsStore implements OnDestroy {
 
   private showNativeNotification(title: string, body: string): void {
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(title, {
-        body,
-        icon: '/icons/icon-192x192.png',
-      });
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(sw => {
+          sw.showNotification(title, {
+            body,
+            icon: '/icons/icon-192x192.png',
+          });
+        }).catch(() => { /* swallow */ });
+      }
     }
   }
 
