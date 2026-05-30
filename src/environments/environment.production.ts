@@ -8,9 +8,9 @@
 export const environment = {
   production: true,
   // apiBaseUrl: 'https://YOUR_BACKEND_URL',
-  apiBaseUrl: 'https://remindly-backend-u4mh.onrender.com',
+  apiBaseUrl: 'https://remindly-backend-production-a3a0.up.railway.app',
   // wsBaseUrl: 'wss://YOUR_BACKEND_URL',
-  wsBaseUrl: 'wss://remindly-backend-u4mh.onrender.com',
+  wsBaseUrl: 'wss://remindly-backend-production-a3a0.up.railway.app',
   appName: 'Remindly',
   appEnv: 'production',
   enableAnalytics: true,
