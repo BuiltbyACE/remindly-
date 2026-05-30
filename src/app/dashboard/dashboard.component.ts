@@ -216,10 +216,7 @@ export class DashboardComponent implements OnInit {
   readonly analyticsStore = inject(AnalyticsStore);
   readonly today = new Date();
 
-  readonly isExecutive = computed(() => {
-    const user = this.authStore.user();
-    return user?.super_admin || this.rbacStore.hasPermission()('audit.read');
-  });
+  readonly isExecutive = computed(() => this.rbacStore.hasPermission()('audit.read'));
   readonly isSecretary = computed(() => !this.isExecutive());
 
   readonly dashboardTitle = computed(() =>
