@@ -24,7 +24,7 @@ export const RbacStore = signalStore(
       if (names.length > 0) {
         // Normalise: capitalise first letter of each word
         const raw = names[0];
-        return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
+        return raw.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
       }
       // Fallback: infer from permissions
       const perms = permissions() ?? [];
