@@ -64,7 +64,6 @@ export class WebSocketService {
   
   // Reconnect configuration
   private reconnectAttempts = 0;
-  private readonly maxReconnectAttempts = 10;
   private readonly baseReconnectDelay = 1000; // 1 second
   private readonly maxReconnectDelay = 30000; // 30 seconds
   private reconnectSubscription: Subscription | null = null;
@@ -333,11 +332,6 @@ export class WebSocketService {
   }
 
   private scheduleReconnect(): void {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      this.updateStatus('disconnected');
-      return;
-    }
-
     this.reconnectAttempts++;
     const delay = Math.min(
       this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts - 1),

@@ -80,7 +80,12 @@ export const NotificationsStore = signalStore(
               const title = (notification as any).subject || 'Remindly';
               const body  = (notification as any).body || (notification as any).message || '';
               const eventId = (notification as any).event_id;
-              const actionUrl = eventId ? `/events/${eventId}` : '/notifications';
+              const approvalId = (notification as any).approval_id;
+              const actionUrl = eventId
+                ? `/events/${eventId}`
+                : approvalId
+                  ? `/approvals/${approvalId}`
+                  : '/notifications';
 
               if ('serviceWorker' in navigator && Notification.permission === 'granted') {
                 navigator.serviceWorker.ready.then(sw => {
@@ -93,7 +98,7 @@ export const NotificationsStore = signalStore(
                     vibrate: [200, 100, 200, 100, 200],
                     requireInteraction: notification.priority === 'high' || notification.priority === 'critical',
                     actions: [
-                      { action: 'open', title: eventId ? '📅 View Event' : '🔔 Open' },
+                      { action: 'open', title: eventId ? '📅 View Event' : approvalId ? '✅ View Approval' : '🔔 Open' },
                       { action: 'dismiss', title: 'Dismiss' },
                     ],
                   } as NotificationOptions & Record<string, unknown>);

@@ -114,6 +114,7 @@ export class ShellComponent implements OnInit, OnDestroy {
   private readonly authStore = inject(AuthStore);
   private readonly orgStore = inject(OrganizationStore);
   private readonly wsStore = inject(WebSocketStore);
+  private visibilityHandler: (() => void) | null = null;
 
   protected onToggleSidebar(): void {
     // Sidebar is desktop-only; no toggle needed on mobile
@@ -125,9 +126,19 @@ export class ShellComponent implements OnInit, OnDestroy {
     const activeOrgId = this.orgStore.activeOrganization()?.id;
     this.wsStore.connect(activeOrgId);
     this.wsStore.initialize();
+
+    this.visibilityHandler = () => {
+      if (document.visibilityState === 'visible' && !this.wsStore.isConnected()) {
+        this.wsStore.reconnect();
+      }
+    };
+    document.addEventListener('visibilitychange', this.visibilityHandler);
   }
 
   ngOnDestroy(): void {
+    if (this.visibilityHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityHandler);
+    }
     this.wsStore.cleanup();
   }
 }

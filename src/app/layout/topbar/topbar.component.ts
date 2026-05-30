@@ -272,7 +272,9 @@ import { WebSocketStore } from '../../websocket/websocket.store';
                 [class.disconnected]="wsStatus() === 'disconnected'"
                 [class.connecting]="wsStatus() === 'connecting' || wsStatus() === 'reconnecting'">
           </span>
-          {{ wsStatus() === 'connected' ? 'Live' : wsStatus() }}
+          @if (wsStatus() === 'connected') {
+            <span>Live</span>
+          }
         </div>
 
         <div class="divider"></div>
