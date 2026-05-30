@@ -72,9 +72,37 @@ export const NotificationsStore = signalStore(
                 },
               });
 
-              // Show toast for critical notifications
-              if (notification.priority === 'critical') {
-                toastService.warning(`${notification.title}: ${notification.message}`);
+              // ── Fire a native phone notification immediately ──────────────
+              // This is what makes the phone buzz/popup in real time when:
+              //   • A secretary creates an event  → executive gets alerted
+              //   • An executive approves          → secretary gets alerted
+              //   • A reminder fires               → user gets alerted
+              const title = (notification as any).subject || 'Remindly';
+              const body  = (notification as any).body || (notification as any).message || '';
+              const eventId = (notification as any).event_id;
+              const actionUrl = eventId ? `/events/${eventId}` : '/notifications';
+
+              if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+                navigator.serviceWorker.ready.then(sw => {
+                  sw.showNotification(title, {
+                    body,
+                    icon: '/icons/icon-192x192.png',
+                    badge: '/icons/icon-72x72.png',
+                    tag: `notif-${notification.id}`,
+                    data: { url: actionUrl },
+                    vibrate: [200, 100, 200, 100, 200],
+                    requireInteraction: notification.priority === 'high' || notification.priority === 'critical',
+                    actions: [
+                      { action: 'open', title: eventId ? '📅 View Event' : '🔔 Open' },
+                      { action: 'dismiss', title: 'Dismiss' },
+                    ],
+                  } as NotificationOptions & Record<string, unknown>);
+                }).catch(() => { /* SW not ready yet — ignore */ });
+              }
+
+              // Also show an in-app toast for critical/high priority
+              if (notification.priority === 'critical' || notification.priority === 'high') {
+                toastService.warning(`${title}: ${body}`);
               }
             }
           }
@@ -94,6 +122,7 @@ export const NotificationsStore = signalStore(
             }
           }
         });
+
 
       // Cleanup on destroy
       return () => {

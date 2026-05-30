@@ -66,8 +66,8 @@ export const AuthStore = signalStore(
           user: result.user,
           isLoading: false,
         });
-        sessionStorage.setItem('remindly_token', result.access_token);
-        sessionStorage.setItem('remindly_user', JSON.stringify(result.user));
+        localStorage.setItem('remindly_token', result.access_token);
+        localStorage.setItem('remindly_user', JSON.stringify(result.user));
         await rbacStore.hydratePermissions();
         
         // Initialize and register push in the background (non-blocking)
@@ -80,11 +80,13 @@ export const AuthStore = signalStore(
           ? await Notification.requestPermission()
           : Notification.permission;
         console.log('[AuthStore] Notification permission:', notificationPerm);
-        if (notificationPerm === 'granted') {
-          new Notification('Welcome to Remindly', {
-            body: `Logged in as ${name}`,
-            icon: '/icons/icon-192x192.png',
-          });
+        if (notificationPerm === 'granted' && 'serviceWorker' in navigator) {
+          navigator.serviceWorker.ready.then(sw => {
+            sw.showNotification('Welcome to Remindly', {
+              body: `Logged in as ${name}`,
+              icon: '/icons/icon-192x192.png',
+            });
+          }).catch(() => { /* non-critical */ });
         } else if (notificationPerm === 'denied') {
           toastService.warning('Notifications are blocked. Enable them in your browser settings for reminder alerts.');
         }
@@ -112,29 +114,29 @@ export const AuthStore = signalStore(
       pushService.unregister();
       rbacStore.reset();
       patchState(store, { accessToken: null, user: null, error: null });
-      sessionStorage.removeItem('remindly_token');
-      sessionStorage.removeItem('remindly_user');
+      localStorage.removeItem('remindly_token');
+      localStorage.removeItem('remindly_user');
     },
 
 
     persistToStorage(user: UserProfile): void {
-      sessionStorage.setItem('remindly_user', JSON.stringify(user));
+      localStorage.setItem('remindly_user', JSON.stringify(user));
     },
   })),
   withMethods((store, rbacStore = inject(RbacStore)) => ({
     hydrateFromStorage(): boolean {
-      const token = sessionStorage.getItem('remindly_token');
+      const token = localStorage.getItem('remindly_token');
       if (!token) return false;
 
       patchState(store, { accessToken: token });
 
-      const stored = sessionStorage.getItem('remindly_user');
+      const stored = localStorage.getItem('remindly_user');
       if (stored) {
         try {
           const user = JSON.parse(stored) as UserProfile;
           patchState(store, { user });
         } catch {
-          sessionStorage.removeItem('remindly_user');
+          localStorage.removeItem('remindly_user');
         }
       }
 

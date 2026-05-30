@@ -258,40 +258,42 @@ export class WebSocketService {
 
   private buildWebSocketUrl(organizationId?: string): string {
     // Convert http(s) to ws(s)
-    let url = this.apiConfig.wsBaseUrl;
-    
+    let baseUrl = this.apiConfig.wsBaseUrl;
+
     // Ensure proper WebSocket protocol
-    if (url.startsWith('http://')) {
-      url = url.replace('http://', 'ws://');
-    } else if (url.startsWith('https://')) {
-      url = url.replace('https://', 'wss://');
+    if (baseUrl.startsWith('http://')) {
+      baseUrl = baseUrl.replace('http://', 'ws://');
+    } else if (baseUrl.startsWith('https://')) {
+      baseUrl = baseUrl.replace('https://', 'wss://');
     }
-    
-    // Append path if not present
-    if (!url.includes('/ws')) {
-      url = url.endsWith('/') ? `${url}api/v1/ws` : `${url}/api/v1/ws`;
-    }
-    
+
+    // Strip any trailing slash
+    baseUrl = baseUrl.replace(/\/$/, '');
+
+    // Backend WebSocket endpoint is at /ws (root level)
+    // NOT /api/v1/ws — that is for REST only
+    const url = `${baseUrl}/ws`;
+
     // Build query params
     const params: string[] = [];
-    
+
     // Add JWT token from auth store (primary auth mechanism for WS)
     const token = this.authStore.accessToken();
     if (token) {
       params.push(`token=${encodeURIComponent(token)}`);
     }
-    
+
     // Add organization ID if provided
     if (organizationId) {
       params.push(`org=${encodeURIComponent(organizationId)}`);
     }
-    
+
     // Append query params to URL
     if (params.length > 0) {
-      const separator = url.includes('?') ? '&' : '?';
-      url = `${url}${separator}${params.join('&')}`;
+      url.includes('?');
+      return `${url}?${params.join('&')}`;
     }
-    
+
     return url;
   }
 

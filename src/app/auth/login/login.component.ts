@@ -496,21 +496,8 @@ export class LoginComponent {
 
     try {
       await this.authStore.login(this.email(), this.password());
-      // Read permissions from sessionStorage (set by hydratePermissions)
-      const cached = sessionStorage.getItem('remindly_permissions');
-      const raw: unknown = cached ? JSON.parse(cached) : [];
-      let permissions: string[];
-      if (Array.isArray(raw)) {
-        permissions = raw;
-      } else if (raw && typeof raw === 'object') {
-        const obj = raw as Record<string, unknown>;
-        permissions = 'data' in obj && Array.isArray(obj['data'])
-          ? obj['data'] as string[]
-          : [];
-      } else {
-        permissions = [];
-      }
-      if (permissions.includes('admin.access')) {
+      const user = this.authStore.user();
+      if (user?.super_admin || user?.permissions?.includes('admin.access')) {
         await this.router.navigate(['/admin/dashboard']);
       } else {
         await this.router.navigate(['/dashboard']);

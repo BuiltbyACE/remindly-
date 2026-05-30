@@ -5,17 +5,27 @@ self.addEventListener('push', (event) => {
   if (!data?.notification?.title) return;
 
   const notification = data.notification;
+  const notifUrl = notification.data?.url || '/notifications';
+
+  // Determine contextual action labels based on notification type
+  const isReminder = notification.tag?.startsWith('notif-') && notification.title?.startsWith('Reminder:');
+  const isApproval = notification.title?.includes('Approval');
+
+  const actions = isReminder
+    ? [{ action: 'open', title: '📅 View Event' }, { action: 'dismiss', title: 'Dismiss' }]
+    : isApproval
+      ? [{ action: 'open', title: '✅ Review Now' }, { action: 'dismiss', title: 'Later' }]
+      : [{ action: 'open', title: 'Open Remindly' }];
+
   const options = {
     body: notification.body || '',
     icon: notification.icon || '/icons/icon-192x192.png',
-    badge: '/icons/icon-192x192.png',
+    badge: '/icons/icon-72x72.png',
     tag: notification.tag || 'remindly-' + Date.now(),
-    data: notification.data || { url: '/' },
-    vibrate: [200, 100, 200],
+    data: { url: notifUrl, ...notification.data },
+    vibrate: [200, 100, 200, 100, 200],
     requireInteraction: true,
-    actions: notification.actions || [
-      { action: 'open', title: 'Open Remindly' }
-    ]
+    actions,
   };
 
   event.waitUntil(

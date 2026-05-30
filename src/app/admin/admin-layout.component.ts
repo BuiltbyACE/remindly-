@@ -269,7 +269,11 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.toast.success('Logged out successfully');
-    // Removed native notification on logout to prevent illegal constructor error on Android
+    try {
+      if (Notification.permission === 'granted') {
+        new Notification('Remindly', { body: 'Logged out successfully', icon: '/icons/icon-192x192.png' });
+      }
+    } catch { /* notification not supported */ }
     setTimeout(() => {
       this.authStore.clearSession();
       this.router.navigate(['/admin/login']);

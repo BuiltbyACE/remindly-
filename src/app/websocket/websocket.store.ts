@@ -29,6 +29,23 @@ export const WebSocketStore = signalStore(
   withMethods((store, webSocketService = inject(WebSocketService)) => {
     let statusSubscription: Subscription | null = null;
     let messageSubscription: Subscription | null = null;
+    let keepAliveTimer: ReturnType<typeof setInterval> | null = null;
+    const apiBase = (webSocketService as any)['apiConfig']?.apiBaseUrl || '';
+
+    function startKeepAlive(): void {
+      if (keepAliveTimer) return;
+      keepAliveTimer = setInterval(() => {
+        // Ping the backend health endpoint to prevent Render free tier from sleeping
+        fetch(`${apiBase}/`).catch(() => { /* ignore — fire-and-forget */ });
+      }, 25000);
+    }
+
+    function stopKeepAlive(): void {
+      if (keepAliveTimer) {
+        clearInterval(keepAliveTimer);
+        keepAliveTimer = null;
+      }
+    }
 
     return {
       /**
@@ -67,6 +84,7 @@ export const WebSocketStore = signalStore(
       connect(organizationId?: string): void {
         patchState(store, { isManualDisconnect: false });
         webSocketService.connect(organizationId);
+        startKeepAlive();
       },
 
       /**
@@ -74,6 +92,7 @@ export const WebSocketStore = signalStore(
        */
       disconnect(): void {
         patchState(store, { isManualDisconnect: true });
+        stopKeepAlive();
         webSocketService.disconnect();
       },
 
@@ -134,6 +153,7 @@ export const WebSocketStore = signalStore(
           messageSubscription.unsubscribe();
           messageSubscription = null;
         }
+        stopKeepAlive();
         webSocketService.disconnect();
       },
 

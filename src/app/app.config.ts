@@ -35,7 +35,7 @@ export const appConfig: ApplicationConfig = {
         responseInterceptor,
       ]),
     ),
-    provideServiceWorker('sw.js', {
+    provideServiceWorker('ngsw-worker.js', {
       registrationStrategy: 'registerImmediately',
     }),
     {

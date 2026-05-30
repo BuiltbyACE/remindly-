@@ -334,8 +334,9 @@ export class TopbarComponent {
 
   async logout(): Promise<void> {
     try {
-      if (Notification.permission === 'granted') {
-        new Notification('Remindly', { body: 'Logged out successfully', icon: '/icons/icon-192x192.png' });
+      if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
+        const sw = await navigator.serviceWorker.ready;
+        await sw.showNotification('Remindly', { body: 'Logged out successfully', icon: '/icons/icon-192x192.png' });
       }
     } catch { /* notification not supported */ }
     this.authStore.clearSession();

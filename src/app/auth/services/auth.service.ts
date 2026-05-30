@@ -12,6 +12,12 @@ export interface UserProfile {
   is_verified: boolean;
   created_at: string;
   updated_at: string;
+  role?: string;
+  roles?: string[];
+  permissions?: string[];
+  super_admin?: boolean;
+  organization_id?: string;
+  membership_id?: string;
 }
 
 export interface LoginRequest {
