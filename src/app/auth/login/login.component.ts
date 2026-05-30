@@ -496,12 +496,7 @@ export class LoginComponent {
 
     try {
       await this.authStore.login(this.email(), this.password());
-      const user = this.authStore.user();
-      if (user?.super_admin || user?.permissions?.includes('admin.access')) {
-        await this.router.navigate(['/admin/dashboard']);
-      } else {
-        await this.router.navigate(['/dashboard']);
-      }
+      await this.router.navigate(['/dashboard']);
     } catch {
       // Error handled in store
     }

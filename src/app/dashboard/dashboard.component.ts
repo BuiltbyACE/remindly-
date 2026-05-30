@@ -160,7 +160,7 @@ import { AnalyticsChartsComponent } from './components/analytics-charts.componen
           <app-pending-approvals />
         </div>
       } @else {
-        <!-- Non-Secretary View (Executive/Admin) -->
+        <!-- Non-Secretary View (Executive) -->
 
         <!-- Stats -->
         <div class="section">
@@ -172,31 +172,25 @@ import { AnalyticsChartsComponent } from './components/analytics-charts.componen
         <app-escalated-alert />
 
         <!-- Executive: AI + Alerts -->
-        @if (isExecutive()) {
-          <div class="section">
-            <p class="section-title">Intelligence</p>
-            <div class="two-col">
-              <app-ai-briefing-card />
-              <app-critical-alerts />
-            </div>
+        <div class="section">
+          <p class="section-title">Intelligence</p>
+          <div class="two-col">
+            <app-ai-briefing-card />
+            <app-critical-alerts />
           </div>
-        }
+        </div>
 
         <!-- Executive: Analytics -->
-        @if (isExecutive()) {
-          <div class="section">
-            <p class="section-title">Analytics</p>
-            <app-analytics-charts />
-          </div>
-        }
+        <div class="section">
+          <p class="section-title">Analytics</p>
+          <app-analytics-charts />
+        </div>
 
         <!-- Pending Approvals -->
-        @if (isAdmin() || isExecutive()) {
-          <div class="section">
-            <p class="section-title">Pending Action</p>
-            <app-pending-approvals />
-          </div>
-        }
+        <div class="section">
+          <p class="section-title">Pending Action</p>
+          <app-pending-approvals />
+        </div>
 
         <!-- Schedule + Activity -->
         <div class="section">
@@ -223,14 +217,11 @@ export class DashboardComponent implements OnInit {
   readonly today = new Date();
 
   readonly isExecutive = computed(() => this.rbacStore.hasPermission()('audit.read'));
-  readonly isAdmin = computed(() => this.rbacStore.hasPermission()('events.approve') && !this.isExecutive());
-  readonly isSecretary = computed(() => !this.isExecutive() && !this.isAdmin());
+  readonly isSecretary = computed(() => !this.isExecutive());
 
-  readonly dashboardTitle = computed(() => {
-    if (this.isExecutive()) return 'Executive Dashboard';
-    if (this.isAdmin()) return 'Admin Dashboard';
-    return 'My Dashboard';
-  });
+  readonly dashboardTitle = computed(() =>
+    this.isExecutive() ? 'Executive Dashboard' : 'My Dashboard',
+  );
 
   ngOnInit(): void {
     this.eventsStore.loadEvents();

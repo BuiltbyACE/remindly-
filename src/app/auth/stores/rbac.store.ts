@@ -28,8 +28,7 @@ export const RbacStore = signalStore(
       }
       // Fallback: infer from permissions
       const perms = permissions() ?? [];
-      if (perms.includes('audit.read') || perms.includes('documents.approve')) return 'Executive';
-      if (perms.includes('events.approve') || perms.includes('documents.delete')) return 'Admin';
+      if (perms.includes('audit.read') || perms.includes('documents.approve') || perms.includes('events.approve') || perms.includes('documents.delete')) return 'Executive';
       if (perms.includes('events.read') || perms.includes('documents.read')) return 'Secretary';
       return 'Member';
     }),

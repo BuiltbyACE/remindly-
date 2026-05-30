@@ -12,12 +12,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error) => {
-      const isAdminRequest = req.url.includes('/api/v1/admin/');
-
       switch (error.status) {
         case HttpStatusCode.Unauthorized:
           authStore.clearSession();
-          router.navigate([isAdminRequest ? '/admin/login' : '/auth/login']);
+          router.navigate(['/auth/login']);
           break;
         case HttpStatusCode.Forbidden:
           toast.error('You do not have permission to perform this action.');
