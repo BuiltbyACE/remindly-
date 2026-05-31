@@ -9,7 +9,7 @@ export const DOCUMENTS_ROUTES: Routes = [
   },
   {
     path: 'upload',
-    canActivate: [permissionGuard('documents.read')],
+    canActivate: [permissionGuard('documents.read', 'documents.upload')],
     loadComponent: () => import('./feature-create/document-upload.component').then(m => m.DocumentUploadComponent),
   },
   {

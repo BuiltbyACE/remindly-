@@ -37,10 +37,6 @@ export const routes: Routes = [
         canActivate: [permissionGuard('notifications.send')],
       },
       {
-        path: 'ai',
-        loadChildren: () => import('./ai/ai.routes').then(m => m.AI_ROUTES),
-      },
-      {
         path: 'integrations',
         loadChildren: () => import('./integrations/integrations.routes').then(m => m.INTEGRATIONS_ROUTES),
         canActivate: [permissionGuard('integrations.manage')],

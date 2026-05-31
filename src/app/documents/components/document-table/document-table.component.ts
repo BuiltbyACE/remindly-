@@ -5,11 +5,12 @@ import { DocumentsStore } from '../../stores/documents.store';
 import { RbacStore } from '../../../auth/stores/rbac.store';
 import { DOCUMENT_STATUS_LABELS, formatFileSize } from '../../models/document.model';
 import type { DocumentStatus } from '../../models/document.model';
+import { AppPermissionDirective } from '@shared/directives/app-permission/app-permission.directive';
 
 @Component({
   selector: 'app-document-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, AppPermissionDirective],
   template: `
     <div class="space-y-4">
       <!-- Status Filter -->
@@ -174,7 +175,7 @@ import type { DocumentStatus } from '../../models/document.model';
           } @else {
             <div class="p-8 text-center">
               <p class="text-gray-500 mb-2">No documents found</p>
-              <a routerLink="/documents/upload"
+              <a routerLink="/documents/upload" *appPermission="'documents.upload'"
                 class="text-sm text-blue-600 hover:text-blue-800 underline">Upload your first document</a>
             </div>
           }

@@ -27,7 +27,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           toast.warning('A workflow conflict occurred. Please review and try again.');
           break;
         case HttpStatusCode.UnprocessableEntity:
-          // Validation errors — let components handle via form errors
+          toast.error('The submitted data is invalid. Please check and try again.');
           break;
         case HttpStatusCode.InternalServerError:
           toast.error('A system error occurred. Our team has been notified.');

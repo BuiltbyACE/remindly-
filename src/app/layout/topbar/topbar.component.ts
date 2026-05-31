@@ -321,7 +321,7 @@ export class TopbarComponent {
           approvals: 'Approvals',
           documents: 'Documents',
           notifications: 'Alerts',
-          ai: 'AI Briefing',
+
           settings: 'Settings',
           admin: 'Admin',
         };

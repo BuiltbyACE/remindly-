@@ -4,14 +4,12 @@ import { AuthStore } from '../auth/stores/auth.store';
 import { OrganizationStore } from '../organizations/stores/organization.store';
 import { EventsStore } from '../events/stores/events.store';
 import { RbacStore } from '../auth/stores/rbac.store';
-import { AiStore } from '../ai/stores/ai.store';
 import { AnalyticsStore } from '../analytics/stores/analytics.store';
 import { StatsCardsComponent } from './components/stats-cards.component';
 import { QuickActionsComponent } from './components/quick-actions.component';
 import { TodayScheduleComponent } from './components/today-schedule.component';
 import { RecentActivityComponent } from './components/recent-activity.component';
 import { EscalatedAlertComponent } from './components/escalated-alert.component';
-import { AiBriefingCardComponent } from './components/ai-briefing-card.component';
 import { CriticalAlertsComponent } from './components/critical-alerts.component';
 import { PendingApprovalsComponent } from './components/pending-approvals.component';
 import { AnalyticsChartsComponent } from './components/analytics-charts.component';
@@ -21,7 +19,7 @@ import { AnalyticsChartsComponent } from './components/analytics-charts.componen
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DatePipe, StatsCardsComponent, QuickActionsComponent, TodayScheduleComponent,
-    RecentActivityComponent, EscalatedAlertComponent, AiBriefingCardComponent,
+    RecentActivityComponent, EscalatedAlertComponent,
     CriticalAlertsComponent, PendingApprovalsComponent, AnalyticsChartsComponent,
   ],
   styles: [`
@@ -171,13 +169,10 @@ import { AnalyticsChartsComponent } from './components/analytics-charts.componen
         <!-- Escalated alert -->
         <app-escalated-alert />
 
-        <!-- Executive: AI + Alerts -->
+        <!-- Executive: Alerts -->
         <div class="section">
           <p class="section-title">Intelligence</p>
-          <div class="two-col">
-            <app-ai-briefing-card />
-            <app-critical-alerts />
-          </div>
+          <app-critical-alerts />
         </div>
 
         <!-- Executive: Analytics -->
@@ -212,7 +207,6 @@ export class DashboardComponent implements OnInit {
   readonly orgStore = inject(OrganizationStore);
   readonly eventsStore = inject(EventsStore);
   readonly rbacStore = inject(RbacStore);
-  readonly aiStore = inject(AiStore);
   readonly analyticsStore = inject(AnalyticsStore);
   readonly today = new Date();
 
@@ -226,7 +220,6 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.eventsStore.loadEvents();
     if (this.isExecutive()) {
-      this.aiStore.loadTodayBriefing();
       this.analyticsStore.loadMetrics();
     }
   }

@@ -42,7 +42,11 @@ export class DocumentsService extends BaseApiClient {
     formData.append('file', file);
     formData.append('title', title);
     if (description) formData.append('description', description);
-    return this.http.post<Document>(`${this.baseUrl}/api/v1/documents/upload`, formData);
+    return this.post<unknown>('/api/v1/documents/upload', formData)
+      .pipe(map((data: any) => {
+        if (data && data.success && data.data) return data.data as Document;
+        return data as Document;
+      }));
   }
 
   downloadDocument(documentId: string, forceDownload = false): Observable<Blob> {
