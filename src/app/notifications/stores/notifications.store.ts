@@ -326,16 +326,27 @@ export const NotificationsStore = signalStore(
 
       // Dismiss all unread notifications
       async dismissAllUnread(): Promise<void> {
-        const unread = store.notifications().filter((n) => n.status === 'unread');
-        let dismissed = 0;
+        try {
+          const result = await lastValueFrom(
+            notificationsService.markAllRead()
+          );
+          const count = result?.count ?? 0;
 
-        for (const notification of unread) {
-          const ok = await this.dismissNotification(notification.id);
-          if (ok) dismissed++;
-        }
-
-        if (dismissed > 0) {
-          toastService.success(`${dismissed} ${dismissed === 1 ? 'notification' : 'notifications'} marked as read`);
+          if (count > 0) {
+            const updatedNotifications = store.notifications().map((n) =>
+              n.status === 'unread' ? { ...n, status: 'acknowledged' as const } : n
+            );
+            patchState(store, { notifications: updatedNotifications });
+            toastService.success(`${count} ${count === 1 ? 'notification' : 'notifications'} marked as read`);
+          }
+        } catch (error) {
+          let message = 'Failed to mark all as read';
+          if (error instanceof HttpErrorResponse && error.error?.detail) {
+            message = error.error.detail;
+          } else if (error instanceof Error) {
+            message = error.message;
+          }
+          toastService.error(message);
         }
       },
 

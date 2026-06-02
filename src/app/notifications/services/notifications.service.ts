@@ -80,4 +80,9 @@ export class NotificationsService extends BaseApiClient {
     return this.post<unknown>(`/api/v1/notifications/${notificationId}/acknowledge`, body)
       .pipe(map(data => fromApiNotification(data)));
   }
+
+  markAllRead(): Observable<{ count: number }> {
+    return this.post<unknown>('/api/v1/notifications/mark-all-read', {})
+      .pipe(map(data => data as { count: number }));
+  }
 }
