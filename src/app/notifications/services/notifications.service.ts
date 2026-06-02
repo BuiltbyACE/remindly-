@@ -62,6 +62,7 @@ export class NotificationsService extends BaseApiClient {
     return this.get<NotificationListResponse>('/api/v1/notifications/my', {
       page,
       page_size: pageSize,
+      _t: Date.now(),
     }).pipe(map(data => fromApiListResponse(data)));
   }
 
