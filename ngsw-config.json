@@ -42,17 +42,7 @@
         "timeout": "5s"
       }
     },
-    {
-      "name": "notifications-api",
-      "urls": ["/api/v1/notifications/**"],
-      "cacheConfig": {
-        "strategy": "freshness",
-        "maxSize": 50,
-        "maxAge": "1d",
-        "timeout": "5s"
-      }
-    },
-    {
+{
       "name": "voice-api",
       "urls": ["/api/v1/voice/**"],
       "cacheConfig": {

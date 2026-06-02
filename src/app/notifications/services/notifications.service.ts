@@ -63,6 +63,7 @@ export class NotificationsService extends BaseApiClient {
       page,
       page_size: pageSize,
       _t: Date.now(),
+      'ngsw-bypass': true,
     }).pipe(map(data => fromApiListResponse(data)));
   }
 
