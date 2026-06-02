@@ -3,7 +3,7 @@
   publish   = "dist/Remindly/browser"
 
 [build.environment]
-  NODE_VERSION = "22"
+  NODE_VERSION = "22.22.0"
 
 # Angular SPA — send all routes to index.html
 [[redirects]]
