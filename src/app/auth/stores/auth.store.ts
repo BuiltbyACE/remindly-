@@ -1,5 +1,6 @@
 import { signalStore, withState, withComputed, withMethods, patchState } from '@ngrx/signals';
 import { computed, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { AuthService, UserProfile } from '../services/auth.service';
 import { RbacStore } from './rbac.store';
@@ -12,6 +13,9 @@ interface AuthState {
   user: UserProfile | null;
   isLoading: boolean;
   error: string | null;
+  mustChangePassword: boolean;
+  changePasswordError: string | null;
+  isChangingPassword: boolean;
 }
 
 export const AuthStore = signalStore(
@@ -21,14 +25,18 @@ export const AuthStore = signalStore(
     user: null,
     isLoading: false,
     error: null,
+    mustChangePassword: false,
+    changePasswordError: null,
+    isChangingPassword: false,
   }),
-  withComputed(({ accessToken, user }) => ({
+  withComputed(({ accessToken, user, mustChangePassword }) => ({
     isAuthenticated: computed(() => !!accessToken() && !!user()),
     userDisplayName: computed(() => user()?.full_name ?? ''),
     userInitials: computed(() => {
       const name = user()?.full_name ?? '';
       return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     }),
+    mustChangePasswordFlag: computed(() => mustChangePassword()),
   })),
   withMethods((store, authService = inject(AuthService), rbacStore = inject(RbacStore), pushService = inject(PushSubscriptionService), toastService = inject(ToastService), settingsService = inject(SettingsService)) => ({
     setToken(token: string): void {
@@ -40,17 +48,41 @@ export const AuthStore = signalStore(
       patchState(store, { isLoading: true });
       try {
         const user = await lastValueFrom(authService.getCurrentUser());
-        patchState(store, { user, isLoading: false });
-        await rbacStore.hydratePermissions();
-        
-        // Initialize and register push in the background (non-blocking)
-        pushService.initialize().then(() => {
-          pushService.register();
-        });
+        patchState(store, { user, isLoading: false, mustChangePassword: user.must_change_password === true });
+        localStorage.setItem('remindly_user', JSON.stringify(user));
+        localStorage.setItem('remindly_must_change_password', String(user.must_change_password === true));
+        await rbacStore.hydratePermissions(user.permissions, user.roles);
 
-        // Request notification permission if not yet granted (non-blocking)
-        if (Notification.permission === 'default') {
-          Notification.requestPermission().catch(() => {});
+        if (!store.mustChangePassword()) {
+          pushService.initialize().then(() => {
+            pushService.register();
+          });
+
+          if (Notification.permission === 'default') {
+            Notification.requestPermission().catch(() => {});
+          }
+
+          const name = user.full_name;
+          if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(sw => {
+              sw.showNotification('Welcome to Remindly', {
+                body: `Logged in as ${name}`,
+                icon: '/icons/icon-192x192.png',
+              });
+            }).catch(() => {});
+          }
+          toastService.success(`Welcome back, ${name}!`);
+
+          try {
+            await lastValueFrom(
+              settingsService.updateNotificationPreferences({
+                daily_digest: true,
+                daily_digest_time: '08:00',
+              })
+            );
+          } catch {
+            // Non-critical
+          }
         }
       } catch {
         patchState(store, { isLoading: false });
@@ -61,47 +93,50 @@ export const AuthStore = signalStore(
       patchState(store, { isLoading: true, error: null });
       try {
         const result = await lastValueFrom(authService.login(email, password));
+        const mustChangePassword = result.user.must_change_password === true;
+
         patchState(store, {
           accessToken: result.access_token,
           user: result.user,
+          mustChangePassword,
           isLoading: false,
         });
         localStorage.setItem('remindly_token', result.access_token);
         localStorage.setItem('remindly_user', JSON.stringify(result.user));
-        await rbacStore.hydratePermissions();
-        
-        // Initialize and register push in the background (non-blocking)
-        pushService.initialize().then(() => {
-          pushService.register();
-        });
+        localStorage.setItem('remindly_must_change_password', String(mustChangePassword));
+        await rbacStore.hydratePermissions(result.user.permissions, result.user.roles);
 
-        const name = result.user.full_name;
-        const notificationPerm = Notification.permission === 'default'
-          ? await Notification.requestPermission()
-          : Notification.permission;
-        console.log('[AuthStore] Notification permission:', notificationPerm);
-        if (notificationPerm === 'granted' && 'serviceWorker' in navigator) {
-          navigator.serviceWorker.ready.then(sw => {
-            sw.showNotification('Welcome to Remindly', {
-              body: `Logged in as ${name}`,
-              icon: '/icons/icon-192x192.png',
-            });
-          }).catch(() => { /* non-critical */ });
-        } else if (notificationPerm === 'denied') {
-          toastService.warning('Notifications are blocked. Enable them in your browser settings for reminder alerts.');
-        }
-        toastService.success(`Welcome back, ${name}!`);
+        if (!mustChangePassword) {
+          pushService.initialize().then(() => {
+            pushService.register();
+          });
 
-        // Enable daily digest by default
-        try {
-          await lastValueFrom(
-            settingsService.updateNotificationPreferences({
-              daily_digest: true,
-              daily_digest_time: '08:00',
-            })
-          );
-        } catch {
-          // Non-critical — user can enable manually in settings
+          const name = result.user.full_name;
+          const notificationPerm = Notification.permission === 'default'
+            ? await Notification.requestPermission()
+            : Notification.permission;
+          if (notificationPerm === 'granted' && 'serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(sw => {
+              sw.showNotification('Welcome to Remindly', {
+                body: `Logged in as ${name}`,
+                icon: '/icons/icon-192x192.png',
+              });
+            }).catch(() => {});
+          } else if (notificationPerm === 'denied') {
+            toastService.warning('Notifications are blocked. Enable them in your browser settings for reminder alerts.');
+          }
+          toastService.success(`Welcome back, ${name}!`);
+
+          try {
+            await lastValueFrom(
+              settingsService.updateNotificationPreferences({
+                daily_digest: true,
+                daily_digest_time: '08:00',
+              })
+            );
+          } catch {
+            // Non-critical
+          }
         }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Login failed';
@@ -110,14 +145,43 @@ export const AuthStore = signalStore(
       }
     },
 
+    async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+      patchState(store, { isChangingPassword: true, changePasswordError: null });
+      try {
+        await lastValueFrom(authService.changePassword(currentPassword, newPassword));
+        patchState(store, {
+          mustChangePassword: false,
+          isChangingPassword: false,
+          changePasswordError: null,
+        });
+        localStorage.setItem('remindly_must_change_password', 'false');
+      } catch (err: unknown) {
+        let message = 'Failed to change password';
+        if (err instanceof HttpErrorResponse && err.error?.detail) {
+          message = err.error.detail;
+        } else if (err instanceof Error) {
+          message = err.message;
+        }
+        patchState(store, { changePasswordError: message, isChangingPassword: false });
+        throw err;
+      }
+    },
+
     clearSession(): void {
       pushService.unregister();
       rbacStore.reset();
-      patchState(store, { accessToken: null, user: null, error: null });
+      patchState(store, {
+        accessToken: null,
+        user: null,
+        error: null,
+        mustChangePassword: false,
+        changePasswordError: null,
+        isChangingPassword: false,
+      });
       localStorage.removeItem('remindly_token');
       localStorage.removeItem('remindly_user');
+      localStorage.removeItem('remindly_must_change_password');
     },
-
 
     persistToStorage(user: UserProfile): void {
       localStorage.setItem('remindly_user', JSON.stringify(user));
@@ -138,6 +202,11 @@ export const AuthStore = signalStore(
         } catch {
           localStorage.removeItem('remindly_user');
         }
+      }
+
+      const mcp = localStorage.getItem('remindly_must_change_password');
+      if (mcp) {
+        patchState(store, { mustChangePassword: mcp === 'true' });
       }
 
       rbacStore.hydrateFromStorage();

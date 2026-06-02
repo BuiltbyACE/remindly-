@@ -29,7 +29,7 @@ export const RbacStore = signalStore(
       // Fallback: infer from permissions
       const perms = permissions() ?? [];
       if (perms.includes('audit.read') || perms.includes('documents.approve') || perms.includes('events.approve') || perms.includes('documents.delete')) return 'Executive';
-      if (perms.includes('events.read') || perms.includes('documents.read')) return 'Secretary';
+      if (perms.includes('events.create') || perms.includes('events.read') || perms.includes('documents.read')) return 'Secretary';
       return 'Member';
     }),
   })),
@@ -51,7 +51,23 @@ export const RbacStore = signalStore(
       return false;
     },
 
-    async hydratePermissions(): Promise<void> {
+    /**
+     * Hydrate permissions from /auth/me data first (primary source),
+     * falling back to a dedicated API call if not provided.
+     */
+    async hydratePermissions(permissionsFromAuth?: string[], rolesFromAuth?: string[]): Promise<void> {
+      // Primary: permissions from /auth/me (passed by AuthStore)
+      if (permissionsFromAuth && permissionsFromAuth.length > 0) {
+        sessionStorage.setItem('remindly_permissions', JSON.stringify(permissionsFromAuth));
+        patchState(store, { permissions: permissionsFromAuth, isLoaded: true });
+        if (rolesFromAuth && rolesFromAuth.length > 0) {
+          sessionStorage.setItem('remindly_roles', JSON.stringify(rolesFromAuth));
+          patchState(store, { roleNames: rolesFromAuth });
+        }
+        return;
+      }
+
+      // Fallback: dedicated RBAC API call
       try {
         const permissions = await lastValueFrom(rbacService.getMyPermissions());
         sessionStorage.setItem('remindly_permissions', JSON.stringify(permissions));
@@ -59,13 +75,13 @@ export const RbacStore = signalStore(
       } catch {
         patchState(store, { permissions: [], isLoaded: true });
       }
-      // Separately fetch actual role names
+
+      // Separately fetch actual role names (silent fallback)
       try {
         const roles = await lastValueFrom(rbacService.getMyRoles());
         sessionStorage.setItem('remindly_roles', JSON.stringify(roles));
         patchState(store, { roleNames: roles });
       } catch {
-        // getMyRoles may not exist on backend yet — silently ignore
         patchState(store, { roleNames: [] });
       }
     },

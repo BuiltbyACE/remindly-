@@ -1,10 +1,13 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { PwaInstallService } from '../core/services/pwa-install.service';
+import { AuthStore } from '../auth/stores/auth.store';
 import { SettingsStore } from './stores/settings.store';
 
 @Component({
   selector: 'app-settings',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule],
   styles: [`
     :host { display: block; }
 
@@ -316,6 +319,120 @@ import { SettingsStore } from './stores/settings.store';
       cursor: not-allowed;
     }
 
+    /* ── Form fields (password section) ── */
+    .field { margin-bottom: 20px; }
+
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #5C666F;
+      margin-bottom: 8px;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8C959E;
+      pointer-events: none;
+      display: flex;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: #1A1C1E;
+      background: #F5F2ED;
+      border: 1.5px solid transparent;
+      border-radius: 12px;
+      outline: none;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .input-field::placeholder { color: #B5AD9F; }
+
+    .input-field:focus {
+      background: #fff;
+      border-color: #3A82B5;
+      box-shadow: 0 0 0 3px rgba(58,130,181,.12);
+    }
+
+    .toggle-pw {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      padding: 6px;
+      color: #8C959E;
+      cursor: pointer;
+      display: flex;
+      border-radius: 6px;
+      transition: color 0.15s;
+    }
+
+    .toggle-pw:hover { color: #3A82B5; }
+
+    .error-msg {
+      padding: 12px 16px;
+      background: #FDF6F4;
+      border: 1px solid #E8D0C8;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #8B3F2E;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .success-msg {
+      padding: 12px 16px;
+      background: #F0F9F4;
+      border: 1px solid #C8E6D0;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #2E7D5A;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px 24px;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, #0F2B4C 0%, #1A5F8B 100%);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(15,43,76,.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(15,43,76,.3);
+    }
+
+    .submit-btn:active:not(:disabled) { transform: translateY(0); }
+
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
     /* ── Frame ── */
     .section { margin-bottom: 24px; }
 
@@ -487,6 +604,156 @@ import { SettingsStore } from './stores/settings.store';
         </div>
       </div>
 
+      <!-- ─── Password ────────────────────────────────── -->
+      <div class="section">
+        <div class="card">
+          <div class="card-header">
+            <h3>Password</h3>
+            <p>Update your account password</p>
+          </div>
+          <div class="card-body">
+            @if (passwordSuccess()) {
+              <div class="success-msg" role="status">{{ passwordSuccess() }}</div>
+            }
+
+            @if (authStore.changePasswordError()) {
+              <div class="error-msg" role="alert">{{ authStore.changePasswordError() }}</div>
+            }
+
+            <form (ngSubmit)="onChangePassword()">
+              <div class="field">
+                <label class="field-label" for="settings-currentPassword">Current password</label>
+                <div class="input-wrap">
+                  <span class="input-icon">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                  </span>
+                  <input id="settings-currentPassword"
+                    [type]="showCurrent() ? 'text' : 'password'"
+                    [(ngModel)]="currentPassword" name="currentPassword" required
+                    class="input-field" placeholder="Enter current password"
+                  />
+                  <button type="button" class="toggle-pw" (click)="showCurrent.update(v => !v)" aria-label="Toggle current password visibility">
+                    @if (showCurrent()) {
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                      </svg>
+                    } @else {
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                      </svg>
+                    }
+                  </button>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="settings-newPassword">New password</label>
+                <div class="input-wrap">
+                  <span class="input-icon">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                  </span>
+                  <input id="settings-newPassword"
+                    [type]="showNew() ? 'text' : 'password'"
+                    [(ngModel)]="newPassword" name="newPassword" required
+                    class="input-field" placeholder="Min. 8 characters"
+                  />
+                  <button type="button" class="toggle-pw" (click)="showNew.update(v => !v)" aria-label="Toggle new password visibility">
+                    @if (showNew()) {
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                      </svg>
+                    } @else {
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                      </svg>
+                    }
+                  </button>
+                </div>
+                @if (newPassword()) {
+                  <div style="margin-top:8px;padding-left:4px;display:flex;flex-direction:column;gap:4px;font-size:12px;">
+                    <span [style.color]="hasMinLength() ? '#2E7D5A' : '#8C959E'">
+                      @if (hasMinLength()) { ✓ } @else { ○ } At least 8 characters
+                    </span>
+                    <span [style.color]="hasUpperCase() ? '#2E7D5A' : '#8C959E'">
+                      @if (hasUpperCase()) { ✓ } @else { ○ } At least 1 uppercase letter
+                    </span>
+                    <span [style.color]="hasNumber() ? '#2E7D5A' : '#8C959E'">
+                      @if (hasNumber()) { ✓ } @else { ○ } At least 1 number
+                    </span>
+                    <span [style.color]="hasSpecialChar() ? '#2E7D5A' : '#8C959E'">
+                      @if (hasSpecialChar()) { ✓ } @else { ○ } At least 1 special character
+                    </span>
+                  </div>
+
+                  @if (passwordStrength() > 0) {
+                    <div style="margin-top:10px;padding-left:4px;">
+                      <div style="height:4px;background:#E2E6EB;border-radius:4px;overflow:hidden;">
+                        <div [style.width]="strengthWidth()" [style.background]="strengthColor()"
+                             style="height:100%;border-radius:4px;transition:all 0.2s ease;"></div>
+                      </div>
+                      <p [style.color]="strengthColor()" style="font-size:11px;margin:4px 0 0 0;font-weight:600;">
+                        {{ strengthLabel() }}
+                      </p>
+                    </div>
+                  }
+                }
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="settings-confirmPassword">Confirm new password</label>
+                <div class="input-wrap">
+                  <span class="input-icon">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </span>
+                  <input id="settings-confirmPassword"
+                    [type]="showConfirm() ? 'text' : 'password'"
+                    [(ngModel)]="confirmPassword" name="confirmPassword" required
+                    class="input-field" placeholder="Repeat new password"
+                  />
+                  <button type="button" class="toggle-pw" (click)="showConfirm.update(v => !v)" aria-label="Toggle confirm password visibility">
+                    @if (showConfirm()) {
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                      </svg>
+                    } @else {
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                      </svg>
+                    }
+                  </button>
+                </div>
+                @if (confirmPassword() && newPassword() !== confirmPassword()) {
+                  <p style="font-size:12px;color:#B8543B;margin-top:6px;padding-left:4px;">Passwords do not match</p>
+                }
+              </div>
+
+              <button type="submit" class="submit-btn"
+                [disabled]="authStore.isChangingPassword() || !currentPassword() || !confirmPassword() || newPassword() !== confirmPassword() || !hasMinLength() || !hasUpperCase() || !hasNumber() || !hasSpecialChar()"
+              >
+                @if (authStore.isChangingPassword()) {
+                  <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Saving...
+                } @else {
+                  Update Password
+                }
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
       <!-- ─── Preferences ─────────────────────────────── -->
       <div class="section">
         <div class="card">
@@ -563,7 +830,48 @@ import { SettingsStore } from './stores/settings.store';
 export class SettingsComponent {
   readonly pwa = inject(PwaInstallService);
   readonly settingsStore = inject(SettingsStore);
+  readonly authStore = inject(AuthStore);
   readonly installing = signal(false);
+
+  // ── Password change signals ──
+  readonly currentPassword = signal('');
+  readonly newPassword = signal('');
+  readonly confirmPassword = signal('');
+  readonly showCurrent = signal(false);
+  readonly showNew = signal(false);
+  readonly showConfirm = signal(false);
+  readonly passwordSuccess = signal('');
+
+  readonly hasMinLength = computed(() => this.newPassword().length >= 8);
+  readonly hasUpperCase = computed(() => /[A-Z]/.test(this.newPassword()));
+  readonly hasNumber = computed(() => /[0-9]/.test(this.newPassword()));
+  readonly hasSpecialChar = computed(() => /[^a-zA-Z0-9]/.test(this.newPassword()));
+  readonly passwordStrength = computed(() =>
+    [this.hasMinLength(), this.hasUpperCase(), this.hasNumber(), this.hasSpecialChar].filter(Boolean).length
+  );
+  readonly strengthLabel = computed(() =>
+    ['', 'Weak', 'Fair', 'Good', 'Strong'][this.passwordStrength()]
+  );
+  readonly strengthColor = computed(() =>
+    ['#E2E6EB', '#B8543B', '#D68A3C', '#3A82B5', '#2E7D5A'][this.passwordStrength()]
+  );
+  readonly strengthWidth = computed(() => `${this.passwordStrength() * 25}%`);
+
+  async onChangePassword(): Promise<void> {
+    this.passwordSuccess.set('');
+    if (!this.currentPassword() || !this.newPassword() || this.newPassword() !== this.confirmPassword()) {
+      return;
+    }
+    try {
+      await this.authStore.changePassword(this.currentPassword(), this.newPassword());
+      this.passwordSuccess.set('Password updated successfully.');
+      this.currentPassword.set('');
+      this.newPassword.set('');
+      this.confirmPassword.set('');
+    } catch {
+      // error is already surfaced via authStore.changePasswordError()
+    }
+  }
 
   async install(): Promise<void> {
     this.installing.set(true);

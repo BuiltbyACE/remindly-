@@ -175,7 +175,7 @@ import { AppPermissionDirective } from '@shared/directives/app-permission/app-pe
           } @else {
             <div class="p-8 text-center">
               <p class="text-gray-500 mb-2">No documents found</p>
-              <a routerLink="/documents/upload" *appPermission="'documents.upload'"
+              <a routerLink="/documents/upload" *appPermission="'documents.create'"
                 class="text-sm text-blue-600 hover:text-blue-800 underline">Upload your first document</a>
             </div>
           }

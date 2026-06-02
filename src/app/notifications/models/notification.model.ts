@@ -22,6 +22,8 @@ export interface Notification {
 }
 
 export interface NotificationAcknowledgeRequest {
+  notification_id?: string;
+  status?: NotificationStatus;
   notes?: string;
 }
 

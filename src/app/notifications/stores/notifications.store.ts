@@ -4,6 +4,7 @@
  */
 
 import { computed, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
 import { lastValueFrom, Subscription } from 'rxjs';
 import { NotificationsService } from '../services/notifications.service';
@@ -272,8 +273,12 @@ export const NotificationsStore = signalStore(
           }
           return false;
         } catch (error) {
-          const message =
-            error instanceof Error ? error.message : 'Failed to dismiss notification';
+          let message = 'Failed to dismiss notification';
+          if (error instanceof HttpErrorResponse && error.error?.detail) {
+            message = error.error.detail;
+          } else if (error instanceof Error) {
+            message = error.message;
+          }
           toastService.error(message);
           return false;
         }
@@ -308,8 +313,12 @@ export const NotificationsStore = signalStore(
           }
           return false;
         } catch (error) {
-          const message =
-            error instanceof Error ? error.message : 'Failed to acknowledge notification';
+          let message = 'Failed to acknowledge notification';
+          if (error instanceof HttpErrorResponse && error.error?.detail) {
+            message = error.error.detail;
+          } else if (error instanceof Error) {
+            message = error.message;
+          }
           toastService.error(message);
           return false;
         }
@@ -318,12 +327,16 @@ export const NotificationsStore = signalStore(
       // Dismiss all unread notifications
       async dismissAllUnread(): Promise<void> {
         const unread = store.notifications().filter((n) => n.status === 'unread');
-        
+        let dismissed = 0;
+
         for (const notification of unread) {
-          await this.dismissNotification(notification.id);
+          const ok = await this.dismissNotification(notification.id);
+          if (ok) dismissed++;
         }
-        
-        toastService.success(`${unread.length} notifications marked as read`);
+
+        if (dismissed > 0) {
+          toastService.success(`${dismissed} ${dismissed === 1 ? 'notification' : 'notifications'} marked as read`);
+        }
       },
 
       // Reset store state

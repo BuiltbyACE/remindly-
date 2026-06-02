@@ -16,6 +16,7 @@ export interface UserProfile {
   roles?: string[];
   permissions?: string[];
   super_admin?: boolean;
+  must_change_password?: boolean;
   organization_id?: string;
   membership_id?: string;
 }
@@ -27,7 +28,14 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   access_token: string;
+  refresh_token: string;
+  expires_in: number;
   user: UserProfile;
+}
+
+export interface ChangePasswordRequest {
+  current_password: string;
+  new_password: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -38,5 +46,12 @@ export class AuthService extends BaseApiClient {
 
   getCurrentUser(): Observable<UserProfile> {
     return this.get<UserProfile>('/api/v1/auth/me');
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<boolean> {
+    return this.post<boolean>('/api/v1/auth/change-password', {
+      current_password: currentPassword,
+      new_password: newPassword,
+    });
   }
 }

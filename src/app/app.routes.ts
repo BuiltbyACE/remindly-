@@ -49,7 +49,6 @@ export const routes: Routes = [
       {
         path: 'settings',
         loadChildren: () => import('./settings/settings.routes').then(m => m.SETTINGS_ROUTES),
-        canActivate: [permissionGuard('organizations.manage')],
       },
       {
         path: 'documents',

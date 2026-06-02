@@ -1,11 +1,10 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthStore } from '../stores/auth.store';
-import { RbacStore } from '../stores/rbac.store';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-change-password',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule],
   styles: [`
@@ -21,7 +20,6 @@ import { RbacStore } from '../stores/rbac.store';
       background: linear-gradient(165deg, #0A1929 0%, #0F2B4C 35%, #1A5F8B 65%, #2D7A9F 100%);
     }
 
-    /* ── Organic wave overlays ── */
     .wave-layer {
       position: absolute;
       inset: 0;
@@ -55,7 +53,6 @@ import { RbacStore } from '../stores/rbac.store';
       opacity: 0.04;
     }
 
-    /* ── Subtle horizontal line pattern ── */
     .lines {
       position: absolute;
       inset: 0;
@@ -84,7 +81,6 @@ import { RbacStore } from '../stores/rbac.store';
       );
     }
 
-    /* ── Content wrapper ── */
     .content {
       position: relative;
       z-index: 10;
@@ -94,7 +90,6 @@ import { RbacStore } from '../stores/rbac.store';
       animation: fadeUp 0.6s ease-out;
     }
 
-    /* ── Logo area ── */
     .logo-area {
       text-align: center;
       margin-bottom: 32px;
@@ -142,7 +137,6 @@ import { RbacStore } from '../stores/rbac.store';
       margin: 0;
     }
 
-    /* ── Card ── */
     .card {
       background: #FCFAF7;
       border-radius: 20px;
@@ -171,7 +165,6 @@ import { RbacStore } from '../stores/rbac.store';
       margin: 0;
     }
 
-    /* ── Form ── */
     .field {
       margin-bottom: 20px;
     }
@@ -245,7 +238,6 @@ import { RbacStore } from '../stores/rbac.store';
 
     .toggle-pw:hover { color: #3A82B5; }
 
-    /* ── Error ── */
     .error-msg {
       padding: 12px 16px;
       background: #FDF6F4;
@@ -257,7 +249,17 @@ import { RbacStore } from '../stores/rbac.store';
       text-align: center;
     }
 
-    /* ── Button ── */
+    .success-msg {
+      padding: 12px 16px;
+      background: #F0F9F4;
+      border: 1px solid #C8E6D0;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #2E7D5A;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
     .submit-btn {
       width: 100%;
       padding: 14px 24px;
@@ -291,35 +293,11 @@ import { RbacStore } from '../stores/rbac.store';
       cursor: not-allowed;
     }
 
-    /* ── Divider ── */
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 24px 0;
-    }
-
-    .divider-line {
-      flex: 1;
-      height: 1px;
-      background: #E2E6EB;
-    }
-
-    .divider-text {
-      font-size: 11px;
-      color: #8C959E;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      white-space: nowrap;
-    }
-
-    /* ── Animation ── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(16px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── Mobile ── */
     @media (max-width: 640px) {
       .page {
         align-items: flex-start;
@@ -367,7 +345,6 @@ import { RbacStore } from '../stores/rbac.store';
   `],
   template: `
     <div class="page">
-      <!-- Organic wave overlays -->
       <div class="wave-layer">
         <div class="wave wave-1"></div>
         <div class="wave wave-2"></div>
@@ -376,9 +353,7 @@ import { RbacStore } from '../stores/rbac.store';
       <div class="lines"></div>
       <div class="lines-vert"></div>
 
-      <!-- Content -->
       <div class="content">
-        <!-- Logo -->
         <div class="logo-area">
           <div class="logo-ring">
             <div class="logo-ring-inner">
@@ -394,12 +369,15 @@ import { RbacStore } from '../stores/rbac.store';
           <p class="brand-tagline">Executive Command Center</p>
         </div>
 
-        <!-- Card -->
         <div class="card">
           <div class="card-header">
-            <h2 class="card-title">Welcome back</h2>
-            <p class="card-sub">Sign in to your account</p>
+            <h2 class="card-title">Change password</h2>
+            <p class="card-sub">Set a new password for your account</p>
           </div>
+
+          @if (successMessage()) {
+            <div class="success-msg" role="status">{{ successMessage() }}</div>
+          }
 
           @if (error()) {
             <div class="error-msg" role="alert">{{ error() }}</div>
@@ -407,27 +385,7 @@ import { RbacStore } from '../stores/rbac.store';
 
           <form (ngSubmit)="onSubmit()">
             <div class="field">
-              <label class="field-label" for="email">Email</label>
-              <div class="input-wrap">
-                <span class="input-icon">
-                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                  </svg>
-                </span>
-                <input
-                  id="email"
-                  type="email"
-                  [(ngModel)]="email"
-                  name="email"
-                  required
-                  class="input-field"
-                  placeholder="you@company.com"
-                />
-              </div>
-            </div>
-
-            <div class="field">
-              <label class="field-label" for="password">Password</label>
+              <label class="field-label" for="currentPassword">Current password</label>
               <div class="input-wrap">
                 <span class="input-icon">
                   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -435,16 +393,16 @@ import { RbacStore } from '../stores/rbac.store';
                   </svg>
                 </span>
                 <input
-                  id="password"
-                  [type]="showPassword() ? 'text' : 'password'"
-                  [(ngModel)]="password"
-                  name="password"
+                  id="currentPassword"
+                  [type]="showCurrent() ? 'text' : 'password'"
+                  [(ngModel)]="currentPassword"
+                  name="currentPassword"
                   required
                   class="input-field"
-                  placeholder="Enter your password"
+                  placeholder="Enter current password"
                 />
-                <button type="button" class="toggle-pw" (click)="showPassword.update(v => !v)" aria-label="Toggle password visibility">
-                  @if (showPassword()) {
+                <button type="button" class="toggle-pw" (click)="showCurrent.update(v => !v)" aria-label="Toggle current password visibility">
+                  @if (showCurrent()) {
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
                     </svg>
@@ -458,46 +416,178 @@ import { RbacStore } from '../stores/rbac.store';
               </div>
             </div>
 
+            <div class="field">
+              <label class="field-label" for="newPassword">New password</label>
+              <div class="input-wrap">
+                <span class="input-icon">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                  </svg>
+                </span>
+                <input
+                  id="newPassword"
+                  [type]="showNew() ? 'text' : 'password'"
+                  [(ngModel)]="newPassword"
+                  name="newPassword"
+                  required
+                  minlength="8"
+                  class="input-field"
+                  placeholder="Min. 8 characters"
+                />
+                <button type="button" class="toggle-pw" (click)="showNew.update(v => !v)" aria-label="Toggle new password visibility">
+                  @if (showNew()) {
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                    </svg>
+                  } @else {
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                  }
+                </button>
+              </div>
+              @if (newPassword()) {
+                <div style="margin-top:8px;padding-left:4px;display:flex;flex-direction:column;gap:4px;font-size:12px;">
+                  <span [style.color]="hasMinLength() ? '#2E7D5A' : '#8C959E'">
+                    @if (hasMinLength()) { ✓ } @else { ○ } At least 8 characters
+                  </span>
+                  <span [style.color]="hasUpperCase() ? '#2E7D5A' : '#8C959E'">
+                    @if (hasUpperCase()) { ✓ } @else { ○ } At least 1 uppercase letter
+                  </span>
+                  <span [style.color]="hasNumber() ? '#2E7D5A' : '#8C959E'">
+                    @if (hasNumber()) { ✓ } @else { ○ } At least 1 number
+                  </span>
+                  <span [style.color]="hasSpecialChar() ? '#2E7D5A' : '#8C959E'">
+                    @if (hasSpecialChar()) { ✓ } @else { ○ } At least 1 special character
+                  </span>
+                </div>
+
+                @if (passwordStrength() > 0) {
+                  <div style="margin-top:10px;padding-left:4px;">
+                    <div style="height:4px;background:#E2E6EB;border-radius:4px;overflow:hidden;">
+                      <div [style.width]="strengthWidth()" [style.background]="strengthColor()"
+                           style="height:100%;border-radius:4px;transition:all 0.2s ease;"></div>
+                    </div>
+                    <p [style.color]="strengthColor()" style="font-size:11px;margin:4px 0 0 0;font-weight:600;">
+                      {{ strengthLabel() }}
+                    </p>
+                  </div>
+                }
+              }
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="confirmPassword">Confirm new password</label>
+              <div class="input-wrap">
+                <span class="input-icon">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </span>
+                <input
+                  id="confirmPassword"
+                  [type]="showConfirm() ? 'text' : 'password'"
+                  [(ngModel)]="confirmPassword"
+                  name="confirmPassword"
+                  required
+                  class="input-field"
+                  placeholder="Repeat new password"
+                />
+                <button type="button" class="toggle-pw" (click)="showConfirm.update(v => !v)" aria-label="Toggle confirm password visibility">
+                  @if (showConfirm()) {
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                    </svg>
+                  } @else {
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                  }
+                </button>
+              </div>
+              @if (confirmPassword() && newPassword() !== confirmPassword()) {
+                <p style="font-size:12px;color:#B8543B;margin-top:6px;padding-left:4px;">Passwords do not match</p>
+              }
+            </div>
+
             <button
               type="submit"
               class="submit-btn"
-              [disabled]="isLoading() || !email() || !password()"
+              [disabled]="isChangingPassword() || !currentPassword() || !confirmPassword() || newPassword() !== confirmPassword() || !hasMinLength() || !hasUpperCase() || !hasNumber() || !hasSpecialChar()"
             >
-              @if (isLoading()) {
+              @if (isChangingPassword()) {
                 <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Signing in...
+                Changing password...
               } @else {
-                Sign In
+                Change password
               }
             </button>
           </form>
         </div>
-
       </div>
     </div>
   `,
 })
-export class LoginComponent {
+export class ChangePasswordComponent {
   private readonly authStore = inject(AuthStore);
-  private readonly rbacStore = inject(RbacStore);
   private readonly router = inject(Router);
 
-  readonly email = signal('');
-  readonly password = signal('');
-  readonly showPassword = signal(false);
-  readonly isLoading = this.authStore.isLoading;
-  readonly error = this.authStore.error;
+  readonly currentPassword = signal('');
+  readonly newPassword = signal('');
+  readonly confirmPassword = signal('');
+  readonly showCurrent = signal(false);
+  readonly showNew = signal(false);
+  readonly showConfirm = signal(false);
+  readonly successMessage = signal('');
+  readonly isChangingPassword = this.authStore.isChangingPassword;
+  readonly error = this.authStore.changePasswordError;
+
+  readonly hasMinLength = computed(() => this.newPassword().length >= 8);
+  readonly hasUpperCase = computed(() => /[A-Z]/.test(this.newPassword()));
+  readonly hasNumber = computed(() => /[0-9]/.test(this.newPassword()));
+  readonly hasSpecialChar = computed(() => /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\;'\/`~]/.test(this.newPassword()));
+
+  readonly passwordStrength = computed(() => {
+    let score = 0;
+    if (this.hasMinLength()) score++;
+    if (this.hasUpperCase()) score++;
+    if (this.hasNumber()) score++;
+    if (this.hasSpecialChar()) score++;
+    return score;
+  });
+
+  readonly strengthLabel = computed(() => {
+    const s = this.passwordStrength();
+    if (s === 0) return '';
+    if (s === 1) return 'Weak';
+    if (s === 2) return 'Fair';
+    if (s === 3) return 'Good';
+    return 'Strong';
+  });
+
+  readonly strengthColor = computed(() => {
+    const s = this.passwordStrength();
+    if (s === 0) return '';
+    if (s === 1) return '#B8543B';
+    if (s === 2) return '#D4A043';
+    if (s === 3) return '#5A9ECF';
+    return '#2E7D5A';
+  });
+
+  readonly strengthWidth = computed(() => `${(this.passwordStrength() / 4) * 100}%`);
 
   async onSubmit(): Promise<void> {
-    if (!this.email() || !this.password()) return;
+    if (!this.currentPassword() || !this.confirmPassword() || this.newPassword() !== this.confirmPassword() || !this.hasMinLength() || !this.hasUpperCase() || !this.hasNumber() || !this.hasSpecialChar()) return;
 
     try {
-      await this.authStore.login(this.email(), this.password());
-      const target = this.authStore.mustChangePasswordFlag() ? '/auth/change-password' : '/dashboard';
-      await this.router.navigate([target]);
+      await this.authStore.changePassword(this.currentPassword(), this.newPassword());
+      this.successMessage.set('Password changed successfully. Redirecting...');
+      setTimeout(() => this.router.navigate(['/dashboard']), 1500);
     } catch {
       // Error handled in store
     }

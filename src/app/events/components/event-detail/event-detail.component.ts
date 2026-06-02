@@ -423,18 +423,18 @@ export class EventDetailComponent implements OnInit, OnDestroy {
 
   readonly event = () => this.store.selectedEvent();
 
-  readonly canEdit = () => this.rbacStore.hasPermission()('events.write');
+  readonly canEdit = () => this.rbacStore.hasPermission()('events.create');
   readonly canDelete = () => this.rbacStore.hasPermission()('events.delete');
   readonly canApprove = () => this.rbacStore.hasPermission()('events.approve');
 
   readonly ACTION_PERMISSIONS: Record<string, string> = {
-    request_approval: 'events.write',
+    request_approval: 'events.create',
     approve: 'events.approve',
     reject: 'events.approve',
-    schedule: 'events.write',
-    activate: 'events.write',
-    complete: 'events.write',
-    cancel: 'events.write',
+    schedule: 'events.create',
+    activate: 'events.create',
+    complete: 'events.create',
+    cancel: 'events.create',
   };
 
   readonly availableActions = () => {
