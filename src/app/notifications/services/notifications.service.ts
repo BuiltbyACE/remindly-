@@ -62,6 +62,8 @@ export class NotificationsService extends BaseApiClient {
     return this.get<NotificationListResponse>('/api/v1/notifications/my', {
       page,
       page_size: pageSize,
+      status: filters?.status,
+      priority: filters?.priority,
       _t: Date.now(),
       'ngsw-bypass': true,
     }).pipe(map(data => fromApiListResponse(data)));

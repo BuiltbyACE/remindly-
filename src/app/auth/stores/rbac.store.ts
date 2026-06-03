@@ -56,16 +56,18 @@ export const RbacStore = signalStore(
      * falling back to a dedicated API call if not provided.
      */
     async hydratePermissions(permissionsFromAuth?: string[], rolesFromAuth?: string[]): Promise<void> {
-      // Primary: permissions from /auth/me (passed by AuthStore)
+      // Primary: roles and permissions from auth context
+      let loaded = false;
       if (permissionsFromAuth && permissionsFromAuth.length > 0) {
         sessionStorage.setItem('remindly_permissions', JSON.stringify(permissionsFromAuth));
         patchState(store, { permissions: permissionsFromAuth, isLoaded: true });
-        if (rolesFromAuth && rolesFromAuth.length > 0) {
-          sessionStorage.setItem('remindly_roles', JSON.stringify(rolesFromAuth));
-          patchState(store, { roleNames: rolesFromAuth });
-        }
-        return;
+        loaded = true;
       }
+      if (rolesFromAuth && rolesFromAuth.length > 0) {
+        sessionStorage.setItem('remindly_roles', JSON.stringify(rolesFromAuth));
+        patchState(store, { roleNames: rolesFromAuth });
+      }
+      if (loaded) return;
 
       // Fallback: dedicated RBAC API call
       try {

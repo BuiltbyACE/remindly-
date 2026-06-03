@@ -62,17 +62,6 @@ export const AuthStore = signalStore(
             Notification.requestPermission().catch(() => {});
           }
 
-          const name = user.full_name;
-          if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(sw => {
-              sw.showNotification('Welcome to Remindly', {
-                body: `Logged in as ${name}`,
-                icon: '/icons/icon-192x192.png',
-              });
-            }).catch(() => {});
-          }
-          toastService.success(`Welcome back, ${name}!`);
-
           try {
             await lastValueFrom(
               settingsService.updateNotificationPreferences({
@@ -112,18 +101,23 @@ export const AuthStore = signalStore(
           });
 
           const name = result.user.full_name;
-          const notificationPerm = Notification.permission === 'default'
-            ? await Notification.requestPermission()
-            : Notification.permission;
-          if (notificationPerm === 'granted' && 'serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(sw => {
-              sw.showNotification('Welcome to Remindly', {
-                body: `Logged in as ${name}`,
-                icon: '/icons/icon-192x192.png',
-              });
-            }).catch(() => {});
-          } else if (notificationPerm === 'denied') {
-            toastService.warning('Notifications are blocked. Enable them in your browser settings for reminder alerts.');
+          // Show native notification only once per tab session (not on page refresh)
+          const wasAlreadyLoggedIn = sessionStorage.getItem('remindly_session_active');
+          if (!wasAlreadyLoggedIn) {
+            sessionStorage.setItem('remindly_session_active', 'true');
+            const notificationPerm = Notification.permission === 'default'
+              ? await Notification.requestPermission()
+              : Notification.permission;
+            if (notificationPerm === 'granted' && 'serviceWorker' in navigator) {
+              navigator.serviceWorker.ready.then(sw => {
+                sw.showNotification('Welcome to Remindly', {
+                  body: `Logged in as ${name}`,
+                  icon: '/icons/icon-192x192.png',
+                });
+              }).catch(() => {});
+            } else if (notificationPerm === 'denied') {
+              toastService.warning('Notifications are blocked. Enable them in your browser settings for reminder alerts.');
+            }
           }
           toastService.success(`Welcome back, ${name}!`);
 
