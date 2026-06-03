@@ -326,43 +326,27 @@ export const NotificationsStore = signalStore(
 
       // Dismiss all unread notifications
       async dismissAllUnread(): Promise<void> {
-        const unreadNotifications = store.notifications().filter(n => n.status === 'unread');
-        if (unreadNotifications.length === 0) return;
+        try {
+          const result = await lastValueFrom(
+            notificationsService.markAllRead()
+          );
+          const count = result?.count ?? 0;
 
-        // Optimistically update UI immediately
-        const updatedNotifications = store.notifications().map((n) =>
-          n.status === 'unread' ? { ...n, status: 'acknowledged' as const } : n
-        );
-        patchState(store, { notifications: updatedNotifications });
-
-        const results = await Promise.allSettled(
-          unreadNotifications.map(n =>
-            lastValueFrom(notificationsService.acknowledgeNotification(n.id))
-          )
-        );
-
-        let finalNotifications = [...store.notifications()];
-        let succeeded = 0;
-        let failed = 0;
-
-        results.forEach((result, index) => {
-          const original = unreadNotifications[index];
-          if (result.status === 'fulfilled') {
-            succeeded++;
-            finalNotifications = finalNotifications.map(n => n.id === original.id ? result.value : n);
-          } else {
-            failed++;
-            finalNotifications = finalNotifications.map(n => n.id === original.id ? original : n);
+          if (count > 0) {
+            const updatedNotifications = store.notifications().map((n) =>
+              n.status === 'unread' ? { ...n, status: 'acknowledged' as const } : n
+            );
+            patchState(store, { notifications: updatedNotifications });
+            toastService.success(`${count} ${count === 1 ? 'notification' : 'notifications'} marked as read`);
           }
-        });
-
-        patchState(store, { notifications: finalNotifications });
-
-        if (succeeded > 0) {
-          toastService.success(`${succeeded} notification${succeeded > 1 ? 's' : ''} marked as read`);
-        }
-        if (failed > 0) {
-          toastService.error(`${failed} notification${failed > 1 ? 's' : ''} failed to mark as read`);
+        } catch (error) {
+          let message = 'Failed to mark all as read';
+          if (error instanceof HttpErrorResponse && error.error?.detail) {
+            message = error.error.detail;
+          } else if (error instanceof Error) {
+            message = error.message;
+          }
+          toastService.error(message);
         }
       },
 

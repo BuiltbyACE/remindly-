@@ -78,7 +78,7 @@ export class NotificationsService extends BaseApiClient {
     notificationId: string,
     request?: NotificationAcknowledgeRequest
   ): Observable<Notification> {
-    const body: NotificationAcknowledgeRequest = { notification_id: notificationId, status: 'read', ...request };
+    const body: NotificationAcknowledgeRequest = { notification_id: notificationId, ...request };
     return this.post<unknown>(`/api/v1/notifications/${notificationId}/acknowledge`, body)
       .pipe(map(data => fromApiNotification(data)));
   }
