@@ -7,6 +7,7 @@ import { ToastComponent } from '@shared/components/toast/toast.component';
 import { AuthStore } from '../../auth/stores/auth.store';
 import { OrganizationStore } from '../../organizations/stores/organization.store';
 import { WebSocketStore } from '../../websocket/websocket.store';
+import { OfflineSyncService } from '../../core/services/offline-sync.service';
 
 @Component({
   selector: 'app-shell',
@@ -87,6 +88,22 @@ import { WebSocketStore } from '../../websocket/websocket.store';
     @media (max-width: 1023px) {
       .backdrop { display: none !important; }
     }
+
+    .offline-banner {
+      background-color: var(--color-warning);
+      color: #000;
+      text-align: center;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
   `],
   template: `
     <div class="shell">
@@ -97,6 +114,14 @@ import { WebSocketStore } from '../../websocket/websocket.store';
 
       <!-- Main content column -->
       <div class="main-area">
+        @if (!offlineSync.isOnline()) {
+          <div class="offline-banner">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.163a1.5 1.5 0 013.111 1.62m-5.46-3.841L3 3m18 18L3 3" />
+            </svg>
+            Working Offline - changes will sync later
+          </div>
+        }
         <app-topbar (toggleSidebar)="onToggleSidebar()" />
         <main id="main-content">
           <router-outlet />
@@ -114,6 +139,7 @@ export class ShellComponent implements OnInit, OnDestroy {
   private readonly authStore = inject(AuthStore);
   private readonly orgStore = inject(OrganizationStore);
   private readonly wsStore = inject(WebSocketStore);
+  protected readonly offlineSync = inject(OfflineSyncService);
   private visibilityHandler: (() => void) | null = null;
 
   protected onToggleSidebar(): void {

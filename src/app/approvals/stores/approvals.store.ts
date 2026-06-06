@@ -99,9 +99,9 @@ export const ApprovalsStore = signalStore(
     
     // Secretary role checker
     const isSecretary = computed(() => {
-      const hasExecutivePerm = rbacStore.hasPermission()('audit.read');
-      const hasAdminPerm = rbacStore.hasPermission()('events.approve') && !hasExecutivePerm;
-      return !hasExecutivePerm && !hasAdminPerm;
+      const hasAdminPerm = rbacStore.hasPermission()('audit.read');
+      const hasExecPerm = rbacStore.hasPermission()('events.approve');
+      return !hasAdminPerm && !hasExecPerm;
     });
     
     return {

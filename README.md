@@ -86,7 +86,6 @@ src/
 │   ├── reminders/      # Reminder policy management
 │   ├── settings/       # User & organization settings, PWA install
 │   ├── shared/         # Directives, pipes, reusable components (confirm-dialog, toast, etc.)
-│   ├── voice/          # Voice interface & history
 │   └── websocket/      # WebSocket service & store
 ├── environments/       # environment.ts / environment.production.ts
 ├── styles/             # tokens.css (design tokens)
@@ -150,7 +149,7 @@ Permissions are fetched from `GET /api/v1/rbac/my` on login and cached in `sessi
 |------|-------------|
 | **Secretary** | Create/edit own events, view own non-approved events |
 | **Executive** | Full CRUD on all events, approve/reject/delete, full document access |
-| **Admin** | All Executive + `admin.access` (user/org/member management) |
+| **Super Admin** | All Executive + `admin.access` (user/org/member management) |
 
 ---
 
@@ -171,7 +170,6 @@ The frontend expects your backend to serve these endpoints **under `apiBaseUrl`*
 | `/api/v1/push/**` | Push subscription (VAPID public key at `GET /push/vapid-key`) |
 | `/api/v1/ai/**` | AI briefing |
 | `/api/v1/analytics/**` | Analytics data |
-| `/api/v1/voice/**` | Voice interface |
 | `/api/v1/integrations/**` | Integration settings |
 | `/api/v1/audit/**` | Audit log |
 | `/api/v1/settings/**` | User & organization settings |

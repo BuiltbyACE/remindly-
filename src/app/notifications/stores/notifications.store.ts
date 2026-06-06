@@ -10,6 +10,8 @@ import { lastValueFrom, Subscription } from 'rxjs';
 import { NotificationsService } from '../services/notifications.service';
 import { ToastService } from '@shared/components/toast/toast.service';
 import { WebSocketStore } from '../../websocket/websocket.store';
+import { OfflineSyncService } from '../../core/services/offline-sync.service';
+import { IndexedDbService } from '../../core/services/indexed-db.service';
 import type {
   Notification,
   NotificationPriority,
@@ -222,8 +224,28 @@ export const NotificationsStore = signalStore(
       // Load notifications
       async loadNotifications(): Promise<void> {
         patchState(store, { loading: true, error: null });
+        
+        const offlineSyncService = inject(OfflineSyncService);
+        const indexedDb = inject(IndexedDbService);
 
         try {
+          if (!offlineSyncService.isOnline()) {
+            // Load from cache if offline
+            const cached = await indexedDb.get<any>('cache', 'notifications_list');
+            if (cached) {
+              patchState(store, {
+                notifications: cached.items ?? [],
+                pagination: {
+                  page: cached.page ?? 1,
+                  pageSize: cached.page_size ?? store.pagination().pageSize,
+                  total: cached.total ?? 0,
+                },
+                loading: false,
+              });
+              return;
+            }
+          }
+
           const response = await lastValueFrom(
             notificationsService.listMyNotifications(
               store.filters(),
@@ -231,6 +253,11 @@ export const NotificationsStore = signalStore(
               store.pagination().pageSize
             )
           );
+          
+          // Cache the response
+          if (response) {
+            await indexedDb.set('cache', 'notifications_list', response);
+          }
 
           patchState(store, {
             notifications: response?.items ?? [],
@@ -245,34 +272,70 @@ export const NotificationsStore = signalStore(
           const message =
             error instanceof Error ? error.message : 'Failed to load notifications';
           patchState(store, { error: message, loading: false });
+          
+          // If network failed, try cache as fallback
+          try {
+            const cached = await indexedDb.get<any>('cache', 'notifications_list');
+            if (cached) {
+              patchState(store, {
+                notifications: cached.items ?? [],
+                loading: false,
+                error: null
+              });
+            }
+          } catch (e) { /* ignore fallback error */ }
         }
       },
 
       // Mark notification as read (dismiss)
       async dismissNotification(notificationId: string): Promise<boolean> {
+        const offlineSyncService = inject(OfflineSyncService);
+        const indexedDb = inject(IndexedDbService);
+
+        // Optimistic UI Update
+        const notification = store.notifications().find((n) => n.id === notificationId);
+        if (notification) {
+          const optimisticNotif = { ...notification, status: 'acknowledged' as const };
+          const updatedNotifications = store
+            .notifications()
+            .map((n) => (n.id === notificationId ? optimisticNotif : n));
+
+          patchState(store, {
+            notifications: updatedNotifications,
+            selectedNotification:
+              store.selectedNotification()?.id === notificationId
+                ? optimisticNotif
+                : store.selectedNotification(),
+          });
+        }
+
+        if (!offlineSyncService.isOnline()) {
+          await offlineSyncService.queueAction('ACKNOWLEDGE_NOTIFICATION', { notificationId });
+          return true;
+        }
+
         try {
-          const notification = await lastValueFrom(
+          const result = await lastValueFrom(
             notificationsService.acknowledgeNotification(notificationId)
           );
-
-          if (notification) {
-            // Update in the list
-            const updatedNotifications = store
-              .notifications()
-              .map((n) => (n.id === notificationId ? notification : n));
-
-            patchState(store, {
-              notifications: updatedNotifications,
-              selectedNotification:
-                store.selectedNotification()?.id === notificationId
-                  ? notification
-                  : store.selectedNotification(),
-            });
-
-            return true;
+          
+          if (result) {
+            // Update cache after successful dismiss
+            const cacheResponse = await indexedDb.get<any>('cache', 'notifications_list');
+            if (cacheResponse) {
+              cacheResponse.items = cacheResponse.items.map((n: any) => n.id === notificationId ? result : n);
+              await indexedDb.set('cache', 'notifications_list', cacheResponse);
+            }
           }
-          return false;
+
+          return !!result;
         } catch (error) {
+          // Revert optimistic update on failure
+          if (notification) {
+            const reverted = store.notifications().map((n) => (n.id === notificationId ? notification : n));
+            patchState(store, { notifications: reverted });
+          }
+          
           let message = 'Failed to dismiss notification';
           if (error instanceof HttpErrorResponse && error.error?.detail) {
             message = error.error.detail;
@@ -289,30 +352,55 @@ export const NotificationsStore = signalStore(
         notificationId: string,
         notes?: string
       ): Promise<boolean> {
+        const offlineSyncService = inject(OfflineSyncService);
+        const indexedDb = inject(IndexedDbService);
+
+        // Optimistic UI Update
+        const notification = store.notifications().find((n) => n.id === notificationId);
+        if (notification) {
+          const optimisticNotif = { ...notification, status: 'acknowledged' as const };
+          const updatedNotifications = store
+            .notifications()
+            .map((n) => (n.id === notificationId ? optimisticNotif : n));
+
+          patchState(store, {
+            notifications: updatedNotifications,
+            selectedNotification:
+              store.selectedNotification()?.id === notificationId
+                ? optimisticNotif
+                : store.selectedNotification(),
+          });
+        }
+
+        if (!offlineSyncService.isOnline()) {
+          await offlineSyncService.queueAction('ACKNOWLEDGE_NOTIFICATION', { notificationId, notes });
+          toastService.success('Notification acknowledged (Offline)');
+          return true;
+        }
+
         try {
-          const notification = await lastValueFrom(
+          const result = await lastValueFrom(
             notificationsService.acknowledgeNotification(notificationId, { notes })
           );
 
-          if (notification) {
-            // Update in the list
-            const updatedNotifications = store
-              .notifications()
-              .map((n) => (n.id === notificationId ? notification : n));
-
-            patchState(store, {
-              notifications: updatedNotifications,
-              selectedNotification:
-                store.selectedNotification()?.id === notificationId
-                  ? notification
-                  : store.selectedNotification(),
-            });
-
+          if (result) {
+            // Update cache after successful dismiss
+            const cacheResponse = await indexedDb.get<any>('cache', 'notifications_list');
+            if (cacheResponse) {
+              cacheResponse.items = cacheResponse.items.map((n: any) => n.id === notificationId ? result : n);
+              await indexedDb.set('cache', 'notifications_list', cacheResponse);
+            }
             toastService.success('Notification acknowledged');
-            return true;
           }
-          return false;
+
+          return !!result;
         } catch (error) {
+          // Revert optimistic update on failure
+          if (notification) {
+            const reverted = store.notifications().map((n) => (n.id === notificationId ? notification : n));
+            patchState(store, { notifications: reverted });
+          }
+          
           let message = 'Failed to acknowledge notification';
           if (error instanceof HttpErrorResponse && error.error?.detail) {
             message = error.error.detail;
@@ -326,6 +414,21 @@ export const NotificationsStore = signalStore(
 
       // Dismiss all unread notifications
       async dismissAllUnread(): Promise<void> {
+        const offlineSyncService = inject(OfflineSyncService);
+        const indexedDb = inject(IndexedDbService);
+
+        // Optimistic Update
+        const updatedNotifications = store.notifications().map((n) =>
+          n.status === 'unread' ? { ...n, status: 'acknowledged' as const } : n
+        );
+        patchState(store, { notifications: updatedNotifications });
+
+        if (!offlineSyncService.isOnline()) {
+          await offlineSyncService.queueAction('DISMISS_ALL', {});
+          toastService.success('All marked as read (Offline)');
+          return;
+        }
+
         try {
           const result = await lastValueFrom(
             notificationsService.markAllRead()
@@ -333,10 +436,12 @@ export const NotificationsStore = signalStore(
           const count = result?.count ?? 0;
 
           if (count > 0) {
-            const updatedNotifications = store.notifications().map((n) =>
-              n.status === 'unread' ? { ...n, status: 'acknowledged' as const } : n
-            );
-            patchState(store, { notifications: updatedNotifications });
+            // Update cache
+            const cacheResponse = await indexedDb.get<any>('cache', 'notifications_list');
+            if (cacheResponse) {
+              cacheResponse.items = cacheResponse.items.map((n: any) => n.status === 'unread' ? { ...n, status: 'acknowledged' } : n);
+              await indexedDb.set('cache', 'notifications_list', cacheResponse);
+            }
             toastService.success(`${count} ${count === 1 ? 'notification' : 'notifications'} marked as read`);
           }
         } catch (error) {

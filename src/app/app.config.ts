@@ -36,7 +36,8 @@ export const appConfig: ApplicationConfig = {
       ]),
     ),
     provideServiceWorker('sw.js', {
-      registrationStrategy: 'registerImmediately',
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000',
     }),
     {
       provide: API_CONFIG,
@@ -50,14 +51,6 @@ export const appConfig: ApplicationConfig = {
       useFactory: () => {
         const authStore = inject(AuthStore);
         return () => authStore.hydrateFromStorage();
-      },
-      multi: true,
-    },
-    {
-      provide: APP_INITIALIZER,
-      useFactory: () => {
-        const pushService = inject(PushSubscriptionService);
-        return () => pushService.initialize();
       },
       multi: true,
     },

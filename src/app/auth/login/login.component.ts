@@ -391,7 +391,7 @@ import { RbacStore } from '../stores/rbac.store';
             </div>
           </div>
           <h1 class="brand-name">remindly</h1>
-          <p class="brand-tagline">Executive Command Center</p>
+          <p class="brand-tagline">Admin Command Center</p>
         </div>
 
         <!-- Card -->

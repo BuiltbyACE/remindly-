@@ -276,9 +276,9 @@ export class TodayScheduleComponent {
 
   readonly todaysEvents = computed(() => {
     // Check if user is secretary
-    const hasExecutivePerm = this.rbacStore.hasPermission()('audit.read');
-    const hasAdminPerm = this.rbacStore.hasPermission()('events.approve') && !hasExecutivePerm;
-    const isSecretary = !hasExecutivePerm && !hasAdminPerm;
+    const hasAdminPerm = this.rbacStore.hasPermission()('audit.read');
+    const hasExecPerm = this.rbacStore.hasPermission()('events.approve');
+    const isSecretary = !hasAdminPerm && !hasExecPerm;
     
     let events = this.eventsStore.events();
     
@@ -299,9 +299,9 @@ export class TodayScheduleComponent {
 
   readonly upcomingEvents = computed(() => {
     // Check if user is secretary
-    const hasExecutivePerm = this.rbacStore.hasPermission()('audit.read');
-    const hasAdminPerm = this.rbacStore.hasPermission()('events.approve') && !hasExecutivePerm;
-    const isSecretary = !hasExecutivePerm && !hasAdminPerm;
+    const hasAdminPerm = this.rbacStore.hasPermission()('audit.read');
+    const hasExecPerm = this.rbacStore.hasPermission()('events.approve');
+    const isSecretary = !hasAdminPerm && !hasExecPerm;
     
     let events = this.eventsStore.events();
     

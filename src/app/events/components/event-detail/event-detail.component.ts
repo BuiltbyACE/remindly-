@@ -441,19 +441,19 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     const event = this.event();
     if (!event) return [];
     const hasPermission = this.rbacStore.hasPermission();
-    const isExecutive = hasPermission('audit.read');
+    const isAdmin = hasPermission('audit.read');
 
     let actions = getAvailableActions(event.status);
-    if (isExecutive && event.status === 'draft') {
+    if (isAdmin && event.status === 'draft') {
       actions = [...actions, 'approve'];
     }
 
     return actions.filter(action => {
       if (action === 'request_approval') {
-        return !isExecutive;
+        return !isAdmin;
       }
       if (action === 'approve' || action === 'reject') {
-        return isExecutive || hasPermission(this.ACTION_PERMISSIONS[action]);
+        return isAdmin || hasPermission(this.ACTION_PERMISSIONS[action]);
       }
       return hasPermission(this.ACTION_PERMISSIONS[action] ?? 'events.read');
     });

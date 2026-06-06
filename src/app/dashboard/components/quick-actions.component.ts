@@ -21,12 +21,6 @@ const QUICK_ACTIONS: QuickAction[] = [
     variant: 'secondary',
     icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
   },
-  {
-    label: 'Voice Command',
-    routerLink: '/voice',
-    variant: 'secondary',
-    icon: 'M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z',
-  },
 ];
 
 @Component({

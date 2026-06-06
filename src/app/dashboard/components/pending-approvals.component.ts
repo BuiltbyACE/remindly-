@@ -94,9 +94,9 @@ export class PendingApprovalsComponent {
 
   readonly pendingApprovals = computed<Approval[]>(() => {
     // Check if user is secretary
-    const hasExecutivePerm = this.rbacStore.hasPermission()('audit.read');
-    const hasAdminPerm = this.rbacStore.hasPermission()('events.approve') && !hasExecutivePerm;
-    const isSecretary = !hasExecutivePerm && !hasAdminPerm;
+    const hasAdminPerm = this.rbacStore.hasPermission()('audit.read');
+    const hasExecPerm = this.rbacStore.hasPermission()('events.approve');
+    const isSecretary = !hasAdminPerm && !hasExecPerm;
     
     if (isSecretary) {
       // For secretary, use secretary-specific actionable approvals

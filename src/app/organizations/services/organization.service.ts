@@ -14,12 +14,14 @@ export interface Organization {
 @Injectable({ providedIn: 'root' })
 export class OrganizationService extends BaseApiClient {
   listOrganizations(): Observable<Organization[]> {
-    return this.get<Organization | null>('/api/v1/organizations/my').pipe(
-      map(org => org ? [org] : []),
+    return this.get<{ status: string; data: Organization[] }>('/api/v1/organizations/my').pipe(
+      map(res => res?.data || [])
     );
   }
 
   getOrganization(orgId: string): Observable<Organization> {
-    return this.get<Organization>(`/api/v1/organizations/${orgId}`);
+    return this.get<{ status: string; data: Organization }>(`/api/v1/organizations/${orgId}`).pipe(
+      map(res => res.data)
+    );
   }
 }

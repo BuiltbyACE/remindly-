@@ -487,7 +487,7 @@ import { SettingsStore } from './stores/settings.store';
               <p class="pwa-label">Progressive Web App</p>
               <h2 class="pwa-title">Install Remindly</h2>
               <p class="pwa-desc">
-                Get the full executive experience — fast, offline-ready, and installable on any device.
+                Get the full admin experience — fast, offline-ready, and installable on any device.
               </p>
 
               <!-- Feature pills -->
@@ -822,7 +822,7 @@ import { SettingsStore } from './stores/settings.store';
 
       <!-- Footer -->
       <p class="footer-note">
-        Built by <strong>SafariStack Solutions</strong> &middot; Remindly Executive AI Assistant
+        Built by <strong>SafariStack Solutions</strong> &middot; Remindly Admin AI Assistant
       </p>
     </div>
   `,

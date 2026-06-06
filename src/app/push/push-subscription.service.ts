@@ -22,7 +22,12 @@ export class PushSubscriptionService extends BaseApiClient {
   }
 
   async register(): Promise<void> {
-    console.log('[PushSubscriptionService] Registering... swPush.isEnabled:', this.swPush.isEnabled, 'vapidKey:', this.vapidKey);
+    console.log('[PushSubscriptionService] Registering... swPush.isEnabled:', this.swPush.isEnabled);
+    
+    if (!this.vapidKey) {
+      await this.initialize();
+    }
+
     if (!this.vapidKey || !this.swPush.isEnabled) {
       console.warn('[PushSubscriptionService] Registration skipped: missing VAPID key or service worker disabled.');
       return;

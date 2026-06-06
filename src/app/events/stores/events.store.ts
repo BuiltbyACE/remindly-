@@ -46,9 +46,9 @@ export class EventsStore implements OnDestroy {
 
   // Secretary role checker
   private readonly isSecretary = computed(() => {
-    const hasExecutivePerm = this.rbacStore.hasPermission()('audit.read');
-    const hasAdminPerm = this.rbacStore.hasPermission()('events.approve') && !hasExecutivePerm;
-    return !hasExecutivePerm && !hasAdminPerm;
+    const hasAdminPerm = this.rbacStore.hasPermission()('audit.read');
+    const hasExecPerm = this.rbacStore.hasPermission()('events.approve');
+    return !hasAdminPerm && !hasExecPerm;
   });
 
   ngOnDestroy(): void {
